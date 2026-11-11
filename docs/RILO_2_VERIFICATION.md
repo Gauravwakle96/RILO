@@ -16,10 +16,12 @@ new product or hackathon scores.
   source/wheel build passed. Standard Playwright acceptance: **16 passed**, **10
   explicitly opt-in live checks skipped**, in 3.9 minutes. Both npm audits reported
   zero known vulnerabilities.
-- Container target acceptance is **not performed locally** because Docker Desktop's
-  Linux daemon was unavailable. A separate GitHub Actions container job now builds
-  the image and checks the packaged Rilo CLI, Node, pinned Promptfoo runtime and
-  Tesseract. A green remote job is required before claiming the image verified.
+- Container target acceptance was **verified remotely** by GitHub Actions run
+  [43072130188](https://github.com/Gauravwakle96/RILO/actions/runs/43072130188).
+  The successful container job built the pinned image and checked the packaged Rilo
+  CLI, Node, Promptfoo 0.125.1 runtime and Tesseract. Docker Desktop's local Linux
+  daemon remained unavailable, so this is remote Linux acceptance rather than a
+  local container result.
 - Live Tavily is intentionally excluded without a real key. Live private GitHub
   acceptance remains credential-gated and is not represented as executed.
 
