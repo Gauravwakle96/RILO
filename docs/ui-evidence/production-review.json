@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8018/",
+  "desktop": {
+    "title": "Rilo — Agent reliability workspace",
+    "headings": [
+      "Experiments"
+    ],
+    "robots": "noindex, nofollow",
+    "viewport": [
+      1440,
+      900
+    ],
+    "overflow": false,
+    "storedKeys": [
+      "rilo-theme"
+    ],
+    "fonts": [
+      "JetBrains Mono",
+      "Inter Variable"
+    ]
+  },
+  "mobile": {
+    "viewport": [
+      390,
+      844
+    ],
+    "overflow": false,
+    "sidebarTransform": "matrix(1, 0, 0, 1, -232, 0)",
+    "sidebarOpen": false,
+    "menuVisible": true,
+    "menuFocusReturn": true,
+    "axeViolations": 0
+  },
+  "axeViolations": [],
+  "axeIncomplete": [],
+  "errors": [],
+  "network": []
+}

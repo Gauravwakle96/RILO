@@ -1,0 +1,22 @@
+{
+  "unauthenticated": {
+    "http_status": 401,
+    "message": "virtual key is required. Provide a virtual key via the x-bf-vk header.",
+    "duration_ms": 163.48
+  },
+  "restricted_key": {
+    "http_status": 200,
+    "duration_ms": 23783.28,
+    "model": "qwen2.5-coder:7b",
+    "usage": {
+      "prompt_tokens": 28,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "completion_tokens": 9,
+      "total_tokens": 37
+    },
+    "output": "{\n  \"ready\": true\n}"
+  }
+}

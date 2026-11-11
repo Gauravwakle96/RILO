@@ -1,0 +1,14 @@
+{
+  "url": "http://127.0.0.1:5187/#/experiments/exp_7c57787e469a4e0c",
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "targets": [
+        [
+          ".inspector-footer > span:nth-child(2)"
+        ]
+      ]
+    }
+  ]
+}

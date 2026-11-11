@@ -1,0 +1,57 @@
+name: Verify Rilo
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          uv sync --locked
+          npm ci --prefix frontend
+          npm ci --prefix backend/rilo/promptfoo_runtime
+      - name: Python lint, typing, tests and package
+        run: |
+          uv run ruff check backend/rilo tests scripts examples
+          uv run mypy backend/rilo
+          uv run pytest --cov=rilo --cov-report=term-missing --cov-fail-under=80
+          uv build
+      - name: Frontend checks
+        run: |
+          npm run lint --prefix frontend
+          npm run typecheck --prefix frontend
+          npm run build --prefix frontend
+          npm audit --prefix frontend
+          npm audit --prefix backend/rilo/promptfoo_runtime
+      - name: Browser acceptance with local fixture engine
+        env:
+          RILO_DATA_DIR: .rilo-ci
+          CI_SKIP_LIVE_TRACE: '1'
+        run: |
+          uv run rilo serve > rilo-ci.log 2>&1 &
+          RILO_SERVICE_PID=$!
+          trap 'kill -INT "$RILO_SERVICE_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:8018/health > /dev/null; then break; fi
+            sleep 1
+          done
+          cd frontend
+          npx playwright install --with-deps chromium
+          npm run test:e2e

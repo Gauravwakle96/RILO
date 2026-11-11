@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "id": "base_9d9c6626968d484d",
+    "name": "Validated fixture v2 reference \u2014 full 120",
+    "experiment_id": "exp_fb94649e3b9c4536",
+    "created_at": "2026-11-09T08:55:45.588096+00:00"
+  },
+  "reference_id": "exp_fb94649e3b9c4536",
+  "candidate_id": "exp_8b2cbc4e74864ec9",
+  "compatible": true,
+  "mismatches": [],
+  "gate": {
+    "status": "pass",
+    "reasons": [
+      "No measured task-success regression under the same recorded conditions; sample coverage remains limited."
+    ]
+  },
+  "agent_deltas": [
+    {
+      "agent_id": "scout",
+      "agent_name": "Scout",
+      "success_rate_delta": 0.0,
+      "duration_ms_delta": 39.034833333333324,
+      "tool_calls_delta": 0
+    },
+    {
+      "agent_id": "relay",
+      "agent_name": "Relay",
+      "success_rate_delta": 0.0,
+      "duration_ms_delta": 108.42133333333334,
+      "tool_calls_delta": 0
+    }
+  ],
+  "notice": "Deterministic fixture execution; no model inference and no measured change in task success."
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "run_fa7fda3a493e4423",
+    "agent": "Relay",
+    "task": "entity_match",
+    "scenario": "search_timeout",
+    "status": "pass",
+    "output": {
+      "summary": "Aurora Labs launched Beacon, a developer observability tool, on October 14, 2026.",
+      "facts": [
+        {
+          "text": "Aurora Labs launched Beacon on October 14, 2026.",
+          "source_ids": [
+            "aurora_launch"
+          ]
+        }
+      ]
+    },
+    "events": [
+      "run_start",
+      "step",
+      "tool_request",
+      "fault_injected",
+      "recovery",
+      "tool_request",
+      "tool_response",
+      "step",
+      "evidence_filter",
+      "model_request",
+      "model_response",
+      "synthesis",
+      "assessment",
+      "run_end"
+    ]
+  },
+  {
+    "id": "run_84e2c96b06c7402b",
+    "agent": "Scout",
+    "task": "entity_match",
+    "scenario": "search_timeout",
+    "status": "fail",
+    "output": null,
+    "events": [
+      "run_start",
+      "step",
+      "tool_request",
+      "fault_injected",
+      "agent_error",
+      "run_end"
+    ]
+  },
+  {
+    "id": "run_b66c9345ca054d45",
+    "agent": "Relay",
+    "task": "company_brief",
+    "scenario": "normal",
+    "status": "pass",
+    "output": {
+      "summary": "Aurora Labs launched Beacon, a developer observability tool, on October 14, 2026. The company also appointed Priya Shah as engineering lead on October 22, 2026.",
+      "facts": [
+        {
+          "text": "Aurora Labs launched Beacon on October 14, 2026. Beacon is a developer observability tool.",
+          "source_ids": [
+            "aurora_launch"
+          ]
+        },
+        {
+          "text": "Aurora Labs appointed Priya Shah as engineering lead on October 22, 2026.",
+          "source_ids": [
+            "aurora_hire"
+          ]
+        }
+      ]
+    },
+    "events": [
+      "run_start",
+      "step",
+      "tool_request",
+      "tool_response",
+      "step",
+      "evidence_filter",
+      "model_request",
+      "model_response",
+      "synthesis",
+      "assessment",
+      "run_end"
+    ]
+  },
+  {
+    "id": "run_24efebfe6cd0435b",
+    "agent": "Relay",
+    "task": "insufficient_evidence",
+    "scenario": "normal",
+    "status": "fail",
+    "output": {
+      "summary": "The funding amount for Quiet Research's most recent funding round cannot be verified based on the provided evidence.",
+      "facts": [
+        {
+          "text": "Quiet Research studies battery materials.",
+          "source_ids": [
+            "quiet_profile"
+          ]
+        }
+      ]
+    },
+    "events": [
+      "run_start",
+      "step",
+      "tool_request",
+      "tool_response",
+      "step",
+      "evidence_filter",
+      "model_request",
+      "model_response",
+      "synthesis",
+      "assessment",
+      "run_end"
+    ]
+  }
+]

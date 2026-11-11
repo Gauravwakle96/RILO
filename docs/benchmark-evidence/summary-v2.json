@@ -1,0 +1,104 @@
+{
+  "id": "exp_8b95841fed304432",
+  "name": "Validated reference grader v2 \u2014 120 local model attempts",
+  "state": "completed",
+  "created_at": "2026-11-09T08:28:47.916590+00:00",
+  "updated_at": "2026-11-09T08:44:50.544297+00:00",
+  "progress": {
+    "completed": 120,
+    "total": 120
+  },
+  "summary": {
+    "passes": 72,
+    "failures": 48,
+    "inconclusive": 0,
+    "infrastructure_errors": 0
+  },
+  "agent_metrics": [
+    {
+      "agent_id": "scout",
+      "agent_name": "Scout",
+      "total": 60,
+      "passed": 24,
+      "failed": 36,
+      "inconclusive": 0,
+      "infrastructure_errors": 0,
+      "success_rate": 0.4,
+      "avg_duration_ms": 5805.081166666667,
+      "total_tool_calls": 60,
+      "total_model_calls": 45,
+      "total_steps": 105,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": null,
+      "output_tokens": null,
+      "api_cost_usd": null,
+      "tokens_provenance": "unknown",
+      "cost_provenance": "unknown",
+      "scenario_exposures": 45
+    },
+    {
+      "agent_id": "relay",
+      "agent_name": "Relay",
+      "total": 60,
+      "passed": 48,
+      "failed": 12,
+      "inconclusive": 0,
+      "infrastructure_errors": 0,
+      "success_rate": 0.8,
+      "avg_duration_ms": 10010.499666666667,
+      "total_tool_calls": 87,
+      "total_model_calls": 75,
+      "total_steps": 120,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": 19470,
+      "output_tokens": 7221,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "reported",
+      "cost_provenance": "estimated",
+      "scenario_exposures": 45
+    }
+  ],
+  "elapsed_seconds": 962.627707,
+  "reported_dispatch_subtotals": {
+    "Scout": {
+      "reported_response_input_tokens": 9708,
+      "reported_response_output_tokens": 3582,
+      "responses": 30
+    },
+    "Relay": {
+      "reported_response_input_tokens": 19470,
+      "reported_response_output_tokens": 7221,
+      "responses": 60
+    }
+  },
+  "limits": {
+    "max_model_calls": 12,
+    "max_tool_calls": 6,
+    "timeout_seconds": 120
+  },
+  "manifest_hashes": {
+    "agent_runtime_hash": "05a6cbfce7f71809727dc8035694b26728dcccd20eb0690851c8f9faaafabe79",
+    "grader_hash": "f948db89dfeb4c24cfde76c1bb3e1f0ca9cd03b033867207cab983ec3b2bf481",
+    "runtime_hash": "d04dfb0023870b6b3cabc027cc19b24e5a816ef7e431f695b2c81480cc82fe46",
+    "evidence_hash": "45e7e14a6f9925c63a5b20cd944015b779f58d7bd6d453b0297e3251768f5c2b",
+    "agent_hash": "f3708a51d04f23381eb3e704be9e9ed8217dd4e78edb71df96604f672c0cd078",
+    "task_hash": "4347cc70b398da6142ecbedb90baa1046e71a7f942a758f221bf140b1f1775c3",
+    "scenario_hash": "104d77fdd699f43dcbfe4fb6f5fd0bff2bcdd6ad15284cbbb66384453f5e26ec"
+  },
+  "reference_grader": "research-evidence-v2",
+  "price_basis": {
+    "version": "model-token-pricing-v1",
+    "status": "configured",
+    "requested_model": "ollama/qwen2.5-coder:7b",
+    "currency": "USD",
+    "unit": "per million reported input/output tokens",
+    "rates": {
+      "input_usd_per_million": 0.0,
+      "output_usd_per_million": 0.0
+    },
+    "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+    "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+    "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+  },
+  "notice": "Synthetic controlled evidence; actual Bifrost/Ollama inference. Response subtotals exclude attempts with no dispatch and do not overwrite conservative unknown aggregate metrics."
+}

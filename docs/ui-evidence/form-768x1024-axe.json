@@ -1,0 +1,14 @@
+{
+  "url": "http://127.0.0.1:5187/#/scenarios",
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "targets": [
+        [
+          ".attempt-preview > span > small"
+        ]
+      ]
+    }
+  ]
+}

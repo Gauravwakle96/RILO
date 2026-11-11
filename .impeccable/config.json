@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "frontend/src/styles.css"
+        ],
+        "createdAt": "2026-11-09T09:10:52.097Z",
+        "reason": "Agent: existing DESIGN.md explicitly selects locally hosted licensed Inter for the Rilo developer workspace; preserve its established interface typography and verified layouts."
+      }
+    ]
+  }
+}

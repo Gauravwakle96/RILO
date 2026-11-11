@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "target": "Isolated production FastAPI app on http://127.0.0.1:8079, no worker",
+  "command": "node tests/backend/browser_docs.mjs http://127.0.0.1:8079",
+  "operationCount": 26,
+  "schemaCount": 10,
+  "filtered": 6,
+  "postCount": 2,
+  "keyboardExpansion": "passed",
+  "mobile": {
+    "content": 375,
+    "viewport": 375
+  },
+  "redocOperationCount": 26,
+  "authenticatedOpenApiStatus": 200,
+  "unknownAssetStatus": 404,
+  "unknownApiStatus": 404,
+  "javascriptErrors": 0,
+  "failedRequests": 0,
+  "externalRequests": 0,
+  "documentationSource": "https://fastapi.tiangolo.com/how-to/custom-docs-ui-assets/",
+  "release_acceptance": {
+    "production": "http://127.0.0.1:8018",
+    "development": "http://127.0.0.1:5187",
+    "status": "passed",
+    "operationCount": 26,
+    "schemaCount": 10,
+    "javascriptErrors": 0,
+    "failedRequests": 0,
+    "externalRequests": 0,
+    "redocProxy": "verified after correction"
+  }
+}

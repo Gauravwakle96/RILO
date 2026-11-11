@@ -1,0 +1,3104 @@
+{
+  "id": "exp_a26e263257194f93",
+  "name": "tell me about the git hub repo  · 1 retest retest retest",
+  "state": "completed",
+  "created_at": "2026-11-09T18:39:36.482125+00:00",
+  "updated_at": "2026-11-09T18:41:28.923294+00:00",
+  "spec": {
+    "name": "tell me about the git hub repo  · 1 retest retest retest",
+    "agent_ids": [
+      "repo_analyst",
+      "relay"
+    ],
+    "task_ids": [
+      "workspace_4b6a868e1b81c26a"
+    ],
+    "scenario_ids": [
+      "normal"
+    ],
+    "repetitions": 1,
+    "engine": "bifrost",
+    "mode": "controlled",
+    "model": "ollama/qwen2.5-coder:7b",
+    "limits": {
+      "max_model_calls": 2,
+      "max_tool_calls": 2,
+      "timeout_seconds": 180
+    }
+  },
+  "progress": {
+    "completed": 2,
+    "total": 2
+  },
+  "summary": {
+    "passes": 0,
+    "failures": 0,
+    "inconclusive": 2,
+    "infrastructure_errors": 0
+  },
+  "agent_metrics": [
+    {
+      "agent_id": "repo_analyst",
+      "agent_name": "Repo Analyst",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "inconclusive": 1,
+      "infrastructure_errors": 0,
+      "success_rate": null,
+      "avg_duration_ms": 65348.24,
+      "total_tool_calls": 0,
+      "total_model_calls": 2,
+      "total_steps": 1,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": 1963,
+      "output_tokens": 900,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "reported",
+      "cost_provenance": "estimated",
+      "scenario_exposures": 0
+    },
+    {
+      "agent_id": "relay",
+      "agent_name": "Relay",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "inconclusive": 1,
+      "infrastructure_errors": 0,
+      "success_rate": null,
+      "avg_duration_ms": 38439.05,
+      "total_tool_calls": 0,
+      "total_model_calls": 1,
+      "total_steps": 1,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": 932,
+      "output_tokens": 482,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "reported",
+      "cost_provenance": "estimated",
+      "scenario_exposures": 0
+    }
+  ],
+  "manifest": {
+    "version": "1.1",
+    "grader_version": "workspace-evidence-v1",
+    "engine": "bifrost",
+    "mode": "controlled",
+    "model": "ollama/qwen2.5-coder:7b",
+    "bifrost_url": "http://127.0.0.1:8086",
+    "agent_versions": [
+      {
+        "id": "repo_analyst",
+        "name": "Repo Analyst",
+        "description": "Reviews captured repository files, architecture and static observations with exact file references.",
+        "framework": "LangGraph task profile",
+        "kind": "graph",
+        "version": "2.0.0",
+        "capabilities": [
+          "repository_analysis",
+          "file_citations"
+        ],
+        "config": {
+          "workspace_categories": [
+            "repository"
+          ],
+          "retries": 1
+        },
+        "implementation_hash": "776806fe80c9cb84ecc1cd7f8f07c18fb9b9eba329f267ead0811af09551415c",
+        "implementation_hash_scope": "workspace profile engine; pinned workspace runtime identity at admission"
+      },
+      {
+        "id": "relay",
+        "name": "Relay",
+        "description": "A LangGraph researcher with bounded recovery and entity/date-aware evidence filtering.",
+        "framework": "LangGraph",
+        "kind": "graph",
+        "version": "1.0.0",
+        "capabilities": [
+          "model_events",
+          "tool_events",
+          "steps",
+          "fault_injection",
+          "controlled_evidence",
+          "cancellation"
+        ],
+        "config": {
+          "retries": 2,
+          "evidence_filtering": true
+        },
+        "implementation_hash": "05a6cbfce7f71809727dc8035694b26728dcccd20eb0690851c8f9faaafabe79",
+        "implementation_hash_scope": "builtin agents.py source at process start"
+      }
+    ],
+    "task_versions": [
+      {
+        "id": "workspace_4b6a868e1b81c26a",
+        "title": "Repository",
+        "prompt": "tell me about the git hub repo ",
+        "source_ids": [],
+        "company": "",
+        "reference_time": "2026-11-09T18:39:36.482125+00:00"
+      }
+    ],
+    "scenario_versions": [
+      {
+        "id": "normal",
+        "name": "Normal conditions",
+        "description": "No injected fault. Establish task quality under the selected limits.",
+        "type": "baseline"
+      }
+    ],
+    "agent_runtime_hash": "05a6cbfce7f71809727dc8035694b26728dcccd20eb0690851c8f9faaafabe79",
+    "grader_hash": "f948db89dfeb4c24cfde76c1bb3e1f0ca9cd03b033867207cab983ec3b2bf481",
+    "runtime_hash": "1616fddc0ad45ec2cef4c6da8bf98061ff62cc0a8ae2d74a1739fd4841564296",
+    "runtime_dependencies": {
+      "httpx": "0.28.1",
+      "pydantic": "2.14.3",
+      "langgraph": "1.2.20",
+      "python": "3.13.15"
+    },
+    "price_basis": {
+      "version": "model-token-pricing-v1",
+      "status": "configured",
+      "requested_model": "ollama/qwen2.5-coder:7b",
+      "currency": "USD",
+      "unit": "per million reported input/output tokens",
+      "rates": {
+        "input_usd_per_million": 0.0,
+        "output_usd_per_million": 0.0
+      },
+      "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+      "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+      "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+    },
+    "evidence_hash": "c2b11da8e847645d0f289e24ddf87d124e517bf939fd7d5827030f181357782e",
+    "agent_hash": "9764e6981df388a80b0f5244bf48bd4c3715d733981bdb92a778e561f9795301",
+    "task_hash": "b080a58d820818327c909e143f29d3833f45282c90713faae513cb43b954b1a5",
+    "scenario_hash": "dd830734df6c1d01617e0271052608910253bcb3b5173cdd284f4520ee741d50",
+    "order_seed": 3388567863,
+    "cache_policy": "request-no-store; provider cache configuration is external",
+    "fixture_notice": null,
+    "sources": [
+      {
+        "reference": "README.md",
+        "title": "README.md",
+        "type": "repository",
+        "id": "src_977f0268fd7f4fbd_1",
+        "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+        "retrieved_at": "2026-11-09T18:31:58.314597+00:00",
+        "content": "# KYRO\n\n**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.\n\nKYRO retrieves authorized source snapshots, indexes code, runs real Semgrep/OSV-Scanner/Trivy containers, explains finding priority, generates a bounded local-model plan, executes approved edits in Docker, independently rescans and prepares an approved draft GitHub pull request.\n\nIts workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**. Users see the original scanner evidence, the proposed operation, the actual code diff and the verification results. Approval is required before editing a repository workspace and before publishing a draft pull request.\n\n[Quick start](#start-with-docker-recommended) · [User guide](#how-to-use-kyro) · [Capabilities](#what-kyro-can-do) · [Recovery](#automatic-recovery) · [Validation](#what-has-been-tested) · [Documentation](#documentation)\n\nThe whole-product [checklist](docs/PRODUCT_CHECKLIST.md), [test execution report](docs/TEST_EXECUTION_REPORT.md) and [implementation status](IMPLEMENTATION_STATUS.md) record actual acceptance and remaining external blockers. This product is not certified secure or ready for public multi-tenant operation.\n",
+        "source_id": "src_977f0268fd7f4fbd",
+        "start_line": 1,
+        "end_line": 13,
+        "snapshot_id": "snap_c0d31363059c486d"
+      }
+    ],
+    "workspace": {
+      "checks": [],
+      "request_hash": "ed33383ffc06ece9a60773b8a95e03ce35c85f122a6d7ab16786b8c2327d84d6",
+      "semantic_review": false,
+      "category": "repository",
+      "prompt": "tell me about the git hub repo ",
+      "inputs": {
+        "url": "https://github.com/Gauravwakle96/KYRO",
+        "upload_ids": [],
+        "text": "",
+        "max_pages": 3,
+        "max_depth": 1,
+        "run_tests": true,
+        "dependency_advisories": false,
+        "test_profile": "python-unittest"
+      },
+      "snapshot_id": "snap_c0d31363059c486d",
+      "conversation_id": "conv_5119660d222f48e5",
+      "turn_id": "turn_f43e7d14f4f04633",
+      "histories": {
+        "repo_analyst": [],
+        "relay": []
+      },
+      "search_provider": "off",
+      "runtime_hash": "cc17849488b1877f08e15e2f71f5a5df91f425d585230d0c22a9c08ce3afe800",
+      "previous_turns": 0,
+      "retest_of": "exp_d2a45ce5499f48a1",
+      "source_capture": "reused_snapshot"
+    },
+    "workspace_runtime_hash": "cc17849488b1877f08e15e2f71f5a5df91f425d585230d0c22a9c08ce3afe800",
+    "snapshot": {
+      "id": "snap_c0d31363059c486d",
+      "category": "repository",
+      "created_at": "2026-11-09T18:31:58.314597+00:00",
+      "sources": [
+        {
+          "reference": "README.md",
+          "title": "README.md",
+          "type": "repository",
+          "id": "src_977f0268fd7f4fbd",
+          "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/alembic.ini",
+          "title": "backend/alembic.ini",
+          "type": "repository",
+          "id": "src_26b725dba32b45a1",
+          "content_hash": "55f6227b037e8558031bdca3ace12a01bd14b7fea0df8d7285d35a508c04a671",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/__init__.py",
+          "title": "backend/app/__init__.py",
+          "type": "repository",
+          "id": "src_c2420a76e88248cb",
+          "content_hash": "0fc4ed3343c4d10cb79b253d1892fd7c0e6dc877bc474f9108399d6c09e9af51",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/agents/engine.py",
+          "title": "backend/app/agents/engine.py",
+          "type": "repository",
+          "id": "src_17adbb06b1a54d0b",
+          "content_hash": "c584cefcad428195b26b569c4c4875eb977dbba24d121d4ca09f44bf220be8d9",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/agents/models.py",
+          "title": "backend/app/agents/models.py",
+          "type": "repository",
+          "id": "src_ddb7265981624278",
+          "content_hash": "e5b95a507e1a676408ed464e60da97fd4793f35bfb5caa4783ab26e6638a01b8",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/agents/schemas.py",
+          "title": "backend/app/agents/schemas.py",
+          "type": "repository",
+          "id": "src_d4adafd5f9ec40e8",
+          "content_hash": "3ae97a5adf1816858001c02d796ea514ab2d2715dd752ca9ac437d99fe47fafa",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/api/routes.py",
+          "title": "backend/app/api/routes.py",
+          "type": "repository",
+          "id": "src_9bfb77e06d7e439c",
+          "content_hash": "6484a515e9d82f9e5b04187ba1e8181954edad52f8595857c3d1f0f388a1bd52",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/api/schemas.py",
+          "title": "backend/app/api/schemas.py",
+          "type": "repository",
+          "id": "src_2fda47b970284ca8",
+          "content_hash": "1ae5ccdb4ebb61bec391dbcdd287aed2e04802946337ae7779251fb37d7665ea",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/core/config.py",
+          "title": "backend/app/core/config.py",
+          "type": "repository",
+          "id": "src_01b368e600a546b3",
+          "content_hash": "d0a24ae3c17c2720fd503e91f91c10b003ac73a2ac5bcbb1cb08bb59e4882f64",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/core/errors.py",
+          "title": "backend/app/core/errors.py",
+          "type": "repository",
+          "id": "src_6ac85b22e7f64fd7",
+          "content_hash": "823cf647bbb7b90a9d06e067423f139b49efce5b359548a3398eb3ddbe97efa0",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/core/security.py",
+          "title": "backend/app/core/security.py",
+          "type": "repository",
+          "id": "src_d1ef878f795946ca",
+          "content_hash": "1895b1e4a236dc7c99f1c1395d31e22fd95b60b0c8456eb17baf531c50f0c11d",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/database.py",
+          "title": "backend/app/database.py",
+          "type": "repository",
+          "id": "src_865a9f9ea6ce4975",
+          "content_hash": "fa20f61efd62a59a02ff8bf9195ed74d7d1efbb8dac3a00bca40d44e104e61b0",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/integrations/github.py",
+          "title": "backend/app/integrations/github.py",
+          "type": "repository",
+          "id": "src_b5c7a1ce8fee4c62",
+          "content_hash": "bce6da97d830fd37643c74fa6c0447e27193133463d833848a06159260c3afbf",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/intelligence/assessment.py",
+          "title": "backend/app/intelligence/assessment.py",
+          "type": "repository",
+          "id": "src_49c0142e02f047a2",
+          "content_hash": "30af12e0b59dbc87d2e11397a20fc1b3d3e882d20af4aa37bfd5f6e3eaf7c62e",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/intelligence/enrichment.py",
+          "title": "backend/app/intelligence/enrichment.py",
+          "type": "repository",
+          "id": "src_7449cf4b3a154664",
+          "content_hash": "90a2b786f89323f97ac8891fb9fe532eacb5e4b558f265d16262671a50e83586",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/jobs/recovery.py",
+          "title": "backend/app/jobs/recovery.py",
+          "type": "repository",
+          "id": "src_fd88d580c32442de",
+          "content_hash": "2447e8879600a3bb29db77d9e7b7f52e576bdb08aaf84a7f7365ff7fa1d8a7d3",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/jobs/worker.py",
+          "title": "backend/app/jobs/worker.py",
+          "type": "repository",
+          "id": "src_7220d9656ce74fb5",
+          "content_hash": "b74ec5666094c37737ceafea1cbe738034b6e7f4e41de32103a85a014e11b211",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/main.py",
+          "title": "backend/app/main.py",
+          "type": "repository",
+          "id": "src_98096e08d9fb405c",
+          "content_hash": "c440030a39cd7a38ff251fc264d76534ccbff9b3368fe805404dedbb3ab56cd4",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/repository/intelligence.py",
+          "title": "backend/app/repository/intelligence.py",
+          "type": "repository",
+          "id": "src_0ca7b9f71ba4470f",
+          "content_hash": "bfa10212fd895f6cdc51bb8737c6dc4255689b0d730d2106acbd67f633fadc80",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/sandbox/runner.py",
+          "title": "backend/app/sandbox/runner.py",
+          "type": "repository",
+          "id": "src_ecd0cc6a74324830",
+          "content_hash": "4570db3006fad6bc34a664cd5120aaff71260ae0192f320443e6be6f1724a34c",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/scanners/adapters.py",
+          "title": "backend/app/scanners/adapters.py",
+          "type": "repository",
+          "id": "src_4ed5796846004464",
+          "content_hash": "fb6573fd59584cf1e6ceb6b3f9bd7c1b72c18c3769ac777c015d9aecef6a6f58",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/scanners/normalization.py",
+          "title": "backend/app/scanners/normalization.py",
+          "type": "repository",
+          "id": "src_6d3d1f42c927478c",
+          "content_hash": "a169662762f2942e7c25037d8151e4e9b70a090bc329a0e3d7cfbcb761012d6a",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/scanners/service.py",
+          "title": "backend/app/scanners/service.py",
+          "type": "repository",
+          "id": "src_ffb81ae817ff43bb",
+          "content_hash": "dd1e42a2627d7ceba9dbe316601a65fa6e3a501edddc26312958cc46fe64173e",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/services/handlers.py",
+          "title": "backend/app/services/handlers.py",
+          "type": "repository",
+          "id": "src_2b50ed5dc6ae4ec5",
+          "content_hash": "a6c4b86c7065eb28342a4c8dd828d9dcd9a8dd36291ab815c90c8a46749beec4",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/conftest.py",
+          "title": "backend/app/tests/conftest.py",
+          "type": "repository",
+          "original_content_hash": "7ff4d03543859cfeacab76e076d616969ba83128d84b68a3a8c31b59bf554ec7",
+          "redacted": true,
+          "id": "src_722c8d9d396746a3",
+          "content_hash": "5a79f2fa269497ce74d33364740024d9f4e9602c84a38eab15e4d562227faf9f",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_agent_reliability.py",
+          "title": "backend/app/tests/test_agent_reliability.py",
+          "type": "repository",
+          "id": "src_baa2157c8e97453e",
+          "content_hash": "469026813e4239e94e1e2332589c1eb10c4a25de5c9ff3c1d29091a46b177018",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_analytics_counts.py",
+          "title": "backend/app/tests/test_analytics_counts.py",
+          "type": "repository",
+          "id": "src_5e96645e01e54ff2",
+          "content_hash": "f99cf79a41fff6a1516ae8ca5b5e53ee3702088b82e0b98104c29f1c5e780b20",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_api_reference.py",
+          "title": "backend/app/tests/test_api_reference.py",
+          "type": "repository",
+          "id": "src_ffe2c5aab1c642c1",
+          "content_hash": "75485ee1be31c7d31c752c51a508c24625cfcd2bd9320aa327020bc41b0724fa",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_automatic_recovery.py",
+          "title": "backend/app/tests/test_automatic_recovery.py",
+          "type": "repository",
+          "id": "src_7f60e8e9c73546ff",
+          "content_hash": "986a39ac7c2ae6cd9b25c6e2e91f0e4598bba801e9fdcb83d5a600beed0ea936",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_cloud_routing.py",
+          "title": "backend/app/tests/test_cloud_routing.py",
+          "type": "repository",
+          "original_content_hash": "ad9bc846e0442d8802cd71a1be07ec58a8d9447f6c0e29407b3094d017f76b65",
+          "redacted": true,
+          "id": "src_24c83e72e9ab419d",
+          "content_hash": "0c951452db859b96a594b628fa80d72d989b205da2c66040f74902d3b3ad1104",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_contracts.py",
+          "title": "backend/app/tests/test_contracts.py",
+          "type": "repository",
+          "id": "src_79aeb2acbaef4f17",
+          "content_hash": "1c208eefcadce9acba018e5b415fa635d16fd6daf6fa74fc65fa6ce89c1f8b5e",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/app/tests/test_integration.py",
+          "title": "backend/app/tests/test_integration.py",
+          "type": "repository",
+          "original_content_hash": "699ceef22f40a6245ba30c2ed3fceb6c2fbaf07b7a15e8465e395b300f7019b9",
+          "redacted": true,
+          "id": "src_46bdd88d467a41b0",
+          "content_hash": "e8c96d5adce272d822e16d081b69aa09abc6cd656fb2ef14b568beed71283a64",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/main.py",
+          "title": "backend/main.py",
+          "type": "repository",
+          "id": "src_759b309241244797",
+          "content_hash": "406efd77de4663aa9b0dd4b1a1e8b86c03f21769948183f1d90954c2044e24e1",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/migrations/env.py",
+          "title": "backend/migrations/env.py",
+          "type": "repository",
+          "id": "src_add7a675f3e84a78",
+          "content_hash": "36b74fcb3be2fcb88ecf7b2613cb928cc5a64b271eba0bcd385c30dc9cf68970",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/pyproject.toml",
+          "title": "backend/pyproject.toml",
+          "type": "repository",
+          "id": "src_df90ec15652e4962",
+          "content_hash": "6060601979e8ce7b19f11b0b868c9f877c8e40173e845df00848570a0c7a7bb3",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/requirements.txt",
+          "title": "backend/requirements.txt",
+          "type": "repository",
+          "id": "src_8c18a7548ce140cc",
+          "content_hash": "0e614cbb61522b2180db8237e6617842416a84ab9097bd1608c65e98247fe47c",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/rules/security.yml",
+          "title": "backend/rules/security.yml",
+          "type": "repository",
+          "id": "src_e37aac9c30b8464e",
+          "content_hash": "522e5d55bf43bcc49449c543711b5352044f9a56f483af43605953b9585be317",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "backend/uv.lock",
+          "title": "backend/uv.lock",
+          "type": "repository",
+          "id": "src_6b4d5a9fef0b4c20",
+          "content_hash": "ec9d03cd3e6a7bd67a2fe3babe4882fe7ebe4fa9e497b6f1805090042e0a37bb",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "frontend/package.json",
+          "title": "frontend/package.json",
+          "type": "repository",
+          "id": "src_1ac8b3224fc04d5f",
+          "content_hash": "a6704ea97415d134481cf6c2433d35567f3a1a361ada7110149f776f444426cd",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        },
+        {
+          "reference": "tests/fixtures/vulnerable-python/requirements.txt",
+          "title": "tests/fixtures/vulnerable-python/requirements.txt",
+          "type": "repository",
+          "id": "src_eac18e34fe5c4a33",
+          "content_hash": "89bf9395734416b1e12a596a6ec3198e4a6434080293696dfbb72b66788415c9",
+          "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+        }
+      ],
+      "metadata": {
+        "files_seen": 40,
+        "files_captured": 40,
+        "skipped_files": [],
+        "languages": [
+          ".ini",
+          ".json",
+          ".lock",
+          ".md",
+          ".py",
+          ".toml",
+          ".txt",
+          ".yml"
+        ],
+        "manifests": [
+          "backend/pyproject.toml",
+          "backend/requirements.txt",
+          "frontend/package.json",
+          "tests/fixtures/vulnerable-python/requirements.txt"
+        ],
+        "limitations": [
+          "Analysis covers captured and selected text only.",
+          "Static observations are not proof of a vulnerability.",
+          "Repository code and dependencies are never executed on the host."
+        ],
+        "redacted_files": [
+          "backend/app/tests/conftest.py",
+          "backend/app/tests/test_cloud_routing.py",
+          "backend/app/tests/test_integration.py"
+        ],
+        "repository": "https://github.com/Gauravwakle96/KYRO",
+        "commit_sha": "a03f97ded1f5da474cf16eefe08afec1b5133e07",
+        "default_branch": "main",
+        "files_in_tree": 319,
+        "retrieval_limit": 40,
+        "omitted_candidate_files": 188,
+        "retrieval": "commit-pinned bounded source files",
+        "static_analysis": {
+          "version": "repository-static-v1",
+          "modules": [
+            {
+              "path": "backend/app/__init__.py",
+              "imports": [],
+              "function_count": 0,
+              "routes": []
+            },
+            {
+              "path": "backend/app/agents/engine.py",
+              "imports": [
+                "app.agents.models",
+                "app.agents.schemas",
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "app.jobs.worker",
+                "app.repository.intelligence",
+                "app.sandbox.runner",
+                "ast",
+                "difflib",
+                "json",
+                "pathlib",
+                "shutil",
+                "sqlalchemy.orm"
+              ],
+              "function_count": 7,
+              "routes": []
+            },
+            {
+              "path": "backend/app/agents/models.py",
+              "imports": [
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "httpx",
+                "ipaddress",
+                "json",
+                "pathlib",
+                "socket",
+                "sqlalchemy",
+                "sqlalchemy.orm",
+                "time",
+                "urllib.parse"
+              ],
+              "function_count": 4,
+              "routes": []
+            },
+            {
+              "path": "backend/app/agents/schemas.py",
+              "imports": [
+                "app.sandbox.runner",
+                "pydantic"
+              ],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/api/routes.py",
+              "imports": [
+                "app.agents.engine",
+                "app.agents.models",
+                "app.api.schemas",
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "app.integrations.github",
+                "app.intelligence.assessment",
+                "app.jobs.recovery",
+                "app.sandbox.runner",
+                "app.scanners.adapters",
+                "argon2.exceptions",
+                "asyncio",
+                "datetime",
+                "fastapi",
+                "fastapi.responses",
+                "httpx",
+                "json",
+                "secrets",
+                "shutil",
+                "sqlalchemy",
+                "sqlalchemy.exc",
+                "sqlalchemy.orm",
+                "threading"
+              ],
+              "function_count": 61,
+              "routes": [
+                {
+                  "function": "health",
+                  "line": 126,
+                  "method": "get",
+                  "path": "/health"
+                },
+                {
+                  "function": "setup",
+                  "line": 132,
+                  "method": "get",
+                  "path": "/auth/setup"
+                },
+                {
+                  "function": "register",
+                  "line": 137,
+                  "method": "post",
+                  "path": "/auth/register"
+                },
+                {
+                  "function": "login",
+                  "line": 149,
+                  "method": "post",
+                  "path": "/auth/login"
+                },
+                {
+                  "function": "me",
+                  "line": 164,
+                  "method": "get",
+                  "path": "/auth/me"
+                },
+                {
+                  "function": "logout",
+                  "line": 169,
+                  "method": "post",
+                  "path": "/auth/logout"
+                },
+                {
+                  "function": "projects",
+                  "line": 177,
+                  "method": "get",
+                  "path": "/projects"
+                },
+                {
+                  "function": "create_project",
+                  "line": 182,
+                  "method": "post",
+                  "path": "/projects"
+                },
+                {
+                  "function": "update_project",
+                  "line": 191,
+                  "method": "patch",
+                  "path": "/projects/{project_id}"
+                },
+                {
+                  "function": "delete_project",
+                  "line": 200,
+                  "method": "delete",
+                  "path": "/projects/{project_id}"
+                },
+                {
+                  "function": "github_status",
+                  "line": 224,
+                  "method": "get",
+                  "path": "/github/status"
+                },
+                {
+                  "function": "github_device",
+                  "line": 230,
+                  "method": "post",
+                  "path": "/github/device"
+                },
+                {
+                  "function": "github_poll",
+                  "line": 244,
+                  "method": "post",
+                  "path": "/github/device/poll"
+                },
+                {
+                  "function": "github_disconnect",
+                  "line": 267,
+                  "method": "delete",
+                  "path": "/github/connection"
+                },
+                {
+                  "function": "github_repos",
+                  "line": 277,
+                  "method": "get",
+                  "path": "/github/repositories"
+                },
+                {
+                  "function": "github_branches",
+                  "line": 286,
+                  "method": "get",
+                  "path": "/github/branches"
+                },
+                {
+                  "function": "repositories",
+                  "line": 297,
+                  "method": "get",
+                  "path": "/repositories"
+                },
+                {
+                  "function": "connect_repository",
+                  "line": 302,
+                  "method": "post",
+                  "path": "/repositories"
+                },
+                {
+                  "function": "fixture",
+                  "line": 311,
+                  "method": "post",
+                  "path": "/repositories/fixture"
+                },
+                {
+                  "function": "repository",
+                  "line": 320,
+                  "method": "get",
+                  "path": "/repositories/{repository_id}"
+                },
+                {
+                  "function": "analyze",
+                  "line": 325,
+                  "method": "post",
+                  "path": "/repositories/{repository_id}/analyze"
+                },
+                {
+                  "function": "source_file",
+                  "line": 333,
+                  "method": "get",
+                  "path": "/repositories/{repository_id}/files"
+                },
+                {
+                  "function": "repository_symbols",
+                  "line": 342,
+                  "method": "get",
+                  "path": "/repository-intelligence/{repository_id}"
+                },
+                {
+                  "function": "scan",
+                  "line": 348,
+                  "method": "post",
+                  "path": "/repositories/{repository_id}/scans"
+                },
+                {
+                  "function": "scanners",
+                  "line": 356,
+                  "method": "get",
+                  "path": "/scanners"
+                },
+                {
+                  "function": "scans",
+                  "line": 361,
+                  "method": "get",
+                  "path": "/scans"
+                },
+                {
+                  "function": "scan_details",
+                  "line": 366,
+                  "method": "get",
+                  "path": "/scans/{scan_id}"
+                },
+                {
+                  "function": "findings",
+                  "line": 375,
+                  "method": "get",
+                  "path": "/findings"
+                },
+                {
+                  "function": "finding_details",
+                  "line": 388,
+                  "method": "get",
+                  "path": "/findings/{finding_id}"
+                },
+                {
+                  "function": "enrich_finding",
+                  "line": 393,
+                  "method": "post",
+                  "path": "/findings/{finding_id}/enrich"
+                },
+                {
+                  "function": "dependency_list",
+                  "line": 399,
+                  "method": "get",
+                  "path": "/dependencies"
+                },
+                {
+                  "function": "graph",
+                  "line": 404,
+                  "method": "get",
+                  "path": "/attack-paths/{repository_id}"
+                },
+                {
+                  "function": "remediation_plan",
+                  "line": 410,
+                  "method": "post",
+                  "path": "/findings/{finding_id}/remediation"
+                },
+                {
+                  "function": "remediation_list",
+                  "line": 419,
+                  "method": "get",
+                  "path": "/remediation"
+                },
+                {
+                  "function": "remediation_details",
+                  "line": 424,
+                  "method": "get",
+                  "path": "/remediation/{task_id}"
+                },
+                {
+                  "function": "approve",
+                  "line": 430,
+                  "method": "post",
+                  "path": "/remediation/{task_id}/approve"
+                },
+                {
+                  "function": "execute",
+                  "line": 442,
+                  "method": "post",
+                  "path": "/remediation/{task_id}/execute"
+                },
+                {
+                  "function": "verification",
+                  "line": 452,
+                  "method": "post",
+                  "path": "/remediation/{task_id}/verify"
+                },
+                {
+                  "function": "report",
+                  "line": 460,
+                  "method": "get",
+                  "path": "/remediation/{task_id}/report"
+                },
+                {
+                  "function": "deliver",
+                  "line": 468,
+                  "method": "post",
+                  "path": "/remediation/{task_id}/pull-request"
+                },
+                {
+                  "function": "pull_requests",
+                  "line": 480,
+                  "method": "get",
+                  "path": "/pull-requests"
+                },
+                {
+                  "function": "refresh_pr",
+                  "line": 485,
+                  "method": "post",
+                  "path": "/remediation/{task_id}/pull-request/refresh"
+                },
+                {
+                  "function": "models",
+                  "line": 501,
+                  "method": "get",
+                  "path": "/models"
+                },
+                {
+                  "function": "model_settings",
+                  "line": 506,
+                  "method": "put",
+                  "path": "/models/settings"
+                },
+                {
+                  "function": "jobs",
+                  "line": 518,
+                  "method": "get",
+                  "path": "/jobs"
+                },
+                {
+                  "function": "job_details",
+                  "line": 523,
+                  "method": "get",
+                  "path": "/jobs/{job_id}"
+                },
+                {
+                  "function": "cancel_job",
+                  "line": 531,
+                  "method": "post",
+                  "path": "/jobs/{job_id}/cancel"
+                },
+                {
+                  "function": "retry_job",
+                  "line": 546,
+                  "method": "post",
+                  "path": "/jobs/{job_id}/retry"
+                },
+                {
+                  "function": "job_events",
+                  "line": 575,
+                  "method": "get",
+                  "path": "/jobs/{job_id}/events"
+                },
+                {
+                  "function": "analytics",
+                  "line": 601,
+                  "method": "get",
+                  "path": "/analytics"
+                },
+                {
+                  "function": "configuration",
+                  "line": 613,
+                  "method": "get",
+                  "path": "/settings"
+                },
+                {
+                  "function": "audit_history",
+                  "line": 618,
+                  "method": "get",
+                  "path": "/audit"
+                }
+              ]
+            },
+            {
+              "path": "backend/app/api/schemas.py",
+              "imports": [
+                "app.integrations.github",
+                "pydantic",
+                "re",
+                "typing"
+              ],
+              "function_count": 2,
+              "routes": []
+            },
+            {
+              "path": "backend/app/core/config.py",
+              "imports": [
+                "pathlib",
+                "pydantic",
+                "pydantic_settings",
+                "typing"
+              ],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/core/errors.py",
+              "imports": [],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/core/security.py",
+              "imports": [
+                "app.core.config",
+                "app.database",
+                "argon2",
+                "cryptography.fernet",
+                "datetime",
+                "fastapi",
+                "hashlib",
+                "os",
+                "pathlib",
+                "re",
+                "secrets",
+                "sqlalchemy.orm"
+              ],
+              "function_count": 5,
+              "routes": []
+            },
+            {
+              "path": "backend/app/database.py",
+              "imports": [
+                "app.core.config",
+                "collections.abc",
+                "datetime",
+                "sqlalchemy",
+                "sqlalchemy.orm",
+                "uuid"
+              ],
+              "function_count": 5,
+              "routes": []
+            },
+            {
+              "path": "backend/app/integrations/github.py",
+              "imports": [
+                "app.core.config",
+                "app.core.errors",
+                "app.core.security",
+                "app.database",
+                "base64",
+                "httpx",
+                "io",
+                "jwt",
+                "pathlib",
+                "re",
+                "sqlalchemy.orm",
+                "tarfile",
+                "time",
+                "urllib.parse"
+              ],
+              "function_count": 8,
+              "routes": []
+            },
+            {
+              "path": "backend/app/intelligence/assessment.py",
+              "imports": [
+                "app.database",
+                "sqlalchemy",
+                "sqlalchemy.orm"
+              ],
+              "function_count": 3,
+              "routes": []
+            },
+            {
+              "path": "backend/app/intelligence/enrichment.py",
+              "imports": [
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "app.jobs.recovery",
+                "httpx",
+                "json",
+                "re",
+                "time",
+                "urllib.parse"
+              ],
+              "function_count": 2,
+              "routes": []
+            },
+            {
+              "path": "backend/app/jobs/recovery.py",
+              "imports": [
+                "app.core.config",
+                "app.core.errors",
+                "app.core.security",
+                "app.database",
+                "datetime",
+                "httpx"
+              ],
+              "function_count": 5,
+              "routes": []
+            },
+            {
+              "path": "backend/app/jobs/worker.py",
+              "imports": [
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "app.jobs",
+                "collections.abc",
+                "datetime",
+                "sqlalchemy",
+                "threading"
+              ],
+              "function_count": 8,
+              "routes": []
+            },
+            {
+              "path": "backend/app/main.py",
+              "imports": [
+                "alembic",
+                "alembic.config",
+                "app.agents.models",
+                "app.api.routes",
+                "app.core.config",
+                "app.core.security",
+                "app.jobs",
+                "app.services.handlers",
+                "collections",
+                "contextlib",
+                "fastapi",
+                "fastapi.middleware.cors",
+                "fastapi.middleware.trustedhost",
+                "fastapi.responses",
+                "fastapi.staticfiles",
+                "json",
+                "logging",
+                "pathlib",
+                "shutil",
+                "threading",
+                "time"
+              ],
+              "function_count": 7,
+              "routes": [
+                {
+                  "function": "api_documentation",
+                  "line": 120,
+                  "method": "get",
+                  "path": "/docs"
+                },
+                {
+                  "function": "spa",
+                  "line": 130,
+                  "method": "get",
+                  "path": "/{path:path}"
+                }
+              ]
+            },
+            {
+              "path": "backend/app/repository/intelligence.py",
+              "imports": [
+                "app.core.security",
+                "app.database",
+                "ast",
+                "collections",
+                "json",
+                "packaging.requirements",
+                "pathlib",
+                "re",
+                "sqlalchemy",
+                "sqlalchemy.orm",
+                "tomllib",
+                "tree_sitter",
+                "tree_sitter_javascript",
+                "tree_sitter_python",
+                "tree_sitter_typescript"
+              ],
+              "function_count": 5,
+              "routes": []
+            },
+            {
+              "path": "backend/app/sandbox/runner.py",
+              "imports": [
+                "app.core.config",
+                "app.core.security",
+                "app.jobs.worker",
+                "json",
+                "pathlib",
+                "re",
+                "subprocess",
+                "tempfile",
+                "time",
+                "uuid"
+              ],
+              "function_count": 9,
+              "routes": []
+            },
+            {
+              "path": "backend/app/scanners/adapters.py",
+              "imports": [
+                "app.core.config",
+                "app.sandbox.runner",
+                "app.scanners.normalization",
+                "json",
+                "pathlib",
+                "uuid"
+              ],
+              "function_count": 3,
+              "routes": []
+            },
+            {
+              "path": "backend/app/scanners/normalization.py",
+              "imports": [
+                "app.core.security",
+                "re"
+              ],
+              "function_count": 7,
+              "routes": []
+            },
+            {
+              "path": "backend/app/scanners/service.py",
+              "imports": [
+                "app.database",
+                "app.intelligence.assessment",
+                "app.jobs.worker",
+                "app.scanners.adapters",
+                "app.scanners.normalization",
+                "pathlib",
+                "sqlalchemy",
+                "sqlalchemy.orm"
+              ],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/services/handlers.py",
+              "imports": [
+                "app.agents.engine",
+                "app.core.errors",
+                "app.core.security",
+                "app.database",
+                "app.integrations.github",
+                "app.intelligence.assessment",
+                "app.intelligence.enrichment",
+                "app.jobs.worker",
+                "app.repository.intelligence",
+                "app.scanners.service",
+                "app.verification.engine",
+                "pathlib",
+                "shutil",
+                "sqlalchemy.orm"
+              ],
+              "function_count": 5,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/conftest.py",
+              "imports": [
+                "app.database",
+                "app.main",
+                "fastapi.testclient",
+                "os",
+                "pytest",
+                "sqlalchemy",
+                "tempfile"
+              ],
+              "function_count": 4,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_agent_reliability.py",
+              "imports": [
+                "app.agents",
+                "app.agents.engine",
+                "app.agents.schemas",
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "httpx",
+                "json",
+                "pytest",
+                "sqlalchemy",
+                "sqlalchemy.exc"
+              ],
+              "function_count": 8,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_analytics_counts.py",
+              "imports": [
+                "app.database"
+              ],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_api_reference.py",
+              "imports": [],
+              "function_count": 1,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_automatic_recovery.py",
+              "imports": [
+                "app.core.config",
+                "app.core.errors",
+                "app.database",
+                "app.integrations.github",
+                "app.jobs",
+                "app.services",
+                "datetime",
+                "httpx",
+                "pytest"
+              ],
+              "function_count": 21,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_cloud_routing.py",
+              "imports": [
+                "app.agents",
+                "app.core.config",
+                "app.database",
+                "httpx",
+                "json",
+                "pytest",
+                "sqlalchemy"
+              ],
+              "function_count": 3,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_contracts.py",
+              "imports": [
+                "app.agents",
+                "app.core.config",
+                "app.database",
+                "app.integrations.github",
+                "app.sandbox.runner",
+                "app.scanners.adapters",
+                "app.scanners.normalization",
+                "httpx",
+                "io",
+                "json",
+                "pytest",
+                "sqlalchemy",
+                "sys",
+                "tarfile"
+              ],
+              "function_count": 22,
+              "routes": []
+            },
+            {
+              "path": "backend/app/tests/test_integration.py",
+              "imports": [
+                "app.agents.models",
+                "app.core.config",
+                "app.core.security",
+                "app.database",
+                "app.jobs",
+                "app.repository.intelligence",
+                "pytest"
+              ],
+              "function_count": 9,
+              "routes": []
+            },
+            {
+              "path": "backend/main.py",
+              "imports": [
+                "app.main"
+              ],
+              "function_count": 0,
+              "routes": []
+            },
+            {
+              "path": "backend/migrations/env.py",
+              "imports": [
+                "alembic",
+                "app.database"
+              ],
+              "function_count": 0,
+              "routes": []
+            }
+          ],
+          "observations": [],
+          "dependencies": [
+            {
+              "requirement": "fastapi>=0.121",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "uvicorn[standard]>=0.38",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "sqlalchemy>=2.0.44",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "alembic>=1.17",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "pydantic-settings>=2.11",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "httpx>=0.28",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "argon2-cffi>=25.1",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "cryptography>=46",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "pyjwt>=2.10",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "psycopg[binary]>=3.2",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "tree-sitter==0.25.2",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "tree-sitter-python>=0.25",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "tree-sitter-javascript>=0.25",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "tree-sitter-typescript>=0.23",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "requirement": "packaging>=25",
+              "ecosystem": "PyPI",
+              "manifest": "backend/pyproject.toml",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@fontsource-variable/inter",
+              "version_spec": "^5.2.8",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@fontsource/jetbrains-mono",
+              "version_spec": "^5.2.8",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@tanstack/react-query",
+              "version_spec": "^5.90.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "lucide-react",
+              "version_spec": "^0.577.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "react",
+              "version_spec": "^19.2.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "react-dom",
+              "version_spec": "^19.2.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "react-router-dom",
+              "version_spec": "^7.9.6",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@axe-core/playwright",
+              "version_spec": "^4.11.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@eslint/js",
+              "version_spec": "^9.39.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@playwright/test",
+              "version_spec": "^1.56.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@testing-library/jest-dom",
+              "version_spec": "^6.9.1",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@testing-library/react",
+              "version_spec": "^16.3.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@types/react",
+              "version_spec": "^19.2.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@types/react-dom",
+              "version_spec": "^19.2.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "@vitejs/plugin-react",
+              "version_spec": "^5.1.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "eslint",
+              "version_spec": "^9.39.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "eslint-plugin-react-hooks",
+              "version_spec": "^7.0.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "eslint-plugin-react-refresh",
+              "version_spec": "^0.4.24",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "globals",
+              "version_spec": "^16.5.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "jsdom",
+              "version_spec": "^27.2.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "typescript",
+              "version_spec": "^5.9.3",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "typescript-eslint",
+              "version_spec": "^8.46.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "vite",
+              "version_spec": "^7.2.2",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            },
+            {
+              "name": "vitest",
+              "version_spec": "^4.0.0",
+              "ecosystem": "npm",
+              "manifest": "frontend/package.json",
+              "vulnerability_status": "not checked"
+            }
+          ],
+          "test_files": [
+            "backend/app/tests/conftest.py",
+            "backend/app/tests/test_agent_reliability.py",
+            "backend/app/tests/test_analytics_counts.py",
+            "backend/app/tests/test_api_reference.py",
+            "backend/app/tests/test_automatic_recovery.py",
+            "backend/app/tests/test_cloud_routing.py",
+            "backend/app/tests/test_contracts.py",
+            "backend/app/tests/test_integration.py"
+          ],
+          "executed_repository_code": false,
+          "limitations": [
+            "Static rule matches require contextual review.",
+            "Dependency versions are declarations, not installed or resolved versions.",
+            "Known vulnerability and outdated-package lookups have not been performed.",
+            "Only captured files were inspected."
+          ]
+        },
+        "runtime_tests": {
+          "status": "failed",
+          "executed": true,
+          "exit_code": 5,
+          "stdout": "",
+          "stderr": "\n----------------------------------------------------------------------\nRan 0 tests in 0.000s\n\nNO TESTS RAN\n",
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "unittest",
+            "discover",
+            "-v"
+          ],
+          "image": "python@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90",
+          "network": "none",
+          "timeout_seconds": 60,
+          "scope": "Captured source subset only; no dependency installation",
+          "cleanup": {
+            "status": "completed",
+            "container": "rilo-test-79b86f2ec828",
+            "reason": null
+          }
+        }
+      },
+      "version": 1,
+      "hash": "cd6782445bf531583caf8502b765993738a59e07a4ee783dd33b0588f0274785"
+    },
+    "selection": {
+      "algorithm": "term-overlap-source-priority-v3",
+      "characters": 1312,
+      "passages": 1,
+      "source_count": 40,
+      "coverage": "bounded selected passages; not exhaustive",
+      "input_byte_limit": 6000,
+      "budget_method": "conservative serialized input bytes; not a tokenizer count"
+    },
+    "rubric": {
+      "version": "workspace-evidence-v1",
+      "category": "repository",
+      "ground_truth": null,
+      "accuracy": "undefined without labels"
+    }
+  },
+  "runs": [
+    {
+      "id": "run_2de1402dfda240e4",
+      "experiment_id": "exp_a26e263257194f93",
+      "agent_id": "relay",
+      "agent_name": "Relay",
+      "task_id": "workspace_4b6a868e1b81c26a",
+      "task_name": "Repository",
+      "scenario_id": "normal",
+      "scenario_name": "Normal conditions",
+      "scenario_activated": false,
+      "repetition": 1,
+      "outcome": "completed",
+      "assessment_status": "inconclusive",
+      "duration_ms": 38439.05,
+      "tool_calls": 0,
+      "model_calls": 1,
+      "steps": 1,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": 932,
+      "output_tokens": 482,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "reported",
+      "cost_provenance": "estimated",
+      "cost_basis": {
+        "version": "model-token-pricing-v1",
+        "status": "configured",
+        "requested_model": "ollama/qwen2.5-coder:7b",
+        "currency": "USD",
+        "unit": "per million reported input/output tokens",
+        "rates": {
+          "input_usd_per_million": 0.0,
+          "output_usd_per_million": 0.0
+        },
+        "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+        "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+        "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+      },
+      "output": {
+        "summary": "The KYRO GitHub repository is described in the README.md file. It is an AI-powered autonomous software security and engineering intelligence tool designed for local execution and human-reviewed changes. The tool follows a workflow from Understand to Deliver, and it requires approval before editing a repository workspace and publishing a draft pull request.",
+        "facts": [],
+        "findings": [
+          {
+            "title": "Project Description",
+            "claim": "KYRO is an AI-powered autonomous software security and engineering intelligence tool.",
+            "severity": "info",
+            "explanation": "This information is directly stated in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          },
+          {
+            "title": "Workflow",
+            "claim": "KYRO follows a workflow from Understand to Deliver.",
+            "severity": "info",
+            "explanation": "This information is explicitly mentioned in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          },
+          {
+            "title": "Approval Requirement",
+            "claim": "Approval is required before editing a repository workspace and publishing a draft pull request.",
+            "severity": "info",
+            "explanation": "This requirement is clearly stated in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": {
+        "status": "inconclusive",
+        "checks": [
+          {
+            "name": "Structured response",
+            "passed": true,
+            "evidence": "Output matched the declared schema."
+          },
+          {
+            "name": "Citation validity",
+            "passed": true,
+            "evidence": "3/3 citations match captured references."
+          }
+        ],
+        "findings": [
+          {
+            "title": "Project Description",
+            "claim": "KYRO is an AI-powered autonomous software security and engineering intelligence tool.",
+            "severity": "info",
+            "explanation": "This information is directly stated in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_1",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                  "start_line": 3,
+                  "end_line": 5,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "24e1f3ee94cdfab128a219fa",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Workflow",
+            "claim": "KYRO follows a workflow from Understand to Deliver.",
+            "severity": "info",
+            "explanation": "This information is explicitly mentioned in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_2",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                  "start_line": 9,
+                  "end_line": 9,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "b04b247d3dfdf260bc3299a3",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Approval Requirement",
+            "claim": "Approval is required before editing a repository workspace and publishing a draft pull request.",
+            "severity": "info",
+            "explanation": "This requirement is clearly stated in the README.md file.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_3",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                  "start_line": 9,
+                  "end_line": 9,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "3d5900c6ef89fcae6fd8f839",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          }
+        ],
+        "metrics": {
+          "citation_validity": 1.0,
+          "evidence_coverage": 1.0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "accuracy": null
+        },
+        "rubric_version": "workspace-evidence-v1",
+        "limitations": [
+          "No ground-truth labels: accuracy, precision, recall and F1 are undefined.",
+          "Valid references do not prove an interpretation. Free-text summary is not fully verified.",
+          "Subjective quality and instruction adherence need independent review."
+        ],
+        "rubric": {
+          "version": "repository-v1",
+          "weights": {
+            "finding_accuracy": 25,
+            "evidence_correctness": 20,
+            "issue_coverage": 15,
+            "task_completion": 15,
+            "technical_depth": 10,
+            "instruction_adherence": 10,
+            "execution_efficiency": 5
+          },
+          "policy": "No aggregate score until all weighted criteria have valid independent measurements."
+        },
+        "overall_score": null,
+        "task_checks": {
+          "engine": "promptfoo",
+          "version": "0.125.1",
+          "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+          "status": "ungraded",
+          "score": null,
+          "checks": []
+        }
+      },
+      "events": [
+        {
+          "sequence": 1,
+          "type": "run_start",
+          "timestamp": "2026-11-09T18:39:42.472384+00:00",
+          "title": "Attempt started",
+          "data": {
+            "agent": "Relay",
+            "framework": "LangGraph",
+            "engine": "bifrost",
+            "mode": "controlled",
+            "scenario": "normal",
+            "repetition": 1
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 2,
+          "type": "step",
+          "timestamp": "2026-11-09T18:39:42.492992+00:00",
+          "title": "Inspect shared captured evidence",
+          "data": {
+            "passages": 1,
+            "independent_history": true
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 3,
+          "type": "model_request",
+          "timestamp": "2026-11-09T18:39:42.520517+00:00",
+          "title": "Generate independent response",
+          "data": {
+            "model": "ollama/qwen2.5-coder:7b",
+            "call": 1,
+            "history_messages": 0,
+            "snapshot_id": "snap_c0d31363059c486d"
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 4,
+          "type": "model_response",
+          "timestamp": "2026-11-09T18:40:20.652454+00:00",
+          "title": "Model response received",
+          "data": {
+            "actual_model": "qwen2.5-coder:7b",
+            "actual_provider": "ollama",
+            "requested_model_match": true,
+            "usage": {
+              "prompt_tokens": 932,
+              "prompt_tokens_details": {
+                "cached_read_tokens": 931,
+                "cached_tokens": 931,
+                "cache_write_tokens": 0
+              },
+              "completion_tokens": 482,
+              "total_tokens": 1414
+            },
+            "dispatch": 1
+          },
+          "duration_ms": 38122.16199999966
+        },
+        {
+          "sequence": 5,
+          "type": "synthesis",
+          "timestamp": "2026-11-09T18:40:20.710526+00:00",
+          "title": "Response recorded",
+          "data": {
+            "output": {
+              "summary": "The KYRO GitHub repository is described in the README.md file. It is an AI-powered autonomous software security and engineering intelligence tool designed for local execution and human-reviewed changes. The tool follows a workflow from Understand to Deliver, and it requires approval before editing a repository workspace and publishing a draft pull request.",
+              "facts": [],
+              "findings": [
+                {
+                  "title": "Project Description",
+                  "claim": "KYRO is an AI-powered autonomous software security and engineering intelligence tool.",
+                  "severity": "info",
+                  "explanation": "This information is directly stated in the README.md file.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                },
+                {
+                  "title": "Workflow",
+                  "claim": "KYRO follows a workflow from Understand to Deliver.",
+                  "severity": "info",
+                  "explanation": "This information is explicitly mentioned in the README.md file.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                },
+                {
+                  "title": "Approval Requirement",
+                  "claim": "Approval is required before editing a repository workspace and publishing a draft pull request.",
+                  "severity": "info",
+                  "explanation": "This requirement is clearly stated in the README.md file.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 6,
+          "type": "task_checks",
+          "timestamp": "2026-11-09T18:40:21.117365+00:00",
+          "title": "Promptfoo task checks recorded",
+          "data": {
+            "engine": "promptfoo",
+            "version": "0.125.1",
+            "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+            "status": "ungraded",
+            "score": null,
+            "checks": []
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 7,
+          "type": "assessment",
+          "timestamp": "2026-11-09T18:40:22.034623+00:00",
+          "title": "Evidence checks completed",
+          "data": {
+            "status": "inconclusive",
+            "checks": [
+              {
+                "name": "Structured response",
+                "passed": true,
+                "evidence": "Output matched the declared schema."
+              },
+              {
+                "name": "Citation validity",
+                "passed": true,
+                "evidence": "3/3 citations match captured references."
+              }
+            ],
+            "findings": [
+              {
+                "title": "Project Description",
+                "claim": "KYRO is an AI-powered autonomous software security and engineering intelligence tool.",
+                "severity": "info",
+                "explanation": "This information is directly stated in the README.md file.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_1",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "start_line": 3,
+                      "end_line": 5,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "24e1f3ee94cdfab128a219fa",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              },
+              {
+                "title": "Workflow",
+                "claim": "KYRO follows a workflow from Understand to Deliver.",
+                "severity": "info",
+                "explanation": "This information is explicitly mentioned in the README.md file.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_2",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "start_line": 9,
+                      "end_line": 9,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "b04b247d3dfdf260bc3299a3",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              },
+              {
+                "title": "Approval Requirement",
+                "claim": "Approval is required before editing a repository workspace and publishing a draft pull request.",
+                "severity": "info",
+                "explanation": "This requirement is clearly stated in the README.md file.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_3",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                      "start_line": 9,
+                      "end_line": 9,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "Approval is required before editing a repository workspace and before publishing a draft pull request.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "3d5900c6ef89fcae6fd8f839",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              }
+            ],
+            "metrics": {
+              "citation_validity": 1.0,
+              "evidence_coverage": 1.0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "accuracy": null
+            },
+            "rubric_version": "workspace-evidence-v1",
+            "limitations": [
+              "No ground-truth labels: accuracy, precision, recall and F1 are undefined.",
+              "Valid references do not prove an interpretation. Free-text summary is not fully verified.",
+              "Subjective quality and instruction adherence need independent review."
+            ],
+            "rubric": {
+              "version": "repository-v1",
+              "weights": {
+                "finding_accuracy": 25,
+                "evidence_correctness": 20,
+                "issue_coverage": 15,
+                "task_completion": 15,
+                "technical_depth": 10,
+                "instruction_adherence": 10,
+                "execution_efficiency": 5
+              },
+              "policy": "No aggregate score until all weighted criteria have valid independent measurements."
+            },
+            "overall_score": null,
+            "task_checks": {
+              "engine": "promptfoo",
+              "version": "0.125.1",
+              "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+              "status": "ungraded",
+              "score": null,
+              "checks": []
+            }
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 8,
+          "type": "run_end",
+          "timestamp": "2026-11-09T18:40:22.843309+00:00",
+          "title": "Attempt recorded",
+          "data": {
+            "tool_calls": 0,
+            "model_calls": 1,
+            "steps": 1,
+            "input_tokens": 932,
+            "output_tokens": 482,
+            "tokens_provenance": "reported",
+            "api_cost_usd": 0.0,
+            "cost_provenance": "estimated",
+            "cost_basis": {
+              "version": "model-token-pricing-v1",
+              "status": "configured",
+              "requested_model": "ollama/qwen2.5-coder:7b",
+              "currency": "USD",
+              "unit": "per million reported input/output tokens",
+              "rates": {
+                "input_usd_per_million": 0.0,
+                "output_usd_per_million": 0.0
+              },
+              "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+              "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+              "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+            },
+            "scenario_activated": false,
+            "observation_coverage": "model_tool_boundaries",
+            "duration_ms": 40370.01
+          },
+          "duration_ms": null
+        }
+      ]
+    },
+    {
+      "id": "run_a1d8fe8306224902",
+      "experiment_id": "exp_a26e263257194f93",
+      "agent_id": "repo_analyst",
+      "agent_name": "Repo Analyst",
+      "task_id": "workspace_4b6a868e1b81c26a",
+      "task_name": "Repository",
+      "scenario_id": "normal",
+      "scenario_name": "Normal conditions",
+      "scenario_activated": false,
+      "repetition": 1,
+      "outcome": "completed",
+      "assessment_status": "inconclusive",
+      "duration_ms": 65348.24,
+      "tool_calls": 0,
+      "model_calls": 2,
+      "steps": 1,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": 1963,
+      "output_tokens": 900,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "reported",
+      "cost_provenance": "estimated",
+      "cost_basis": {
+        "version": "model-token-pricing-v1",
+        "status": "configured",
+        "requested_model": "ollama/qwen2.5-coder:7b",
+        "currency": "USD",
+        "unit": "per million reported input/output tokens",
+        "rates": {
+          "input_usd_per_million": 0.0,
+          "output_usd_per_million": 0.0
+        },
+        "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+        "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+        "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+      },
+      "output": {
+        "summary": "The KYRO repository is an AI-powered autonomous software security and engineering intelligence tool designed for local execution and human-reviewed changes. It follows a workflow from Understand to Deliver, involving various stages like Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify. The repository includes a README.md file that outlines the project's purpose, capabilities, and workflow. The product is not certified secure or ready for public multi-tenant operation.",
+        "facts": [],
+        "findings": [
+          {
+            "title": "Project Purpose",
+            "claim": "The project aims to provide AI-powered autonomous software security and engineering intelligence.",
+            "severity": "info",
+            "explanation": "This information is stated directly in the README.md file and is crucial for understanding the project's objectives.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          },
+          {
+            "title": "Workflow Stages",
+            "claim": "The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",
+            "severity": "info",
+            "explanation": "This information is explicitly mentioned in the README.md file and is essential for understanding the project's operational flow.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          },
+          {
+            "title": "Product Status",
+            "claim": "The product is not certified secure or ready for public multi-tenant operation.",
+            "severity": "info",
+            "explanation": "This statement is made in the README.md file and is important for users to be aware of the product's current state.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": {
+        "status": "inconclusive",
+        "checks": [
+          {
+            "name": "Structured response",
+            "passed": true,
+            "evidence": "Output matched the declared schema."
+          },
+          {
+            "name": "Citation validity",
+            "passed": true,
+            "evidence": "3/3 citations match captured references."
+          }
+        ],
+        "findings": [
+          {
+            "title": "Project Purpose",
+            "claim": "The project aims to provide AI-powered autonomous software security and engineering intelligence.",
+            "severity": "info",
+            "explanation": "This information is stated directly in the README.md file and is crucial for understanding the project's objectives.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_1",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                  "start_line": 3,
+                  "end_line": 5,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "24e1f3ee94cdfab128a219fa",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Workflow Stages",
+            "claim": "The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",
+            "severity": "info",
+            "explanation": "This information is explicitly mentioned in the README.md file and is essential for understanding the project's operational flow.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_2",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                  "start_line": 9,
+                  "end_line": 9,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "b04b247d3dfdf260bc3299a3",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Product Status",
+            "claim": "The product is not certified secure or ready for public multi-tenant operation.",
+            "severity": "info",
+            "explanation": "This statement is made in the README.md file and is important for users to be aware of the product's current state.",
+            "citations": [
+              {
+                "source_id": "src_977f0268fd7f4fbd_1",
+                "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                "start_line": null,
+                "end_line": null,
+                "page": null
+              }
+            ],
+            "id": "finding_3",
+            "verification": {
+              "state": "PARTIALLY VERIFIED",
+              "method": "snapshot_reference_and_exact_passage",
+              "scope": "Reference integrity only; interpretation needs review",
+              "claim_correctness": "NEEDS MANUAL REVIEW",
+              "citations": [
+                {
+                  "source_id": "src_977f0268fd7f4fbd_1",
+                  "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                  "start_line": 13,
+                  "end_line": 13,
+                  "page": null,
+                  "reference_origin": "located exact quote in captured source",
+                  "valid": true,
+                  "captured_content": "This product is not certified secure or ready for public multi-tenant operation.",
+                  "matching_method": "exact passage",
+                  "reasons": [],
+                  "evidence_id": "69efc4b5418fb52acedcb21d",
+                  "snapshot_id": "snap_c0d31363059c486d",
+                  "source_reference": "README.md",
+                  "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                  "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                }
+              ]
+            }
+          }
+        ],
+        "metrics": {
+          "citation_validity": 1.0,
+          "evidence_coverage": 1.0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "accuracy": null
+        },
+        "rubric_version": "workspace-evidence-v1",
+        "limitations": [
+          "No ground-truth labels: accuracy, precision, recall and F1 are undefined.",
+          "Valid references do not prove an interpretation. Free-text summary is not fully verified.",
+          "Subjective quality and instruction adherence need independent review."
+        ],
+        "rubric": {
+          "version": "repository-v1",
+          "weights": {
+            "finding_accuracy": 25,
+            "evidence_correctness": 20,
+            "issue_coverage": 15,
+            "task_completion": 15,
+            "technical_depth": 10,
+            "instruction_adherence": 10,
+            "execution_efficiency": 5
+          },
+          "policy": "No aggregate score until all weighted criteria have valid independent measurements."
+        },
+        "overall_score": null,
+        "task_checks": {
+          "engine": "promptfoo",
+          "version": "0.125.1",
+          "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+          "status": "ungraded",
+          "score": null,
+          "checks": []
+        }
+      },
+      "events": [
+        {
+          "sequence": 1,
+          "type": "run_start",
+          "timestamp": "2026-11-09T18:40:23.200796+00:00",
+          "title": "Attempt started",
+          "data": {
+            "agent": "Repo Analyst",
+            "framework": "LangGraph task profile",
+            "engine": "bifrost",
+            "mode": "controlled",
+            "scenario": "normal",
+            "repetition": 1
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 2,
+          "type": "step",
+          "timestamp": "2026-11-09T18:40:23.416243+00:00",
+          "title": "Inspect shared captured evidence",
+          "data": {
+            "passages": 1,
+            "independent_history": true
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 3,
+          "type": "model_request",
+          "timestamp": "2026-11-09T18:40:23.903745+00:00",
+          "title": "Generate independent response",
+          "data": {
+            "model": "ollama/qwen2.5-coder:7b",
+            "call": 1,
+            "history_messages": 0,
+            "snapshot_id": "snap_c0d31363059c486d"
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 4,
+          "type": "model_response",
+          "timestamp": "2026-11-09T18:40:56.768454+00:00",
+          "title": "Model response received",
+          "data": {
+            "actual_model": "qwen2.5-coder:7b",
+            "actual_provider": "ollama",
+            "requested_model_match": true,
+            "usage": {
+              "prompt_tokens": 970,
+              "prompt_tokens_details": {
+                "cached_read_tokens": 969,
+                "cached_tokens": 969,
+                "cache_write_tokens": 0
+              },
+              "completion_tokens": 332,
+              "total_tokens": 1302
+            },
+            "dispatch": 1
+          },
+          "duration_ms": 32645.300400006818
+        },
+        {
+          "sequence": 5,
+          "type": "citation_warning",
+          "timestamp": "2026-11-09T18:40:56.893927+00:00",
+          "title": "Response omitted supporting citations",
+          "data": {
+            "attempt": 1,
+            "output": {
+              "summary": "The KYRO repository is an AI-powered autonomous software security and engineering intelligence tool designed for local execution and human-reviewed changes. It follows a workflow from Understand to Deliver, involving various stages like Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify. The repository includes a README.md file that outlines the project's purpose, capabilities, and workflow. The product is not certified secure or ready for public multi-tenant operation.",
+              "facts": [],
+              "findings": [
+                {
+                  "title": "Project Purpose",
+                  "claim": "The project aims to provide AI-powered autonomous software security and engineering intelligence for local execution and human-reviewed changes.",
+                  "severity": "info",
+                  "explanation": "This information is directly stated in the README.md file and provides context for the project's objectives.",
+                  "citations": []
+                },
+                {
+                  "title": "Workflow Stages",
+                  "claim": "The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",
+                  "severity": "info",
+                  "explanation": "The README.md file explicitly lists these stages, outlining the process the tool follows.",
+                  "citations": []
+                },
+                {
+                  "title": "Security and Certification Status",
+                  "claim": "The product is not certified secure or ready for public multi-tenant operation.",
+                  "severity": "info",
+                  "explanation": "The README.md file explicitly states this, indicating that while the tool is in development, it has not yet reached a secure or production-ready state.",
+                  "citations": []
+                }
+              ]
+            }
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 6,
+          "type": "recovery",
+          "timestamp": "2026-11-09T18:40:57.036486+00:00",
+          "title": "Retry missing citations",
+          "data": {
+            "bounded_retries": 1
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 7,
+          "type": "model_request",
+          "timestamp": "2026-11-09T18:40:57.221243+00:00",
+          "title": "Generate independent response",
+          "data": {
+            "model": "ollama/qwen2.5-coder:7b",
+            "call": 2,
+            "history_messages": 0,
+            "snapshot_id": "snap_c0d31363059c486d"
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 8,
+          "type": "model_response",
+          "timestamp": "2026-11-09T18:41:28.271106+00:00",
+          "title": "Model response received",
+          "data": {
+            "actual_model": "qwen2.5-coder:7b",
+            "actual_provider": "ollama",
+            "requested_model_match": true,
+            "usage": {
+              "prompt_tokens": 993,
+              "prompt_tokens_details": {
+                "cached_read_tokens": 964,
+                "cached_tokens": 964,
+                "cache_write_tokens": 0
+              },
+              "completion_tokens": 568,
+              "total_tokens": 1561
+            },
+            "dispatch": 2
+          },
+          "duration_ms": 30960.585299995728
+        },
+        {
+          "sequence": 9,
+          "type": "synthesis",
+          "timestamp": "2026-11-09T18:41:28.298488+00:00",
+          "title": "Response recorded",
+          "data": {
+            "output": {
+              "summary": "The KYRO repository is an AI-powered autonomous software security and engineering intelligence tool designed for local execution and human-reviewed changes. It follows a workflow from Understand to Deliver, involving various stages like Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify. The repository includes a README.md file that outlines the project's purpose, capabilities, and workflow. The product is not certified secure or ready for public multi-tenant operation.",
+              "facts": [],
+              "findings": [
+                {
+                  "title": "Project Purpose",
+                  "claim": "The project aims to provide AI-powered autonomous software security and engineering intelligence.",
+                  "severity": "info",
+                  "explanation": "This information is stated directly in the README.md file and is crucial for understanding the project's objectives.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                },
+                {
+                  "title": "Workflow Stages",
+                  "claim": "The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",
+                  "severity": "info",
+                  "explanation": "This information is explicitly mentioned in the README.md file and is essential for understanding the project's operational flow.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                },
+                {
+                  "title": "Product Status",
+                  "claim": "The product is not certified secure or ready for public multi-tenant operation.",
+                  "severity": "info",
+                  "explanation": "This statement is made in the README.md file and is important for users to be aware of the product's current state.",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                      "start_line": null,
+                      "end_line": null,
+                      "page": null
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 10,
+          "type": "task_checks",
+          "timestamp": "2026-11-09T18:41:28.338360+00:00",
+          "title": "Promptfoo task checks recorded",
+          "data": {
+            "engine": "promptfoo",
+            "version": "0.125.1",
+            "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+            "status": "ungraded",
+            "score": null,
+            "checks": []
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 11,
+          "type": "assessment",
+          "timestamp": "2026-11-09T18:41:28.354390+00:00",
+          "title": "Evidence checks completed",
+          "data": {
+            "status": "inconclusive",
+            "checks": [
+              {
+                "name": "Structured response",
+                "passed": true,
+                "evidence": "Output matched the declared schema."
+              },
+              {
+                "name": "Citation validity",
+                "passed": true,
+                "evidence": "3/3 citations match captured references."
+              }
+            ],
+            "findings": [
+              {
+                "title": "Project Purpose",
+                "claim": "The project aims to provide AI-powered autonomous software security and engineering intelligence.",
+                "severity": "info",
+                "explanation": "This information is stated directly in the README.md file and is crucial for understanding the project's objectives.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_1",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "start_line": 3,
+                      "end_line": 5,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "**Think. Build. Secure.**\n\nAI-powered autonomous software security and engineering intelligence, built for local execution and human-reviewed changes.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "24e1f3ee94cdfab128a219fa",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              },
+              {
+                "title": "Workflow Stages",
+                "claim": "The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",
+                "severity": "info",
+                "explanation": "This information is explicitly mentioned in the README.md file and is essential for understanding the project's operational flow.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_2",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "start_line": 9,
+                      "end_line": 9,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "Its workflow is **Understand → Detect → Investigate → Prioritize → Plan → Approve → Remediate → Test → Verify → Deliver**.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "b04b247d3dfdf260bc3299a3",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              },
+              {
+                "title": "Product Status",
+                "claim": "The product is not certified secure or ready for public multi-tenant operation.",
+                "severity": "info",
+                "explanation": "This statement is made in the README.md file and is important for users to be aware of the product's current state.",
+                "citations": [
+                  {
+                    "source_id": "src_977f0268fd7f4fbd_1",
+                    "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                    "start_line": null,
+                    "end_line": null,
+                    "page": null
+                  }
+                ],
+                "id": "finding_3",
+                "verification": {
+                  "state": "PARTIALLY VERIFIED",
+                  "method": "snapshot_reference_and_exact_passage",
+                  "scope": "Reference integrity only; interpretation needs review",
+                  "claim_correctness": "NEEDS MANUAL REVIEW",
+                  "citations": [
+                    {
+                      "source_id": "src_977f0268fd7f4fbd_1",
+                      "quote": "This product is not certified secure or ready for public multi-tenant operation.",
+                      "start_line": 13,
+                      "end_line": 13,
+                      "page": null,
+                      "reference_origin": "located exact quote in captured source",
+                      "valid": true,
+                      "captured_content": "This product is not certified secure or ready for public multi-tenant operation.",
+                      "matching_method": "exact passage",
+                      "reasons": [],
+                      "evidence_id": "69efc4b5418fb52acedcb21d",
+                      "snapshot_id": "snap_c0d31363059c486d",
+                      "source_reference": "README.md",
+                      "content_hash": "727c1ff2a8562b6461ad4be2b6deda3e7080aaf01a37eaa488be0964a0ecc5cd",
+                      "retrieved_at": "2026-11-09T18:31:58.314597+00:00"
+                    }
+                  ]
+                }
+              }
+            ],
+            "metrics": {
+              "citation_validity": 1.0,
+              "evidence_coverage": 1.0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "accuracy": null
+            },
+            "rubric_version": "workspace-evidence-v1",
+            "limitations": [
+              "No ground-truth labels: accuracy, precision, recall and F1 are undefined.",
+              "Valid references do not prove an interpretation. Free-text summary is not fully verified.",
+              "Subjective quality and instruction adherence need independent review."
+            ],
+            "rubric": {
+              "version": "repository-v1",
+              "weights": {
+                "finding_accuracy": 25,
+                "evidence_correctness": 20,
+                "issue_coverage": 15,
+                "task_completion": 15,
+                "technical_depth": 10,
+                "instruction_adherence": 10,
+                "execution_efficiency": 5
+              },
+              "policy": "No aggregate score until all weighted criteria have valid independent measurements."
+            },
+            "overall_score": null,
+            "task_checks": {
+              "engine": "promptfoo",
+              "version": "0.125.1",
+              "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+              "status": "ungraded",
+              "score": null,
+              "checks": []
+            }
+          },
+          "duration_ms": null
+        },
+        {
+          "sequence": 12,
+          "type": "run_end",
+          "timestamp": "2026-11-09T18:41:28.395761+00:00",
+          "title": "Attempt recorded",
+          "data": {
+            "tool_calls": 0,
+            "model_calls": 2,
+            "steps": 1,
+            "input_tokens": 1963,
+            "output_tokens": 900,
+            "tokens_provenance": "reported",
+            "api_cost_usd": 0.0,
+            "cost_provenance": "estimated",
+            "cost_basis": {
+              "version": "model-token-pricing-v1",
+              "status": "configured",
+              "requested_model": "ollama/qwen2.5-coder:7b",
+              "currency": "USD",
+              "unit": "per million reported input/output tokens",
+              "rates": {
+                "input_usd_per_million": 0.0,
+                "output_usd_per_million": 0.0
+              },
+              "source": "explicit RILO_MODEL_PRICING_JSON configuration",
+              "model_match_policy": "exact response model or matching provider plus unqualified model; contradictory routing metadata rejected",
+              "coverage": "model-token fees only; excludes search credits, hardware, energy, discounts, and external billing adjustments"
+            },
+            "scenario_activated": false,
+            "observation_coverage": "model_tool_boundaries",
+            "duration_ms": 65423.66
+          },
+          "duration_ms": null
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact_0a97419343b24f61",
+      "experiment_id": "exp_a26e263257194f93",
+      "kind": "comparison",
+      "created_at": "2026-11-09T18:41:28.878138+00:00",
+      "data": {
+        "method": "promptfoo-explicit-checks-v1",
+        "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+        "agents": [
+          {
+            "run_id": "run_2de1402dfda240e4",
+            "agent_id": "relay",
+            "agent_name": "Relay",
+            "outcome": "completed",
+            "status": "ungraded",
+            "score": null,
+            "passed": null,
+            "total": null,
+            "duration_ms": 38439.05,
+            "reason": null
+          },
+          {
+            "run_id": "run_a1d8fe8306224902",
+            "agent_id": "repo_analyst",
+            "agent_name": "Repo Analyst",
+            "outcome": "completed",
+            "status": "ungraded",
+            "score": null,
+            "passed": null,
+            "total": null,
+            "duration_ms": 65348.24,
+            "reason": null
+          }
+        ],
+        "winner": null,
+        "verdict": "ungraded",
+        "explanation": "No success checks were defined. Compare answers, evidence and usage; accuracy and a winner remain undetermined. Add explicit checks to the next task.",
+        "findings": [
+          {
+            "agent_a": "relay",
+            "agent_b": "repo_analyst",
+            "finding_a": "finding_2",
+            "finding_b": "finding_2",
+            "relationship": "potential disagreement",
+            "outcome": "Inconclusive",
+            "method": "shared_source_and_title_overlap",
+            "explanation": "Related findings share source references. Different wording alone does not establish a contradiction or a winner."
+          }
+        ]
+      },
+      "hash": "b96ddf68c25cfe44ffe25045bb32583f397c471375e402c59bfdba51e101ba8d"
+    }
+  ]
+}

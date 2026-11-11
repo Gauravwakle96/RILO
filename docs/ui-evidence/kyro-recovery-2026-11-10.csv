@@ -1,0 +1,7 @@
+﻿evaluation_id,run_id,agent,outcome,finding,claim,verification,sources,latency_ms,input_tokens,output_tokens,task_check_status,task_check_score,task_checks
+exp_a26e263257194f93,run_2de1402dfda240e4,Relay,completed,Project Description,KYRO is an AI-powered autonomous software security and engineering intelligence tool.,PARTIALLY VERIFIED,README.md,38439.05,932,482,ungraded,,[]
+exp_a26e263257194f93,run_2de1402dfda240e4,Relay,completed,Workflow,KYRO follows a workflow from Understand to Deliver.,PARTIALLY VERIFIED,README.md,38439.05,932,482,ungraded,,[]
+exp_a26e263257194f93,run_2de1402dfda240e4,Relay,completed,Approval Requirement,Approval is required before editing a repository workspace and publishing a draft pull request.,PARTIALLY VERIFIED,README.md,38439.05,932,482,ungraded,,[]
+exp_a26e263257194f93,run_a1d8fe8306224902,Repo Analyst,completed,Project Purpose,The project aims to provide AI-powered autonomous software security and engineering intelligence.,PARTIALLY VERIFIED,README.md,65348.24,1963,900,ungraded,,[]
+exp_a26e263257194f93,run_a1d8fe8306224902,Repo Analyst,completed,Workflow Stages,"The KYRO workflow includes stages such as Understand, Detect, Investigate, Prioritize, Plan, Approve, Remediate, Test, and Verify.",PARTIALLY VERIFIED,README.md,65348.24,1963,900,ungraded,,[]
+exp_a26e263257194f93,run_a1d8fe8306224902,Repo Analyst,completed,Product Status,The product is not certified secure or ready for public multi-tenant operation.,PARTIALLY VERIFIED,README.md,65348.24,1963,900,ungraded,,[]

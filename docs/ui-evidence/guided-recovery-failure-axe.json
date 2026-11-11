@@ -1,0 +1,14 @@
+{
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "targets": [
+        [
+          ".inspector-footer > span:nth-child(2)"
+        ]
+      ]
+    }
+  ],
+  "overflow": false
+}

@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp_f36defc85ddb45dd",
+  "candidate_id": "exp_1c30a3545eb2431f",
+  "attempts": 8,
+  "engine": "fixture",
+  "mode": "controlled",
+  "checked": [
+    "create",
+    "actual-results",
+    "trace",
+    "output",
+    "evaluation",
+    "focus-containment",
+    "escape-focus-return",
+    "json-download",
+    "baseline-save",
+    "rerun",
+    "compatible-comparison"
+  ]
+}

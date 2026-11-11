@@ -1,0 +1,61 @@
+{
+  "id": "exp_db2bc8f33a6e4d72",
+  "name": "SDK recovery comparison",
+  "state": "completed",
+  "progress": {
+    "completed": 18,
+    "total": 18
+  },
+  "summary": {
+    "passes": 9,
+    "failures": 9,
+    "inconclusive": 0,
+    "infrastructure_errors": 0
+  },
+  "agent_metrics": [
+    {
+      "agent_id": "scout",
+      "agent_name": "Scout",
+      "total": 9,
+      "passed": 0,
+      "failed": 9,
+      "inconclusive": 0,
+      "infrastructure_errors": 0,
+      "success_rate": 0.0,
+      "avg_duration_ms": 431.0733333333333,
+      "total_tool_calls": 9,
+      "total_model_calls": 0,
+      "total_steps": 15,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": null,
+      "output_tokens": null,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "not_applicable",
+      "cost_provenance": "not_applicable",
+      "scenario_exposures": 6
+    },
+    {
+      "agent_id": "relay",
+      "agent_name": "Relay",
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "inconclusive": 0,
+      "infrastructure_errors": 0,
+      "success_rate": 1.0,
+      "avg_duration_ms": 535.3944444444445,
+      "total_tool_calls": 12,
+      "total_model_calls": 0,
+      "total_steps": 18,
+      "observation_coverage": "model_tool_boundaries",
+      "input_tokens": null,
+      "output_tokens": null,
+      "api_cost_usd": 0.0,
+      "tokens_provenance": "not_applicable",
+      "cost_provenance": "not_applicable",
+      "scenario_exposures": 6
+    }
+  ],
+  "command": "uv run python examples/compare.py",
+  "notice": "Actual persisted SDK execution with deterministic fixture synthesis; no model inference."
+}

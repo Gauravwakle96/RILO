@@ -1,0 +1,10 @@
+{
+  "name": "rilo-promptfoo-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pinned Promptfoo assertion engine for Rilo's recorded agent outputs",
+  "engines": { "node": ">=22.22.0" },
+  "dependencies": { "promptfoo": "0.125.1" },
+  "overrides": { "glob": "14.0.4", "minimatch": "11.0.5", "basic-ftp": "6.2.6" }
+}

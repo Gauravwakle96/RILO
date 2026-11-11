@@ -1,0 +1,111 @@
+{
+  "status": "passed",
+  "url": "http://127.0.0.1:8018",
+  "experimentId": "exp_8b95841fed304432",
+  "observations": [
+    {
+      "label": "actual-model metric comparison",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": []
+    },
+    {
+      "label": "recovery",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "recovery mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": []
+    },
+    {
+      "label": "unhandled-fault",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "insufficient-evidence",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".notice > div"
+            ],
+            [
+              ".output-text > p"
+            ],
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "insufficient-evidence evaluation",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "axeViolations": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}

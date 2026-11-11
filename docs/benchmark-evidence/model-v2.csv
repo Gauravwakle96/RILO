@@ -1,0 +1,121 @@
+id,agent_name,task_name,scenario_name,scenario_activated,repetition,outcome,assessment_status,duration_ms,tool_calls,model_calls,steps,observation_coverage,input_tokens,output_tokens,api_cost_usd,tokens_provenance,cost_provenance
+run_6f7da90ea4754034,Scout,Conflicting release dates,Normal conditions,False,3,completed,pass,25665.67,1,1,2,model_tool_boundaries,298,144,0.0,reported,estimated
+run_e0126ca337d14876,Relay,Entity disambiguation,Misleading source,True,1,completed,pass,5035.61,1,1,2,model_tool_boundaries,298,77,0.0,reported,estimated
+run_aa0a051cba034b9c,Relay,Entity disambiguation,Misleading source,True,2,completed,pass,19834.83,1,1,2,model_tool_boundaries,298,77,0.0,reported,estimated
+run_84e2c96b06c7402b,Scout,Entity disambiguation,Search timeout,True,3,agent_error,fail,497.94,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_fe79052b267a46e3,Relay,Insufficient funding evidence,Model unavailable,True,3,completed,fail,7117.81,1,2,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_8ff1f5100f50428d,Relay,Multi-step company research,Model unavailable,True,2,completed,pass,10768.01,2,2,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_a43ae8edd4c8465a,Scout,Insufficient funding evidence,Model unavailable,True,1,agent_error,fail,447.98,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_9b92e0b6ff9c4169,Scout,Insufficient funding evidence,Misleading source,True,3,completed,fail,3307.21,1,1,2,model_tool_boundaries,235,54,0.0,reported,estimated
+run_ad9416502f7f4c90,Relay,Multi-step company research,Normal conditions,False,3,completed,pass,9915.91,2,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_d8cfd56b352d4bfc,Scout,Recent company briefing,Normal conditions,False,1,completed,pass,17010.47,1,1,2,model_tool_boundaries,386,149,0.0,reported,estimated
+run_2b1c78fff51b4bf7,Relay,Recent company briefing,Model unavailable,True,1,completed,pass,8526.8,1,2,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_4a34ebbbae3e4a11,Relay,Conflicting release dates,Normal conditions,False,2,completed,pass,12753.66,1,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_2d2469da3bf045f4,Relay,Entity disambiguation,Normal conditions,False,1,completed,pass,6786.58,1,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_77724b892190477a,Relay,Insufficient funding evidence,Model unavailable,True,1,completed,fail,5171.64,1,2,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_b73152137bba46a5,Scout,Insufficient funding evidence,Misleading source,True,2,completed,fail,4249.78,1,1,2,model_tool_boundaries,235,54,0.0,reported,estimated
+run_ef9c1bc22d19439a,Scout,Entity disambiguation,Normal conditions,False,2,completed,pass,14284.17,1,1,2,model_tool_boundaries,304,77,0.0,reported,estimated
+run_cc789cd1a5d14ad2,Relay,Multi-step company research,Normal conditions,False,1,completed,pass,17989.12,2,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_3485040d4daa43ef,Scout,Recent company briefing,Normal conditions,False,2,completed,pass,8952.23,1,1,2,model_tool_boundaries,386,149,0.0,reported,estimated
+run_8ca08feb9e6c40a2,Relay,Entity disambiguation,Model unavailable,True,3,completed,pass,4399.3,1,2,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_3d5cfb13328243da,Relay,Recent company briefing,Misleading source,True,2,completed,pass,10473.04,1,1,2,model_tool_boundaries,380,150,0.0,reported,estimated
+run_9a83ef651e7e4806,Relay,Conflicting release dates,Model unavailable,True,2,completed,pass,16287.35,1,2,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_70c66846a4c04988,Scout,Conflicting release dates,Misleading source,True,1,completed,pass,8956.9,1,1,2,model_tool_boundaries,328,151,0.0,reported,estimated
+run_cd9297a31d914836,Scout,Insufficient funding evidence,Normal conditions,False,2,completed,fail,5466.54,1,1,2,model_tool_boundaries,205,59,0.0,reported,estimated
+run_2a58c01538ca49d7,Relay,Recent company briefing,Model unavailable,True,2,completed,pass,15065.11,1,2,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_0ee9b0aa6a2c4d1a,Scout,Multi-step company research,Search timeout,True,1,agent_error,fail,182.48,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_5edd6f54c7cc40ec,Scout,Recent company briefing,Search timeout,True,3,agent_error,fail,161.96,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_3aee2664fab84d4a,Relay,Insufficient funding evidence,Misleading source,True,1,completed,fail,3296.08,1,1,2,model_tool_boundaries,273,54,0.0,reported,estimated
+run_0ff05ac967d748bb,Scout,Insufficient funding evidence,Search timeout,True,1,agent_error,fail,172.04,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_fd6cd9ae3d344e77,Scout,Insufficient funding evidence,Model unavailable,True,3,agent_error,fail,412.95,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_1c48e8f304e24a33,Relay,Multi-step company research,Misleading source,True,2,completed,pass,8020.22,2,1,2,model_tool_boundaries,418,142,0.0,reported,estimated
+run_b157edc97df04b59,Scout,Conflicting release dates,Normal conditions,False,2,completed,pass,9670.96,1,1,2,model_tool_boundaries,298,144,0.0,reported,estimated
+run_766b2468e3414f15,Scout,Conflicting release dates,Search timeout,True,2,agent_error,fail,179.31,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_7cdfd8eeaee04725,Scout,Insufficient funding evidence,Normal conditions,False,1,completed,fail,3430.82,1,1,2,model_tool_boundaries,205,59,0.0,reported,estimated
+run_ab51ef7dbd9e4232,Scout,Multi-step company research,Model unavailable,True,1,agent_error,fail,583.84,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_843f090842f34e48,Relay,Entity disambiguation,Normal conditions,False,2,completed,pass,4859.7,1,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_e9dc8b9703114c63,Scout,Conflicting release dates,Model unavailable,True,2,agent_error,fail,613.52,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_2e262bf13d504b48,Relay,Multi-step company research,Misleading source,True,1,completed,pass,8098.13,2,1,2,model_tool_boundaries,418,142,0.0,reported,estimated
+run_b7c0cad44271413c,Relay,Multi-step company research,Search timeout,True,1,completed,pass,12427.74,3,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_edd2b2e9fcae42d4,Scout,Entity disambiguation,Search timeout,True,2,agent_error,fail,98.28,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_2340d7d3b4c64c8d,Relay,Multi-step company research,Search timeout,True,2,completed,pass,18047.53,3,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_33726868b1a5486e,Scout,Multi-step company research,Search timeout,True,2,agent_error,fail,75.34,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_c5d28ddd33f847c2,Relay,Conflicting release dates,Misleading source,True,2,completed,pass,9794.15,1,1,2,model_tool_boundaries,366,148,0.0,reported,estimated
+run_b66c9345ca054d45,Relay,Recent company briefing,Normal conditions,False,3,completed,pass,10610.13,1,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_d5ad6ef555ea41e1,Scout,Multi-step company research,Normal conditions,False,3,completed,pass,16122.43,1,1,2,model_tool_boundaries,350,182,0.0,reported,estimated
+run_361970b8d18f43ca,Scout,Multi-step company research,Model unavailable,True,2,agent_error,fail,281.67,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_81e3e6cd30624ff7,Relay,Multi-step company research,Search timeout,True,3,completed,pass,27988.56,3,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_0615dc3a88cd427f,Scout,Conflicting release dates,Search timeout,True,3,agent_error,fail,406.83,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_1ecc42ab11cd4ae7,Scout,Conflicting release dates,Normal conditions,False,1,completed,pass,13748.05,1,1,2,model_tool_boundaries,298,144,0.0,reported,estimated
+run_fea966d08708465d,Scout,Entity disambiguation,Misleading source,True,1,completed,pass,5804.36,1,1,2,model_tool_boundaries,334,77,0.0,reported,estimated
+run_721f26930c9b4a98,Relay,Recent company briefing,Normal conditions,False,1,completed,pass,9399.9,1,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_10afaed4120d40b7,Relay,Multi-step company research,Model unavailable,True,1,completed,pass,15231.81,2,2,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_f5d3e5dafb9b4850,Scout,Conflicting release dates,Misleading source,True,2,completed,pass,15902.28,1,1,2,model_tool_boundaries,328,151,0.0,reported,estimated
+run_a94d0c2acf3e4640,Relay,Conflicting release dates,Model unavailable,True,1,completed,pass,13230.55,1,2,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_41f3e709185e4b65,Relay,Multi-step company research,Model unavailable,True,3,completed,pass,21016.67,2,2,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_c20f471787f34453,Scout,Multi-step company research,Misleading source,True,2,completed,pass,9833.97,1,1,2,model_tool_boundaries,380,142,0.0,reported,estimated
+run_a5e3bf1e133b4f0f,Scout,Entity disambiguation,Normal conditions,False,1,completed,pass,4664.1,1,1,2,model_tool_boundaries,304,77,0.0,reported,estimated
+run_b90e649fedf943a1,Relay,Entity disambiguation,Normal conditions,False,3,completed,pass,4519.87,1,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_496e46f45e914087,Relay,Entity disambiguation,Misleading source,True,3,completed,pass,4823.65,1,1,2,model_tool_boundaries,298,77,0.0,reported,estimated
+run_7521bb38f6da43fa,Relay,Insufficient funding evidence,Search timeout,True,2,completed,fail,4402.7,2,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_7a70dd70e4694404,Relay,Conflicting release dates,Normal conditions,False,1,completed,pass,12628.34,1,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_5cd3cb69bdbb4b1f,Scout,Conflicting release dates,Search timeout,True,1,agent_error,fail,210.74,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_d970c6534a9945f5,Scout,Insufficient funding evidence,Search timeout,True,2,agent_error,fail,440.05,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_610dfca7a327442c,Scout,Recent company briefing,Search timeout,True,2,agent_error,fail,349.34,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_68c126231fd742da,Scout,Recent company briefing,Model unavailable,True,3,agent_error,fail,1030.58,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_3221d389743e4e85,Scout,Insufficient funding evidence,Misleading source,True,1,completed,fail,4793.95,1,1,2,model_tool_boundaries,235,54,0.0,reported,estimated
+run_51068d1e6573423b,Relay,Conflicting release dates,Model unavailable,True,3,completed,pass,10461.85,1,2,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_babe3a9008e8453a,Scout,Entity disambiguation,Search timeout,True,1,agent_error,fail,405.62,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_dafb20f8b67f426e,Scout,Entity disambiguation,Misleading source,True,2,completed,pass,4399.4,1,1,2,model_tool_boundaries,334,77,0.0,reported,estimated
+run_74b80d2bdf6f4739,Scout,Recent company briefing,Model unavailable,True,1,agent_error,fail,230.55,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_f74e3ab81db04ff0,Relay,Insufficient funding evidence,Misleading source,True,2,completed,fail,3304.74,1,1,2,model_tool_boundaries,273,54,0.0,reported,estimated
+run_0908a49fb922461c,Scout,Recent company briefing,Normal conditions,False,3,completed,pass,10460.4,1,1,2,model_tool_boundaries,386,149,0.0,reported,estimated
+run_12b754a3c01a496e,Relay,Entity disambiguation,Model unavailable,True,1,completed,pass,6185.29,1,2,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_2094147707594f4e,Relay,Multi-step company research,Misleading source,True,3,completed,pass,19774.52,2,1,2,model_tool_boundaries,418,142,0.0,reported,estimated
+run_35e625ff96ea46c8,Scout,Recent company briefing,Misleading source,True,3,completed,pass,19719.73,1,1,2,model_tool_boundaries,416,159,0.0,reported,estimated
+run_8e642df8b6654ffc,Scout,Entity disambiguation,Misleading source,True,3,completed,pass,6117.66,1,1,2,model_tool_boundaries,334,77,0.0,reported,estimated
+run_309f685caf8a4ece,Relay,Recent company briefing,Model unavailable,True,3,completed,pass,11279.56,1,2,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_b56d615036d94b86,Relay,Conflicting release dates,Normal conditions,False,3,completed,pass,14098.48,1,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_3a270640920d48d3,Scout,Conflicting release dates,Model unavailable,True,1,agent_error,fail,363.72,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_4246fdb642a64fec,Relay,Insufficient funding evidence,Misleading source,True,3,completed,fail,5446.02,1,1,2,model_tool_boundaries,273,54,0.0,reported,estimated
+run_abd9efa0e0944b02,Scout,Recent company briefing,Misleading source,True,1,completed,pass,21263.16,1,1,2,model_tool_boundaries,416,159,0.0,reported,estimated
+run_24efebfe6cd0435b,Relay,Insufficient funding evidence,Normal conditions,False,1,completed,fail,5704.67,1,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_dd58c607524748c6,Scout,Multi-step company research,Model unavailable,True,3,agent_error,fail,211.88,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_348763cbd2ac4462,Relay,Recent company briefing,Search timeout,True,2,completed,pass,15744.05,2,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_71dba8a09ee04d19,Scout,Multi-step company research,Normal conditions,False,2,completed,pass,13364.7,1,1,2,model_tool_boundaries,350,182,0.0,reported,estimated
+run_ff878a10cf394eb9,Relay,Conflicting release dates,Misleading source,True,1,completed,pass,23762.12,1,1,2,model_tool_boundaries,366,148,0.0,reported,estimated
+run_6dfe6241992c4fa9,Scout,Recent company briefing,Misleading source,True,2,completed,pass,29884.17,1,1,2,model_tool_boundaries,416,159,0.0,reported,estimated
+run_d1f9104d4b264066,Scout,Recent company briefing,Search timeout,True,1,agent_error,fail,977.39,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_21fedf895b2542ba,Relay,Entity disambiguation,Model unavailable,True,2,completed,pass,9562.31,1,2,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_95515027bac346c0,Scout,Multi-step company research,Misleading source,True,3,completed,pass,12736.27,1,1,2,model_tool_boundaries,380,142,0.0,reported,estimated
+run_bcf88065a52048f0,Relay,Conflicting release dates,Search timeout,True,3,completed,pass,10273.82,2,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_4af091646fe643e7,Relay,Recent company briefing,Misleading source,True,1,completed,pass,16151.31,1,1,2,model_tool_boundaries,380,150,0.0,reported,estimated
+run_72ebff912bb54108,Scout,Conflicting release dates,Misleading source,True,3,completed,pass,24949.16,1,1,2,model_tool_boundaries,328,151,0.0,reported,estimated
+run_c0169fe66ed24a45,Relay,Conflicting release dates,Search timeout,True,2,completed,pass,12852.64,2,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_6e36521e27294453,Relay,Insufficient funding evidence,Search timeout,True,1,completed,fail,3437.57,2,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_3053a29cc856432a,Relay,Insufficient funding evidence,Model unavailable,True,2,completed,fail,3301.09,1,2,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_e8874f44396549ee,Scout,Conflicting release dates,Model unavailable,True,3,agent_error,fail,134.31,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_3246cd014eed4ec7,Scout,Insufficient funding evidence,Model unavailable,True,2,agent_error,fail,426.86,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_fa7fda3a493e4423,Relay,Entity disambiguation,Search timeout,True,3,completed,pass,4169.43,2,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_2c5314672c5645f8,Scout,Insufficient funding evidence,Normal conditions,False,3,completed,fail,3202.82,1,1,2,model_tool_boundaries,205,59,0.0,reported,estimated
+run_d4f19d4ff79c4ef4,Relay,Insufficient funding evidence,Normal conditions,False,3,completed,fail,3171.1,1,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_87d7802f8ffe480e,Scout,Insufficient funding evidence,Search timeout,True,3,agent_error,fail,54.93,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_1f3ab790db944c0e,Scout,Entity disambiguation,Normal conditions,False,3,completed,pass,4136.38,1,1,2,model_tool_boundaries,304,77,0.0,reported,estimated
+run_47067eee8a9142db,Relay,Insufficient funding evidence,Search timeout,True,3,completed,fail,3307.22,2,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_e279fb460c9d4401,Relay,Conflicting release dates,Misleading source,True,3,completed,pass,7665.94,1,1,2,model_tool_boundaries,366,148,0.0,reported,estimated
+run_c81c79ad8a964dcd,Scout,Entity disambiguation,Model unavailable,True,3,agent_error,fail,144.87,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_c58b381667d747d9,Scout,Multi-step company research,Misleading source,True,1,completed,pass,7231.32,1,1,2,model_tool_boundaries,380,142,0.0,reported,estimated
+run_821e331a13d948b8,Relay,Recent company briefing,Search timeout,True,3,completed,pass,10369.57,2,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_d883a6df96a743e3,Relay,Conflicting release dates,Search timeout,True,1,completed,pass,15290.49,2,1,2,model_tool_boundaries,336,144,0.0,reported,estimated
+run_f1b71deda2a04c25,Relay,Recent company briefing,Normal conditions,False,2,completed,pass,7627.95,1,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_773d3c27ed654624,Scout,Multi-step company research,Search timeout,True,3,agent_error,fail,53.6,1,0,1,model_tool_boundaries,,,,unknown,unknown
+run_83061d8913fe49ae,Scout,Entity disambiguation,Model unavailable,True,2,agent_error,fail,233.83,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_3ff3c8dcc1834014,Relay,Entity disambiguation,Search timeout,True,1,completed,pass,4269.18,2,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_2a4e4cbab13a441b,Relay,Multi-step company research,Normal conditions,False,2,completed,pass,11962.94,2,1,2,model_tool_boundaries,388,182,0.0,reported,estimated
+run_231691b52fad4995,Relay,Recent company briefing,Search timeout,True,1,completed,pass,7758.73,2,1,2,model_tool_boundaries,350,150,0.0,reported,estimated
+run_c4704c2d3d694602,Relay,Insufficient funding evidence,Normal conditions,False,2,completed,fail,3170.83,1,1,2,model_tool_boundaries,243,59,0.0,reported,estimated
+run_7c9859a9bb954fb3,Scout,Recent company briefing,Model unavailable,True,2,agent_error,fail,137.21,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_8f9f7c95cd954d03,Relay,Entity disambiguation,Search timeout,True,2,completed,pass,4167.78,2,1,2,model_tool_boundaries,268,77,0.0,reported,estimated
+run_778f23bfb0ba4480,Scout,Entity disambiguation,Model unavailable,True,1,agent_error,fail,135.94,1,1,2,model_tool_boundaries,,,,unknown,unknown
+run_c361b309efef46d5,Relay,Recent company briefing,Misleading source,True,3,completed,pass,7838.28,1,1,2,model_tool_boundaries,380,150,0.0,reported,estimated
+run_a2f557c0817847c1,Scout,Multi-step company research,Normal conditions,False,1,completed,pass,9320.25,1,1,2,model_tool_boundaries,350,182,0.0,reported,estimated

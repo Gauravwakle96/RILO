@@ -1,0 +1,14 @@
+{
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "targets": [
+        [
+          ".attempt-preview > span > small"
+        ]
+      ]
+    }
+  ],
+  "overflow": false
+}

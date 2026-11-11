@@ -1,0 +1,11 @@
+{
+  "command": "uv run rilo compare --baseline exp_fb94649e3b9c4536 --candidate exp_8b2cbc4e74864ec9 --require-pass",
+  "exit_code": 0,
+  "compatible": true,
+  "gate": {
+    "status": "pass",
+    "reasons": [
+      "No measured task-success regression under the same recorded conditions; sample coverage remains limited."
+    ]
+  }
+}

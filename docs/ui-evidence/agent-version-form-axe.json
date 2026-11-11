@@ -1,0 +1,20 @@
+{
+  "url": "http://127.0.0.1:5187/#/agents",
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "targets": [
+        [
+          "#_r_1_"
+        ],
+        [
+          ".modal-header > div > p"
+        ],
+        [
+          ".notice > div"
+        ]
+      ]
+    }
+  ]
+}

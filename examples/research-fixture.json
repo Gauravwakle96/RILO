@@ -1,0 +1,10 @@
+{
+  "name": "Deterministic research demonstration",
+  "agent_ids": ["scout", "relay"],
+  "task_ids": ["company_brief", "entity_match", "conflicting_sources", "insufficient_evidence", "multi_step"],
+  "scenario_ids": ["normal", "search_timeout", "model_outage", "prompt_injection"],
+  "repetitions": 3,
+  "engine": "fixture",
+  "mode": "controlled",
+  "limits": {"max_model_calls": 12, "max_tool_calls": 6, "timeout_seconds": 120}
+}

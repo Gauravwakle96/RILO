@@ -1,0 +1,47 @@
+# Rilo first-release implementation contract
+
+Shared implementation contract, updated 9 November 2026. JSON snake_case. API at /api/v1; backend port 8018; Vite port 5187 with /api proxy to backend. Production frontend is served by backend if frontend/dist exists. API paths below are relative to /api/v1 except public /health. A self-hosted, searchable OpenAPI reference is available at /docs and /redoc; it establishes a local browser session to read the protected /openapi.json schema. Its scripts and styles are served from /docs-assets, without external CDN requests or mutation execution. Root owns this contract; backend and frontend owners coordinate deviations.
+
+## Session
+
+GET /session establishes local HttpOnly SameSite=Strict session and returns {csrf_token, app_version, workspace_name}. Frontend stores csrf_token in memory and adds X-CSRF-Token on mutations. Origin allowlist includes http://localhost:5187, http://127.0.0.1:5187 and port 8018. CLI can authenticate with server-generated token in ignored .rilo/session.key. Bootstrap rejects untrusted origins/hosts. No frontend localStorage auth token.
+
+## Catalog
+
+GET /agents returns Agent[]. Agent fields: id, name, description, framework, kind (plain/graph/http), version, capabilities (string[]), config (safe object). Builtins scout (plain Python) and relay (LangGraph). POST /agents registers bounded name/description and kind=http plus local endpoint; no arbitrary Python import or shell registration. GET /tasks returns Task[]: id, title, description, prompt, company, reference_time, required_facts (string[]), source_ids (string[]). POST /tasks allows adding a validated referenced task against known source_ids. GET /scenarios returns Scenario[]: id, name, description, type. IDs normal, search_timeout, model_outage, prompt_injection. GET /sources returns Source[]: id, title, url, published_at, content, entity_id, license. Bundled corpus is synthetic; .example URLs are not live research. GET /settings returns config plus integrations: bifrost/ollama/tavily status, detail, configured, and available models where relevant; never raw secrets. PATCH /settings updates validated local bifrost_url and model only. Tavily credential configured through ignored .env, clearly explained in UI.
+
+Agents add implementation_hash and implementation_hash_scope. Builtins hash the loaded local workflow source; HTTP implementation is unobserved and its version remains user declared. GET /agents/{id}/versions lists archived declarations. POST /agents/{id}/versions accepts {version,endpoint,name?,description?}, creates a new current HTTP version, and preserves old experiment snapshots. Reused version labels and builtin revision requests are rejected. POST /agents/{id}/check performs a bounded connectivity check. GET /suites exposes the current research suite. Custom tasks require nonempty supported reference statements and a zoned reference_time; arbitrary HTML/code is not executed.
+
+## Experiment requests
+
+POST /experiments returns 202. Request:
+
+```json
+{"name":"Recovery check","agent_ids":["scout","relay"],"task_ids":["company_brief"],"scenario_ids":["normal","search_timeout"],"repetitions":3,"engine":"fixture","mode":"controlled","model":"ollama/qwen2.5-coder:7b","limits":{"max_model_calls":12,"max_tool_calls":6,"timeout_seconds":120}}
+```
+
+Engines fixture and bifrost are distinct. Fixture is an executable deterministic demonstration, never described as live AI. Bifrost engine makes actual model requests. Mode controlled uses searchable synthetic/recorded corpus; live uses actual Tavily and requires configured credentials. Bifrost mode cannot silently fall back to fixture. Immutable spec/manifest, content hashes, fresh attempts, bounded scheduling, observed usage, and interruption accounting are required. Use Idempotency-Key on create. Repetitions 1-5; cap total attempts at 200.
+
+HTTP adapters support controlled evidence and normal scenario only, with final_output_only coverage. Their engine selection permits invoking the existing agent, whose internal provider/model behavior remains unobserved. Unsupported failure or live selections are rejected. The manifest pins implementation/dependency hashes, grader_version, source/task/scenario versions, limits, randomized order_seed, cache_policy and price_basis. A worker running different implementation hashes records infrastructure errors instead of relabeling the experiment.
+
+## Experiment responses
+
+GET /experiments returns Experiment[]. POST/GET /experiments/{id} uses Experiment: id, name, state (queued/running/completed/partial/cancelled/failed), created_at, updated_at, spec, progress {completed,total}, summary {passes,failures,inconclusive,infrastructure_errors}, agent_metrics (AgentMetric[]). GET detail additionally has runs (RunSummary[]) and manifest. POST /experiments/{id}/cancel requests idempotent cancellation. GET /experiments/{id}/events SSE with cursor is supported; frontend may use bounded polling initially.
+
+AgentMetric: agent_id, agent_name, total, passed, failed, inconclusive, infrastructure_errors, success_rate (0-1 or null), avg_duration_ms, total_tool_calls, total_model_calls, total_steps (number/null), observation_coverage, scenario_exposures, input_tokens (number/null), output_tokens (number/null), api_cost_usd (number/null), tokens_provenance (reported/estimated/unknown/not_applicable), cost_provenance (measured/estimated/unknown/not_applicable). Aggregate usage is null if any included attempt lacks complete observations; individual reported dispatch usage stays inspectable in traces.
+
+RunSummary: id, experiment_id, agent_id, agent_name, task_id, task_name, scenario_id, scenario_name, scenario_activated, repetition, outcome, assessment_status (pass/fail/inconclusive), duration_ms, steps, observation_coverage, tool_calls, model_calls, input_tokens, output_tokens, api_cost_usd, cost_basis and provenance. Steps count explicit step events, and call counts include attempted injected boundaries; token counts cover dispatched model responses. GET /runs/{id} adds output {summary,facts:[{text,source_ids}]}, assessment {status,checks:[{name,passed,evidence}],coverage?,limitations?}, events (TraceEvent[]). TraceEvent: sequence, type, timestamp, title, data (bounded redacted JSON object), duration_ms (number/null). GET /runs/{id}/trace returns events. No hidden chain-of-thought requested. Grader v2 checks supported quoted passages in the structured fact list, accepts required passages within longer supported quotes, and leaves arbitrary summary grounding unassessed.
+
+## Baselines/reports
+
+GET /baselines returns baseline records {id,name,experiment_id,created_at}. POST /baselines accepts {experiment_id,name}. GET /experiments/{id}/report?format=json|csv downloads actual manifest/results/coverage. POST /comparisons accepts {baseline_id,candidate_id} (experiment IDs), returns compatible, mismatches, baseline, candidate, agent_deltas, gate {status:pass/fail/inconclusive, reasons:string[]}. Incompatible manifests/incomplete evidence cannot pass. Initial compatibility compares task/scenario/repetition/engine/mode/model and limits; agent-version changes declared as candidate variables may be supported explicitly.
+
+POST /comparisons optionally accepts allow_agent_changes (strict boolean, default false). When true, agent_hash and agent_runtime_hash changes are recorded in declared_changes [{field,baseline,candidate}], and agent_versions returns both snapshots. Agent IDs, framework/kind, declared capabilities, observation coverage, tasks, evidence, scenarios, model, limits, repetitions, grader/core hashes and price basis must still match. Missing old provenance, incomplete experiments/assessments, infrastructure errors or fewer than three repetitions make the gate inconclusive. Pass means no measured per-agent task-success regression under the recorded sample; fail means at least one agent regressed. JSON exports include every attempt and its events; CSV contains scalar results with spreadsheet-formula escaping.
+
+RILO_MODEL_PRICING_JSON maps requested models to finite nonnegative input_usd_per_million/output_usd_per_million rates. Fees are estimated from the pinned price basis only if every dispatched response reports usage and confirms the requested model/provider. Missing pricing, fallback ambiguity, partial usage, interrupted or opaque HTTP execution remains unknown. Prices do not include Tavily credits or local hardware/electricity costs.
+
+## Limits and security
+
+No public arbitrary network fetch or executable registration. HTTP adapters limited to explicitly validated loopback endpoints and no redirects/proxy environment. Model base URL loopback-only. Real external Tavily endpoint fixed. Validate schemas/body size and response size. Cap calls, attempts, timeout, concurrency; run one worker. Persist jobs before scheduling, reconcile expired attempts, preserve events on cancellation. Fixture has null model token counts and zero API fees with not_applicable provenance. Bifrost failure/unknown usage never becomes a fabricated zero. Worker failures are infrastructure errors, distinct from agent-quality failures.
+
+Errors: {error:{code,message,request_id,details}}. UI accepts FastAPI detail fallback as well. GET /health can be public basic liveness only. No credentials in error text, settings responses, database exports, screenshots, or logs. Team tenancy is future scope.

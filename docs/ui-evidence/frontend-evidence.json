@@ -1,0 +1,439 @@
+{
+  "contract": "../../DESIGN.md \u00e2\u20ac\u201d Rilo developer reliability workspace; primary action New experiment, real API metrics, visible fixture vs Bifrost execution, inspectable runs, native dialogs, local session credentials, responsive navigation and long-content containment.",
+  "targetViewports": [
+    "390x844",
+    "768x1024",
+    "1440x900"
+  ],
+  "accessibility": {
+    "status": "pass",
+    "evidence": "Playwright plus axe-core checked dashboard, evidence, scenarios, forms, dark/light themes and actual fixture/Bifrost inspectors at all three target sizes. No automated violations. Keyboard wrapping, Escape dismissal and focus return passed for dialogs. Mobile drawer excludes hidden controls, contains keyboard focus and returns focus. Reduced-motion styles and theme-only localStorage verified. Axe incomplete observations remain recorded; these do not constitute full accessibility certification."
+  },
+  "responsive": {
+    "status": "pass",
+    "evidence": "Actual rendered screens inspected at390x844,768x1024,1440x900. Document scrollWidth stays within viewport across dashboards, task/evidence/settings/agent/scenario views, long-label forms and actual run inspectors. Tables scroll within a contained region. Touch controls use44px height on mobile/tablet. Mobile drawer and responsive two-column metrics were exercised."
+  },
+  "contentStates": {
+    "loading": {
+      "status": "pass",
+      "evidence": "Network-intercepted session delay visibly produced stable workspace skeleton and Connecting status; released request loaded actual catalog. simulated-loading.png."
+    },
+    "empty": {
+      "status": "pass",
+      "evidence": "Actual experiment search with no matching name produced No matching experiments and functional Clear filters at all viewports. Evidence search no matches showed No evidence available. empty-filter screenshots."
+    },
+    "error": {
+      "status": "pass",
+      "evidence": "Actual disallowed HTTP-agent endpoint returned displayed validation error. Separately simulated connection refusal displayed Workspace connection failed and Reconnect restored actual data. validation-error.png and simulated-connection-error.png."
+    },
+    "partial": {
+      "status": "pass",
+      "evidence": "Simulated503 source catalog preserved real experiment data with explicit missing-data notice; Retry restored catalog. Actual cancellation retained run records and interruption outcomes with available-results notice. simulated-partial.png and cancelled-experiment.png."
+    },
+    "success": {
+      "status": "pass",
+      "evidence": "Actual fixture8attempt experiment completed; opened outputs/evaluation/traces, exported JSON, saved baseline, reran8attempts and obtained compatible strict comparison. Changed candidate to incompatible real/fixture inputs and displayed strict mismatches. real-ui-flow.json, baseline-comparison-desktop.png and incompatible-comparison.png. Real HTTP agent registration then1.1.0 version registration preserved identity/history; version form and controlled execution restrictions passed. Actual comparison request posted allow_agent_changes:true; declared record rendering tested with explicitly labeled simulation."
+    },
+    "permission": {
+      "status": "pass",
+      "evidence": "Explicit simulated403 session rejection displayed Local session was rejected with approved-origin guidance and Reconnect; removing interception restored actual authenticated workspace. simulated-permission.png."
+    }
+  },
+  "renderedEvidence": [
+    {
+      "viewport": "390x844",
+      "artifact": "dashboard-390x844.png",
+      "observation": "Actual local experiment records; labeled API status, primary action, two-column metrics and contained scrollable experiment table. Mobile typography/layout visually inspected."
+    },
+    {
+      "viewport": "768x1024",
+      "artifact": "dashboard-768x1024.png",
+      "observation": "Tablet layout uses collapsed navigation, four metric columns and contained experiment table; visually inspected without page overflow."
+    },
+    {
+      "viewport": "1440x900",
+      "artifact": "dashboard-1440x900.png",
+      "observation": "Desktop sidebar, readable type hierarchy, primary action, actual fixture/Bifrost records and status/result columns; visually inspected."
+    },
+    {
+      "viewport": "390x844",
+      "artifact": "bifrost-trace-390x844.png",
+      "observation": "Actual recorded real-model run event timeline and steps/tool/model counts; full-width focus-contained inspector inspected."
+    },
+    {
+      "viewport": "1440x900",
+      "artifact": "baseline-comparison-desktop.png",
+      "observation": "Actual baseline/candidate results from fixture rerun; strict comparable verdict and saved baseline displayed."
+    },
+    {
+      "viewport": "1440x900",
+      "artifact": "simulated-permission.png",
+      "observation": "Explicit browser boundary simulation of session403; recovery action displayed; no credentials included."
+    },
+    {
+      "viewport": "1440x900",
+      "artifact": "agent-version-form.png",
+      "observation": "Actual registered HTTP agent version dialog; new version label and validated loopback endpoint with preservation of original experiments."
+    },
+    {
+      "viewport": "1440x900",
+      "artifact": "simulated-declared-change-records.png",
+      "observation": "Explicit response simulation verifies the field/baseline/candidate record display; no improvement claim is made."
+    }
+  ],
+  "observedAxeChecks": [
+    {
+      "artifact": "agent-version-form-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              "#_r_1_"
+            ],
+            [
+              ".modal-header > div > p"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "baseline-comparison-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "bifrost-inspector-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "bifrost-inspector-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "bifrost-inspector-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "completed-comparison-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "dashboard-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "dashboard-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "dashboard-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "evidence-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "evidence-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "evidence-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "evidence-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "experiment-form-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".attempt-preview > span > small"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "fixture-inspector-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "fixture-inspector-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "fixture-inspector-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "form-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "form-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "form-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".attempt-preview > span > small"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "light-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "light-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "light-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "run-inspector-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "targets": [
+            [
+              ".inspector-footer > span:nth-child(2)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "scenarios-1440x900-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "scenarios-390x844-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "scenarios-768x1024-axe.json",
+      "violations": 0,
+      "incomplete": [
+        {
+          "id": "aria-allowed-role",
+          "targets": [
+            [
+              "#rilo-navigation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "scenarios-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "settings-axe.json",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "artifact": "simulated-declared-change-records-axe.json",
+      "violations": 0,
+      "incomplete": []
+    }
+  ],
+  "verification": {
+    "browser_suite": "Latest complete suite after recovery UX changes: 13 passed in approximately 2.6 minutes; guide, reviewable 12-attempt fixture example, focused retest preserving model/budgets and all existing flows.",
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed; approximately 94.71 KB compressed JavaScript and 9.83 KB compressed CSS",
+    "dependency_audit": "zero known vulnerabilities",
+    "limitations": [
+      "Live Tavily credentials absent; live external research was not executed by frontend QA.",
+      "Network denial/loading/partial tests are explicitly simulated UI boundaries.",
+      "Axe incomplete rules recorded and visual/keyboard inspection supplement them; this is not accessibility certification.",
+      "Declared change field rendering uses an explicitly labeled response simulation; the allow_agent_changes flag was submitted to the actual API and returned a real comparison. Backend isolated tests own the real differing-agent regression case."
+    ],
+    "latest_repeated_suite": "Complete 13-test suite passed against an idle queue after the latest changes.",
+    "final_production_benchmark": "Six actual benchmark screens passed with zero axe violations, document overflow, JavaScript errors or failed requests. The output/evaluation scroll region has explicit keyboard focus and a visible outline."
+  },
+  "recovery_workflow": {
+    "guide": "Lower-left Start here, route /#/guide; requirements and limits, keyboard section navigation, both themes and three representative viewports verified.",
+    "example": "12 actual persisted fixture attempts, no model calls.",
+    "retest": "Recorded model and limits preserved in reviewable focused task/fault form.",
+    "production": "Four landing/guide screens plus six model-inspection screens passed; zero reported axe violations, page errors, network failures and overflow."
+  }
+}
