@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any
 
 
 def limit_resources() -> None:
-    if os.name != "nt":
+    if sys.platform != "win32":
         import importlib
 
         resource: Any = importlib.import_module("resource")

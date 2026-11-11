@@ -47,16 +47,19 @@ Font copyright and full license notices are retained in [Inter-OFL.txt](docs/lic
 
 Exact transitive versions and distribution hashes are in `uv.lock` and `frontend/package-lock.json`. The local license metadata review found declared licenses or license classifiers for all installed Python packages. Node dependency notices are supplied with installed packages; distribution should retain their required notices. Dependency audits check known advisory data and do not constitute a legal or security certification.
 
-Bifrost and model weights are installed in ignored local locations and are not vendored in this repository. The setup helper records the official artifact URL and its SHA256; Bifrost's upstream license applies to redistribution. Tavily is a service under its own terms. Application uploads, private source objects, conversations and credentials stay in ignored local storage. The synthetic benchmark reports and explicitly prepared KYRO example below are the published evidence set.
+Bifrost and model weights are installed in ignored local locations and are not vendored in this repository. The setup helper records the official artifact URL and its SHA256; Bifrost's upstream license applies to redistribution. Tavily is a service under its own terms. Application uploads, private source objects, conversations and credentials stay in ignored local storage. The published evidence includes the synthetic benchmark reports and the anonymized case study below.
 
-## KYRO example report
+## Anonymized repository case study
 
-The prepared `docs/ui-evidence/kyro-recovery-2026-11-10.*` reports include source
-excerpts from [Gauravwakle96/KYRO](https://github.com/Gauravwakle96/KYRO) at commit
-`a03f97ded1f5da474cf16eefe08afec1b5133e07`. KYRO is MIT-licensed; its copyright and
-permission notice are retained in [KYRO-MIT.txt](docs/licenses/KYRO-MIT.txt).
-Those third-party excerpts retain their license and are not relicensed as Rilo code
-or synthetic CC0 fixtures. The report contains model interpretations, which are not
-claims by KYRO's author or independently validated security conclusions.
+The prepared `docs/ui-evidence/repository-recovery-2026-11-10.*` summaries contain
+Rilo's measured execution data, event types and reference-verification outcomes.
+They omit the analyzed repository's identity, source text, original answers and
+original report identifiers. The original reports and associated source license
+are retained privately. No source excerpts from that project are distributed in
+the current case study, and no upstream copyright notice has been rewritten.
+
+These summaries are selected observations from a historical run, not complete raw
+reports or an independently reproducible repository benchmark. The synthetic
+research benchmark publishes its separate source fixtures and full execution data.
 
 The installed Qwen model is an independently downloaded artifact governed by its model license. Rilo does not grant rights to third-party models, provider brands, or retrieved publications. The working name has not been reviewed for trademark/domain availability.

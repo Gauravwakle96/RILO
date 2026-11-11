@@ -66,13 +66,15 @@ Rilo's contribution is the combination of **controlled agent failures, independe
 
 Scout is the concise baseline; Relay adds bounded recovery. Web, Repo and Document Analyst profiles specialize the same engine. Custom HTTP agents currently support the research benchmark contract, not paired chat.
 
-### A real repository recovery example
+### A real repository recovery case study
 
-Rilo captured **40 files** from [KYRO](https://github.com/Gauravwakle96/KYRO) at commit `a03f97ded1f5da474cf16eefe08afec1b5133e07`. Repo Analyst and Relay independently described the project using the same selected README passage. Repo Analyst first omitted citations; its single repair attempt added them, with the original response retained in the trace.
+Rilo captured **40 files** from a real GitHub repository at a fixed commit. Repo Analyst and Relay independently described the project using the same selected README passage. Repo Analyst first omitted citations; its single repair attempt added them, with the original response retained in the private execution trace.
 
-Both completed, and all emitted citations matched captured passages. This verifies references within a bounded overview, not every claim or the security of the repository. The configured Docker unittest runner found zero tests and returned a failure; that outcome remains in the report.
+Both completed, and all six emitted citations matched captured passages. Relay took **38.44 seconds** with one model call; Repo Analyst took **65.35 seconds** with two. The configured Docker unittest runner found zero tests and returned a failure, which remains in the case study. No success checks were declared, so this run has no accuracy score or quality winner.
 
-[Read the PDF report](docs/ui-evidence/kyro-recovery-2026-11-10.pdf) · [Inspect the complete JSON record](docs/ui-evidence/kyro-recovery-2026-11-10.json) · [Diagnosis and verification](docs/USER_FAILURE_FIXES_2026-11-10.md)
+The public case study is an **anonymized summary of recorded results**. It preserves measurements, reference-check outcomes and event order; repository identity, source passages and raw answers are withheld. It demonstrates bounded citation recovery, with the full research benchmark above providing independently inspectable source evidence.
+
+[Read the case study](docs/ui-evidence/repository-recovery-2026-11-10.md) · [Download PDF](docs/ui-evidence/repository-recovery-2026-11-10.pdf) · [Recorded metrics JSON](docs/ui-evidence/repository-recovery-2026-11-10.json) · [Diagnosis and verification](docs/USER_FAILURE_FIXES_2026-11-10.md)
 
 ## Quick start
 
@@ -236,6 +238,6 @@ For browser tests, start the API/worker with an idle queue, then run from `front
 | [Implementation](docs/RILO_2_IMPLEMENTATION.md) / [Verification](docs/RILO_2_VERIFICATION.md) | Delivered capabilities, test evidence and remaining work |
 | [Promptfoo integration](docs/PROMPTFOO_INTEGRATION.md) / [Third-party notices](THIRD_PARTY_NOTICES.md) | Actual upstream reuse, licenses and boundaries |
 
-Rilo source is **Apache-2.0**. Original synthetic research fixtures are **CC0**. Reused Promptfoo code is **MIT** with attribution; fonts retain their **OFL** notices. KYRO excerpts in the sample report retain their own [MIT notice](docs/licenses/KYRO-MIT.txt). Model weights and downloaded gateway binaries are not included. Historical plans are preserved in the documentation and are not additional completion claims.
+Rilo source is **Apache-2.0**. Original synthetic research fixtures are **CC0**. Reused Promptfoo code is **MIT** with attribution; fonts retain their **OFL** notices. The anonymized repository case study publishes execution measurements and verification outcomes without redistributing the analyzed project's source. Model weights and downloaded gateway binaries are not included. Historical plans are preserved in the documentation and are not additional completion claims.
 
 Built by [Gaurav Wakle](https://github.com/Gauravwakle96). Pronounced **REE-loh**.

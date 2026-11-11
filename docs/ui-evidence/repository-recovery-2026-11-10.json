@@ -1,0 +1,366 @@
+{
+  "schema": "rilo.public-case-study.v1",
+  "case_id": "repository-recovery-2026-11-10",
+  "kind": "anonymized historical execution summary",
+  "recorded_at": "2026-11-09T18:39:36.482125+00:00",
+  "reviewed_on": "2026-11-10",
+  "publication_note": "Selected recorded measurements only; identifying payloads are omitted rather than altered or replaced.",
+  "omitted_fields": [
+    "Repository name, URL, commit SHA and source hashes",
+    "Original evaluation, conversation, snapshot and run identifiers",
+    "Repository source text, original agent answers and finding explanations",
+    "Source-specific static-analysis and dependency details",
+    "Tool payloads and model messages that could identify the source"
+  ],
+  "conditions": {
+    "category": "repository",
+    "task_scope": "Repository overview",
+    "engine": "bifrost",
+    "model": "ollama/qwen2.5-coder:7b",
+    "limits": {
+      "max_model_calls": 2,
+      "max_tool_calls": 2,
+      "timeout_seconds": 180
+    },
+    "files_captured": 40,
+    "commit_pinned": true,
+    "identical_selected_context": true,
+    "independent_histories": true,
+    "execution_order": "sequential",
+    "rubric": {
+      "version": "workspace-evidence-v1",
+      "category": "repository",
+      "ground_truth": null,
+      "accuracy": "undefined without labels"
+    }
+  },
+  "agents": [
+    {
+      "name": "Relay",
+      "version": "1.0.0",
+      "outcome": "completed",
+      "duration_ms": 38439.05,
+      "input_tokens": 932,
+      "output_tokens": 482,
+      "tokens_provenance": "reported",
+      "model_calls": 1,
+      "tool_calls": 0,
+      "steps": 1,
+      "api_cost_usd": 0.0,
+      "cost_provenance": "estimated",
+      "finding_count": 3,
+      "metrics": {
+        "citation_validity": 1.0,
+        "evidence_coverage": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "accuracy": null
+      },
+      "task_checks": {
+        "engine": "promptfoo",
+        "version": "0.125.1",
+        "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+        "status": "ungraded",
+        "score": null,
+        "checks": []
+      },
+      "verification_results": [
+        {
+          "finding_number": 1,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 3,
+              "end_line": 5,
+              "page": null,
+              "valid": true
+            }
+          ]
+        },
+        {
+          "finding_number": 2,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 9,
+              "end_line": 9,
+              "page": null,
+              "valid": true
+            }
+          ]
+        },
+        {
+          "finding_number": 3,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 9,
+              "end_line": 9,
+              "page": null,
+              "valid": true
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "sequence": 1,
+          "timestamp": "2026-11-09T18:39:42.472384+00:00",
+          "type": "run_start",
+          "duration_ms": null
+        },
+        {
+          "sequence": 2,
+          "timestamp": "2026-11-09T18:39:42.492992+00:00",
+          "type": "step",
+          "duration_ms": null,
+          "independent_history": true
+        },
+        {
+          "sequence": 3,
+          "timestamp": "2026-11-09T18:39:42.520517+00:00",
+          "type": "model_request",
+          "duration_ms": null,
+          "call": 1
+        },
+        {
+          "sequence": 4,
+          "timestamp": "2026-11-09T18:40:20.652454+00:00",
+          "type": "model_response",
+          "duration_ms": 38122.16199999966,
+          "actual_model": "qwen2.5-coder:7b",
+          "actual_provider": "ollama"
+        },
+        {
+          "sequence": 5,
+          "timestamp": "2026-11-09T18:40:20.710526+00:00",
+          "type": "synthesis",
+          "duration_ms": null
+        },
+        {
+          "sequence": 6,
+          "timestamp": "2026-11-09T18:40:21.117365+00:00",
+          "type": "task_checks",
+          "duration_ms": null
+        },
+        {
+          "sequence": 7,
+          "timestamp": "2026-11-09T18:40:22.034623+00:00",
+          "type": "assessment",
+          "duration_ms": null
+        },
+        {
+          "sequence": 8,
+          "timestamp": "2026-11-09T18:40:22.843309+00:00",
+          "type": "run_end",
+          "duration_ms": null
+        }
+      ]
+    },
+    {
+      "name": "Repo Analyst",
+      "version": "2.0.0",
+      "outcome": "completed",
+      "duration_ms": 65348.24,
+      "input_tokens": 1963,
+      "output_tokens": 900,
+      "tokens_provenance": "reported",
+      "model_calls": 2,
+      "tool_calls": 0,
+      "steps": 1,
+      "api_cost_usd": 0.0,
+      "cost_provenance": "estimated",
+      "finding_count": 3,
+      "metrics": {
+        "citation_validity": 1.0,
+        "evidence_coverage": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "accuracy": null
+      },
+      "task_checks": {
+        "engine": "promptfoo",
+        "version": "0.125.1",
+        "scope": "Explicit task checks only; not a measurement of overall factual accuracy.",
+        "status": "ungraded",
+        "score": null,
+        "checks": []
+      },
+      "verification_results": [
+        {
+          "finding_number": 1,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 3,
+              "end_line": 5,
+              "page": null,
+              "valid": true
+            }
+          ]
+        },
+        {
+          "finding_number": 2,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 9,
+              "end_line": 9,
+              "page": null,
+              "valid": true
+            }
+          ]
+        },
+        {
+          "finding_number": 3,
+          "state": "PARTIALLY VERIFIED",
+          "method": "snapshot_reference_and_exact_passage",
+          "scope": "Reference integrity only; interpretation needs review",
+          "references": [
+            {
+              "source_reference": "README.md",
+              "start_line": 13,
+              "end_line": 13,
+              "page": null,
+              "valid": true
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "sequence": 1,
+          "timestamp": "2026-11-09T18:40:23.200796+00:00",
+          "type": "run_start",
+          "duration_ms": null
+        },
+        {
+          "sequence": 2,
+          "timestamp": "2026-11-09T18:40:23.416243+00:00",
+          "type": "step",
+          "duration_ms": null,
+          "independent_history": true
+        },
+        {
+          "sequence": 3,
+          "timestamp": "2026-11-09T18:40:23.903745+00:00",
+          "type": "model_request",
+          "duration_ms": null,
+          "call": 1
+        },
+        {
+          "sequence": 4,
+          "timestamp": "2026-11-09T18:40:56.768454+00:00",
+          "type": "model_response",
+          "duration_ms": 32645.300400006818,
+          "actual_model": "qwen2.5-coder:7b",
+          "actual_provider": "ollama"
+        },
+        {
+          "sequence": 5,
+          "timestamp": "2026-11-09T18:40:56.893927+00:00",
+          "type": "citation_warning",
+          "duration_ms": null,
+          "findings_without_citations": 3
+        },
+        {
+          "sequence": 6,
+          "timestamp": "2026-11-09T18:40:57.036486+00:00",
+          "type": "recovery",
+          "duration_ms": null,
+          "bounded_retries": 1
+        },
+        {
+          "sequence": 7,
+          "timestamp": "2026-11-09T18:40:57.221243+00:00",
+          "type": "model_request",
+          "duration_ms": null,
+          "call": 2
+        },
+        {
+          "sequence": 8,
+          "timestamp": "2026-11-09T18:41:28.271106+00:00",
+          "type": "model_response",
+          "duration_ms": 30960.585299995728,
+          "actual_model": "qwen2.5-coder:7b",
+          "actual_provider": "ollama"
+        },
+        {
+          "sequence": 9,
+          "timestamp": "2026-11-09T18:41:28.298488+00:00",
+          "type": "synthesis",
+          "duration_ms": null
+        },
+        {
+          "sequence": 10,
+          "timestamp": "2026-11-09T18:41:28.338360+00:00",
+          "type": "task_checks",
+          "duration_ms": null
+        },
+        {
+          "sequence": 11,
+          "timestamp": "2026-11-09T18:41:28.354390+00:00",
+          "type": "assessment",
+          "duration_ms": null
+        },
+        {
+          "sequence": 12,
+          "timestamp": "2026-11-09T18:41:28.395761+00:00",
+          "type": "run_end",
+          "duration_ms": null
+        }
+      ]
+    }
+  ],
+  "isolated_test_result": {
+    "status": "failed",
+    "executed": true,
+    "exit_code": 5,
+    "command": [
+      "python",
+      "-I",
+      "-m",
+      "unittest",
+      "discover",
+      "-v"
+    ],
+    "image": "python@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90",
+    "network": "none",
+    "timeout_seconds": 60,
+    "scope": "Captured source subset only; no dependency installation",
+    "stdout": "",
+    "stderr": "\n----------------------------------------------------------------------\nRan 0 tests in 0.000s\n\nNO TESTS RAN\n"
+  },
+  "comparison": {
+    "verdict": "ungraded",
+    "quality_winner": null,
+    "explanation": "Both completed; no explicit success checks were defined. Compare reference checks, recovery and usage without assigning factual accuracy."
+  },
+  "limitations": [
+    "This is an anonymized summary derived from a real recorded evaluation, not a full raw report or a new run.",
+    "Original reports, original answers, captured sources and their license remain private.",
+    "Source text is withheld, so readers cannot independently repeat these reference checks from this summary.",
+    "Citation validity measures reference integrity, not the factual accuracy of every interpretation.",
+    "No ground-truth labels or explicit success checks were supplied; accuracy and a quality winner are undefined.",
+    "The overview used one selected README passage from a bounded capture; it was not a complete repository audit.",
+    "Agent tool-call counts exclude shared source capture. Local API fee estimates exclude hardware and energy.",
+    "The isolated unittest profile discovered zero tests and failed; this was not a passing repository test suite."
+  ]
+}

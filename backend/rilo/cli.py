@@ -97,7 +97,8 @@ def serve(args: argparse.Namespace) -> int:
         interrupted = True
 
     previous = signal.signal(signal.SIGINT, stop)
-    previous_break = signal.signal(signal.SIGBREAK, stop) if sys.platform == "win32" else None
+    break_signal = getattr(signal, "SIGBREAK", None)
+    previous_break = signal.signal(break_signal, stop) if break_signal is not None else None
     previous_term = signal.signal(signal.SIGTERM, stop) if sys.platform != "win32" else None
     try:
         for command in process_args:
@@ -114,8 +115,8 @@ def serve(args: argparse.Namespace) -> int:
         return 0
     finally:
         signal.signal(signal.SIGINT, previous)
-        if previous_break is not None:
-            signal.signal(signal.SIGBREAK, previous_break)
+        if break_signal is not None and previous_break is not None:
+            signal.signal(break_signal, previous_break)
         if previous_term is not None:
             signal.signal(signal.SIGTERM, previous_term)
         for child in children:

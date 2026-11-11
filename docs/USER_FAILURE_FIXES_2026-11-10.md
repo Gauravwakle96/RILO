@@ -37,9 +37,9 @@ JavaScript/access limitations and offers readable URLs, pasted source text or
 optional configured Tavily search. JavaScript rendering was not implemented or
 claimed to work. Tavily remains optional and was not live-validated without a key.
 
-## KYRO capture, overview context and retries
+## Repository capture, overview context and retries
 
-Original failed evaluation: `exp_9a20f248d37c4662`. The public GitHub path downloaded
+In the original failed evaluation, the public GitHub path downloaded
 the complete ZIP under an 8 MB/25-second response bound. Shared ingestion failed
 before either model ran. Individual response retry required an absent snapshot.
 
@@ -56,17 +56,16 @@ records. Its UI says “Source capture failed” and “Agent not started”, an
 “Retry source capture” instead of unusable individual response retries. The
 Experiments rerun action also uses the workspace retest endpoint.
 
-Live capture fetched 40 KYRO files at commit
-`a03f97ded1f5da474cf16eefe08afec1b5133e07`, snapshot `snap_c0d31363059c486d`.
+Live capture fetched 40 files from a real repository at a fixed commit, recorded
+in the private snapshot.
 An initial successful capture exposed poor overview context selection. Overview
 questions now prioritize README introductions, and long 20-line blocks split
 at actual line boundaries instead of being discarded wholesale. Repository
 profiles follow the requested scope rather than suggesting security issues in
 every overview. Selected passages remain bounded and shared between agents.
 
-Final live evaluation: `exp_a26e263257194f93`, conversation
-`conv_5119660d222f48e5`. Both Repo Analyst and Relay completed with real descriptions
-of KYRO. All emitted citations matched the captured README. Repo Analyst's first
+In the final live evaluation, both Repo Analyst and Relay completed with real
+repository descriptions. All emitted citations matched the captured README. Repo Analyst's first
 response omitted citations; a single bounded repair attempt added them. The
 original response, warning and recovery remain in its trace. Unsupported claims
 still remain unsupported if the bounded repair does not supply evidence. Scout
@@ -78,9 +77,12 @@ repository test suite. Source capture and model execution are separate outcomes.
 The final overview uses one README passage due to the existing input budget;
 this is not an exhaustive code audit. Valid citations do not prove conclusions.
 
-PDF, Markdown, JSON and CSV were exported from that persisted evaluation to
-`docs/ui-evidence/kyro-recovery-2026-11-10.*`. PDF text extraction confirmed its
-evaluation ID, commit, agent identities and README references across eight pages.
+PDF, Markdown, JSON and CSV were exported from that persisted evaluation. PDF
+text extraction confirmed its evaluation ID, commit, agent identities and README
+references across eight pages. These originals remain private. The public
+[anonymized case study](ui-evidence/repository-recovery-2026-11-10.md) preserves
+measurements, verification outcomes and event order without source text, repository
+identity or original answers. It is a summary, not a complete raw report.
 
 ## Verification
 
@@ -94,7 +96,7 @@ evaluation ID, commit, agent identities and README references across eight pages
 - Frontend full dependency audit, Promptfoo runtime audit and locked Python
   pip-audit reported no known vulnerabilities. Source-pattern review found no
   potential credential matches in 54 application/test source files.
-- The running production UI displayed both completed KYRO responses with no
+- The running production UI displayed both completed repository responses with no
   horizontal overflow. ECC browser screenshot export was unavailable in its
   configured workspace; no screenshot verification is claimed for that attempt.
 

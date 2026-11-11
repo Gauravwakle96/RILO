@@ -63,7 +63,7 @@ Use actual results from [BENCHMARK.md](BENCHMARK.md). Do not describe fixture sy
 
 Use precomputed real experiments for timing; starting a full model run during a three-minute presentation is impractical on this laptop. The fixture engine can demonstrate a fresh complete flow quickly if clearly identified. Do not replace benchmark results with edited screenshots.
 
-For a repository-focused follow-up, show the [KYRO PDF report](ui-evidence/kyro-recovery-2026-11-10.pdf): two independent overviews, a captured commit, exact README references, and the original missing-citation response followed by one repair. This demonstrates source verification without claiming an exhaustive security audit.
+For a repository-focused follow-up, show the [anonymized recovery case study](ui-evidence/repository-recovery-2026-11-10.pdf): two independent runs, recorded timings, six valid reference checks, and a missing-citation event followed by one repair. The private original retains the captured commit, passages and answers. The public summary withholds those details and preserves the failed zero-test result; it demonstrates bounded recovery without claiming an exhaustive security audit or a quality winner.
 
 For a fresh installation, historical JSON/CSV/PDF reports in this repository are
 readable evidence; they are not preloaded into the application. Run the README's

@@ -20,7 +20,9 @@ Show success/coverage, steps, model/tool calls, reported tokens, fee provenance 
 
 For the paired workspace, show the declared-check matrix and a real source citation.
 Point out that an uncited observation stays unsupported and a valid quote does not
-prove every interpretation. The KYRO report includes an actual citation-repair trace.
+prove every interpretation. The [anonymized repository case study](ui-evidence/repository-recovery-2026-11-10.md)
+preserves the event sequence and measured cost of an actual citation repair; raw
+source passages and answers remain private.
 
 Visual: actual metrics table alongside a recorded recovery trace.
 

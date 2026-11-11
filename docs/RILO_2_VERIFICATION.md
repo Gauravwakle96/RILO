@@ -23,15 +23,17 @@ linked there separately from historical local browser acceptance.
   not rerun in this repair; real original-input retests are recorded below.
 - Live capability chat: `exp_45a8e0837f4b498f`, both completed with correct profile
   identities and no artificial source-free findings.
-- Live KYRO capture: 40 files at commit `a03f97ded1f5da474cf16eefe08afec1b5133e07`.
-  Final evaluation `exp_a26e263257194f93`: both agents completed, all emitted
+- Live repository capture: 40 files from a fixed commit.
+  In the final recorded evaluation, both agents completed, all emitted
   citations matched captured passages, and Repo Analyst recovered missing
   citations in one recorded retry. Factual accuracy remains unscored.
 - Real Hack4Hack static capture correctly refuses title-only content before
   inference. JavaScript rendering remains unavailable. The misspelled literal
   check remains failed and is no longer described as a reassuring tie.
-- PDF/Markdown/JSON/CSV reports generated from the persisted KYRO evaluation;
-  extracted PDF confirmed its ID, commit, agent names and source references.
+- PDF/Markdown/JSON/CSV reports generated from the persisted repository evaluation;
+  extracted PDF confirmed its ID, commit, agent names and source references. The
+  original reports remain private; a [public case study](ui-evidence/repository-recovery-2026-11-10.md)
+  retains measurements and verification outcomes with identifying details omitted.
 - Ruff, mypy, frontend lint/types/build and Python package builds passed. npm
   audits and locked Python pip-audit reported no known vulnerabilities.
 

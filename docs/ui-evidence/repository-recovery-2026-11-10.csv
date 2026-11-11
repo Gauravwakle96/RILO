@@ -1,0 +1,3 @@
+case_id,record_kind,agent,outcome,duration_ms,model_calls,tool_calls,input_tokens,output_tokens,citation_validity,evidence_coverage,accuracy,task_check_status,runtime_test_status,runtime_test_exit_code
+repository-recovery-2026-11-10,anonymized historical summary,Relay,completed,38439.05,1,0,932,482,1.0,1.0,,ungraded,failed,5
+repository-recovery-2026-11-10,anonymized historical summary,Repo Analyst,completed,65348.24,2,0,1963,900,1.0,1.0,,ungraded,failed,5
