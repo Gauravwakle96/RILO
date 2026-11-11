@@ -1,8 +1,11 @@
 # Rilo: judge's guide and submission summary
 
-**Project:** Rilo — AI Agent Benchmarking & Verification  
-**Repository:** https://github.com/Gauravwakle96/RILO  
-**Primary challenge:** Bifrost Problem Statement 02  
+**Project:** Rilo — AI Agent Benchmarking & Verification
+
+**Repository:** https://github.com/Gauravwakle96/RILO
+
+**Primary challenge:** Bifrost Problem Statement 02
+
 **Selected benchmark category:** Research agents
 
 ## Submission summary

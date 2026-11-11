@@ -19,7 +19,9 @@ architecture, upstream reuse and remaining validation gaps.
 | Frontend ESLint | Passed |
 | TypeScript | Passed |
 | Production frontend build | Passed |
+| Python wheel build | Passed |
 | Frontend dependency audit | No known vulnerabilities |
+| Promptfoo runtime dependency audit | No known vulnerabilities |
 | README local link targets | All 37 parsed links checked; no missing local targets |
 | Candidate source/report credential scan | No matches for known private credentials or token/private-key patterns |
 | Staged files | No private .env, session keys, database files, model binaries or dependency directories |
