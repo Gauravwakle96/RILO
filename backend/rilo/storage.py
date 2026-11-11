@@ -14,6 +14,14 @@ from typing import Any
 
 from .catalog import AGENTS, SCENARIOS, SOURCES, TASKS, digest
 from .config import Config, redact
+from .identity import (
+    current_owner,
+    normalize_email,
+    password_hash,
+    session_expiry,
+    token_hash,
+    verify_password,
+)
 from .pricing import price_basis
 from .provenance import builtin_metadata, loaded_identity
 from .schemas import ExperimentCreate
@@ -94,6 +102,19 @@ class Store:
                 CREATE INDEX IF NOT EXISTS retries_original ON workspace_retries(original_id,created_at);
                 CREATE UNIQUE INDEX IF NOT EXISTS retries_once ON workspace_retries(run_id);
                 INSERT OR IGNORE INTO schema_versions(version) VALUES(4);
+                CREATE TABLE IF NOT EXISTS users(
+                    id TEXT PRIMARY KEY,email TEXT NOT NULL UNIQUE,name TEXT NOT NULL,password_hash TEXT NOT NULL,
+                    role TEXT NOT NULL CHECK(role IN ('admin','member')),disabled INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS auth_sessions(
+                    id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id),token_hash TEXT NOT NULL UNIQUE,
+                    csrf_hash TEXT NOT NULL,expires_at TEXT NOT NULL,created_at TEXT NOT NULL,last_seen_at TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS auth_sessions_expiry ON auth_sessions(expires_at);
+                CREATE TABLE IF NOT EXISTS object_owners(
+                    object_type TEXT NOT NULL,object_id TEXT NOT NULL,owner_id TEXT NOT NULL REFERENCES users(id),
+                    created_at TEXT NOT NULL,PRIMARY KEY(object_type,object_id));
+                CREATE INDEX IF NOT EXISTS object_owner_lookup ON object_owners(owner_id,object_type,created_at);
+                INSERT OR IGNORE INTO schema_versions(version) VALUES(5);
             """)
         with self.transaction() as connection:
             for kind, values in (
@@ -114,9 +135,128 @@ class Store:
                     (item["id"], item["version"], json.dumps(item), now()),
                 )
 
-    def catalog(self, kind: str) -> list[dict[str, Any]]:
+    def create_user(self, email: str, name: str, password: str, role: str = "member") -> dict:
+        email = normalize_email(email)
+        name = name.strip()
+        if not 1 <= len(name) <= 100 or role not in {"admin", "member"}:
+            raise ValueError("User name or role is invalid.")
+        value = {"id": identifier("user"), "email": email, "name": name, "role": role, "created_at": now()}
+        with self.transaction() as connection:
+            connection.execute(
+                "INSERT INTO users(id,email,name,password_hash,role,created_at) VALUES(?,?,?,?,?,?)",
+                (value["id"], email, name, password_hash(password), role, value["created_at"]),
+            )
+        return value
+
+    def users(self) -> list[dict]:
         with self.connection() as connection:
             return [
+                {key: row[key] for key in ("id", "email", "name", "role", "disabled", "created_at")}
+                for row in connection.execute(
+                    "SELECT id,email,name,role,disabled,created_at FROM users ORDER BY created_at"
+                )
+            ]
+
+    def user_count(self) -> int:
+        with self.connection() as connection:
+            return int(connection.execute("SELECT count(*) FROM users").fetchone()[0])
+
+    def authenticate_user(self, email: str, password: str) -> dict | None:
+        with self.connection() as connection:
+            row = connection.execute(
+                "SELECT id,email,name,password_hash,role,disabled,created_at FROM users WHERE email=?",
+                (normalize_email(email),),
+            ).fetchone()
+        if not row or row["disabled"] or not verify_password(password, row["password_hash"]):
+            return None
+        return {key: row[key] for key in ("id", "email", "name", "role", "created_at")}
+
+    def create_auth_session(self, user_id: str, token: str, csrf: str) -> None:
+        timestamp = now()
+        with self.transaction() as connection:
+            connection.execute("DELETE FROM auth_sessions WHERE expires_at<?", (timestamp,))
+            connection.execute(
+                "INSERT INTO auth_sessions(id,user_id,token_hash,csrf_hash,expires_at,created_at,last_seen_at) VALUES(?,?,?,?,?,?,?)",
+                (identifier("auth"), user_id, token_hash(token), token_hash(csrf), session_expiry(), timestamp, timestamp),
+            )
+
+    def auth_session(self, token: str) -> tuple[dict, str] | None:
+        if not token:
+            return None
+        timestamp = now()
+        with self.transaction() as connection:
+            row = connection.execute(
+                "SELECT s.id,s.csrf_hash,u.id AS user_id,u.email,u.name,u.role,u.created_at "
+                "FROM auth_sessions s JOIN users u ON u.id=s.user_id "
+                "WHERE s.token_hash=? AND s.expires_at>? AND u.disabled=0",
+                (token_hash(token), timestamp),
+            ).fetchone()
+            if row:
+                connection.execute("UPDATE auth_sessions SET last_seen_at=? WHERE id=?", (timestamp, row["id"]))
+        if not row:
+            return None
+        user = {"id": row["user_id"], **{key: row[key] for key in ("email", "name", "role", "created_at")}}
+        return user, row["csrf_hash"]
+
+    def revoke_auth_session(self, token: str) -> None:
+        with self.transaction() as connection:
+            connection.execute("DELETE FROM auth_sessions WHERE token_hash=?", (token_hash(token),))
+
+    def claim_object(self, object_type: str, object_id: str, owner_id: str | None = None) -> None:
+        owner = owner_id or current_owner()
+        if not self.config.hosted or not owner:
+            return
+        with self.transaction() as connection:
+            connection.execute(
+                "INSERT INTO object_owners(object_type,object_id,owner_id,created_at) VALUES(?,?,?,?)",
+                (object_type, object_id, owner, now()),
+            )
+
+    def can_access(self, object_type: str, object_id: str, owner_id: str | None = None) -> bool:
+        if not self.config.hosted:
+            return True
+        owner = owner_id or current_owner()
+        if not owner:
+            return True
+        with self.connection() as connection:
+            row = connection.execute(
+                "SELECT owner_id FROM object_owners WHERE object_type=? AND object_id=?",
+                (object_type, object_id),
+            ).fetchone()
+        return bool(row and row["owner_id"] == owner)
+
+    def require_access(self, object_type: str, object_id: str) -> None:
+        if not self.can_access(object_type, object_id):
+            raise KeyError(object_id)
+
+    def owned_ids(self, object_type: str) -> list[str] | None:
+        owner = current_owner()
+        if not self.config.hosted or not owner:
+            return None
+        with self.connection() as connection:
+            return [
+                row[0]
+                for row in connection.execute(
+                    "SELECT object_id FROM object_owners WHERE object_type=? AND owner_id=? ORDER BY created_at DESC",
+                    (object_type, owner),
+                )
+            ]
+
+    def object_owner(self, object_type: str, object_id: str) -> str | None:
+        with self.connection() as connection:
+            row = connection.execute(
+                "SELECT owner_id FROM object_owners WHERE object_type=? AND object_id=?",
+                (object_type, object_id),
+            ).fetchone()
+        return row[0] if row else None
+
+    def scoped_key(self, value: str | None) -> str | None:
+        owner = current_owner()
+        return owner + ":" + value if self.config.hosted and value and owner else value
+
+    def catalog(self, kind: str) -> list[dict[str, Any]]:
+        with self.connection() as connection:
+            values = [
                 builtin_metadata(json.loads(row["data"]))
                 if kind == "agent"
                 else json.loads(row["data"])
@@ -124,6 +264,16 @@ class Store:
                     "SELECT data FROM catalog WHERE kind=? ORDER BY rowid", (kind,)
                 )
             ]
+        if self.config.hosted and kind in {"agent", "task"} and current_owner():
+            builtins = {item["id"] for item in AGENTS if kind == "agent"} | {
+                item["id"] for item in TASKS if kind == "task"
+            }
+            values = [
+                item
+                for item in values
+                if item["id"] in builtins or self.can_access("catalog_" + kind, item["id"])
+            ]
+        return values
 
     def item(self, kind: str, item_id: str) -> dict[str, Any]:
         with self.connection() as connection:
@@ -132,6 +282,11 @@ class Store:
             ).fetchone()
         if row is None:
             raise KeyError(item_id)
+        builtins = {item["id"] for item in AGENTS if kind == "agent"} | {
+            item["id"] for item in TASKS if kind == "task"
+        }
+        if kind in {"agent", "task"} and item_id not in builtins:
+            self.require_access("catalog_" + kind, item_id)
         item = json.loads(row["data"])
         return builtin_metadata(item) if kind == "agent" else item
 
@@ -146,10 +301,13 @@ class Store:
                     "INSERT INTO agent_versions(agent_id,version,data,created_at) VALUES(?,?,?,?)",
                     (data["id"], data["version"], json.dumps(data), now()),
                 )
+        if kind in {"agent", "task"}:
+            self.claim_object("catalog_" + kind, data["id"])
         return builtin_metadata(data) if kind == "agent" else data
 
     def revise_agent(self, agent_id: str, update: dict[str, Any]) -> dict:
         """Archive an explicitly new HTTP version without mutating experiment snapshots."""
+        self.require_access("catalog_agent", agent_id)
         with self.transaction() as connection:
             row = connection.execute(
                 "SELECT data FROM catalog WHERE kind='agent' AND id=?", (agent_id,)
@@ -206,6 +364,7 @@ class Store:
         *,
         workspace: dict | None = None,
     ) -> dict[str, Any]:
+        idempotency_key = self.scoped_key(idempotency_key)
         agents = [self.item("agent", value) for value in spec.agent_ids]
         if not workspace and any(agent["config"].get("workspace_categories") for agent in agents):
             raise ValueError(
@@ -439,6 +598,7 @@ class Store:
                     "INSERT INTO runs(id,experiment_id,position,data) VALUES(?,?,?,?)",
                     (run["id"], experiment_id, position, json.dumps(run)),
                 )
+        self.claim_object("experiment", experiment_id)
         return self.experiment(experiment_id)
 
     def update_manifest(self, experiment_id: str, manifest: dict) -> None:
@@ -461,6 +621,9 @@ class Store:
             )
 
     def experiments(self) -> list[dict[str, Any]]:
+        owned = self.owned_ids("experiment")
+        if owned is not None:
+            return [self.experiment(value, detail=False) for value in owned[:200]]
         with self.connection() as connection:
             ids = [
                 row["id"]
@@ -471,6 +634,7 @@ class Store:
         return [self.experiment(value, detail=False) for value in ids]
 
     def experiment(self, experiment_id: str, detail: bool = True) -> dict[str, Any]:
+        self.require_access("experiment", experiment_id)
         with self.connection() as connection:
             row = connection.execute(
                 "SELECT * FROM experiments WHERE id=?", (experiment_id,)
@@ -573,6 +737,7 @@ class Store:
             if not row:
                 raise KeyError(run_id)
             result = json.loads(row["data"])
+            self.require_access("experiment", result["experiment_id"])
             result["events"] = [
                 json.loads(event["data"])
                 for event in connection.execute(
@@ -629,6 +794,7 @@ class Store:
         return bool(row and row[0])
 
     def cancel(self, experiment_id: str) -> dict:
+        self.require_access("experiment", experiment_id)
         with self.transaction() as connection:
             row = connection.execute(
                 "SELECT state FROM experiments WHERE id=?", (experiment_id,)
@@ -731,6 +897,7 @@ class Store:
             return [
                 dict(row)
                 for row in connection.execute("SELECT * FROM baselines ORDER BY created_at DESC")
+                if self.can_access("experiment", row["experiment_id"])
             ]
 
     def add_baseline(self, experiment_id: str, name: str) -> dict:
@@ -751,6 +918,7 @@ class Store:
         return record
 
     def experiment_events(self, experiment_id: str, after: int = 0) -> list[dict]:
+        self.require_access("experiment", experiment_id)
         with self.connection() as connection:
             rows = connection.execute(
                 "SELECT events.rowid AS cursor,events.data,runs.id AS run_id FROM events JOIN runs ON runs.id=events.run_id WHERE runs.experiment_id=? AND events.rowid>? ORDER BY events.rowid LIMIT 500",

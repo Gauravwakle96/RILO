@@ -3,15 +3,28 @@
 > RILO 2 workspace expansion: see [implementation status](RILO_2_IMPLEMENTATION.md), [workspace API](WORKSPACE_API.md), [guide](RILO_2_GUIDE.md), and [fresh verification](RILO_2_VERIFICATION.md). Earlier scope notes below describe the preserved benchmark foundation.
 
 
-Rilo runs locally with FastAPI, SQLite, a separate durable worker, and two research agents: Scout (plain Python) and Relay (LangGraph). SQLite WAL suits a single-user, single-worker application and avoids a hosted database or ongoing database fee. Authentication and storage do not implement team tenancy.
+Rilo runs with FastAPI, SQLite, a separate durable worker, and two research agents:
+Scout (plain Python) and Relay (LangGraph). Local mode remains private and loopback-only.
+Optional hosted mode adds persistent scrypt password identities, hashed sessions,
+CSRF protection and per-user ownership while retaining a single API/worker instance.
 
 ## Start and configure
 
 From the repository directory, run `uv sync`, copy `.env.example` to a private `.env`, and run `uv run rilo serve`. For separate processes, run `uv run uvicorn rilo.api:app --host 127.0.0.1 --port 8018` and `uv run python -m rilo.worker`. Production browser assets are served from `frontend/dist` when present. Development uses the frontend's Vite server on port 5187. Restart the API and worker after editing environment variables; neither automatically reloads credentials.
 
-`RILO_DATA_DIR` locates the SQLite database and local session key. `RILO_BIFROST_URL` is the explicitly configured loopback gateway URL, `RILO_MODEL` selects a model, and `BIFROST_API_KEY` supplies a private Bifrost virtual key in the `x-bf-vk` header. A successful gateway health check establishes reachability; authenticated model output and usage are verified during execution. `TAVILY_API_KEY` is necessary for live retrieval. `RILO_PORT` admits the corresponding local browser origin when using a custom server port. Endpoint URLs are restricted to explicit loopback hosts and ports; proxy environment variables and redirects are disabled for service calls.
+`RILO_DATA_DIR` locates the SQLite database and local session key. `RILO_BIFROST_URL`
+is the explicitly configured loopback gateway URL in local mode; hosted mode can use
+the explicit Docker host alias or a literal private IP. `RILO_MODEL` selects a model,
+and `BIFROST_API_KEY` supplies a private Bifrost virtual key in the `x-bf-vk` header.
+A successful gateway health check establishes reachability; authenticated model output
+and usage are verified during execution. `TAVILY_API_KEY` is necessary for live
+retrieval. Custom HTTP agent endpoints remain loopback-only. Arbitrary DNS/public
+inference destinations, proxy environment variables and redirects are disabled.
 
-Keep `.env` and `.rilo` ignored and private. Browser sessions use an HttpOnly, SameSite=Strict cookie with an in-memory CSRF token for mutations. CLI and SDK requests can use the generated `.rilo/session.key` as a bearer credential. This local design is not a substitute for authentication, tenant permissions, and TLS needed for a public deployment.
+Keep `.env` and `.rilo` ignored and private. Local browser sessions use an HttpOnly,
+SameSite=Strict cookie and CSRF token; CLI/SDK clients may use `.rilo/session.key`.
+Hosted mode disables that bearer shortcut, persists hashed sessions, requires HTTPS
+host/origin validation, and scopes stored user objects by owner.
 
 ## Execution and evidence
 

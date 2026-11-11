@@ -52,6 +52,31 @@ export function session(): Promise<Session> {
   return sessionPromise;
 }
 
+export function login(email: string, password: string): Promise<Session> {
+  sessionPromise = fetch("/api/v1/auth/login", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  })
+    .then(readResponse<Session>)
+    .then((value) => {
+      csrfToken = value.csrf_token;
+      return value;
+    })
+    .catch((error) => {
+      sessionPromise = null;
+      throw error;
+    });
+  return sessionPromise;
+}
+
+export async function logout(): Promise<void> {
+  await api<void>("/auth/logout", { method: "POST" });
+  csrfToken = "";
+  sessionPromise = null;
+}
+
 export async function api<T>(
   path: string,
   options: RequestInit = {},

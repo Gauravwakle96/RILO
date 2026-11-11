@@ -59,8 +59,8 @@ Rilo's contribution is the combination of **controlled agent failures, independe
 | Workspace | Working flow |
 | --- | --- |
 | **Chat** | Send shared messages to two agents, keep separate histories, attach context, compare replies, cancel or retry, and export the conversation. Source-free conversation is not assigned a factual-accuracy score. |
-| **Repository** | Capture a public GitHub commit or ZIP; analyze bounded source files with real paths and line references. Python static checks, optional OSV lookups and isolated Docker test profiles add separate evidence. |
-| **Documents** | Analyze text-based PDF, DOCX, TXT and Markdown. PDF citations retain real page numbers; other formats use captured line references. |
+| **Repository** | Capture a public or authorized private GitHub commit, or upload a ZIP; analyze bounded source files with real paths and line references. Python static checks, optional OSV lookups and isolated Docker test profiles add separate evidence. |
+| **Documents** | Analyze PDF, DOCX, TXT and Markdown. PDF citations retain real page numbers, including scanned pages processed by local Tesseract OCR; other formats use captured line references. |
 | **Website** | Capture a bounded set of public pages with robots.txt, DNS and redirect checks. A site with no readable body produces an actionable capture error. |
 | **Search** | Compare research on supplied sources or explicitly enable Tavily for a shared live search. Search is off by default. |
 
@@ -190,6 +190,9 @@ Use [.env.example](.env.example) as the reference. Keep credentials in private `
 | `RILO_WORKSPACE_INPUT_BYTES` | Bounded serialized input; defaults to 6,000 bytes. Increase only after validating model context. |
 | `RILO_MODEL_PRICING_JSON` | Optional explicit token-price map. Missing usage/pricing stays unknown. |
 | `RILO_DATA_DIR` | Private local storage; defaults to `.rilo`. |
+| `RILO_REPOSITORY_FILE_LIMIT`, `RILO_REPOSITORY_BYTE_LIMIT` | Bounded GitHub capture; defaults to 200 files and 12 MB. |
+| `RILO_OCR_LANGUAGE` | Local Tesseract language identifier; defaults to `eng`. |
+| `RILO_HOSTED`, `RILO_PUBLIC_URL`, `RILO_ALLOWED_HOSTS`, `RILO_ALLOWED_ORIGINS` | Optional authenticated hosted mode behind HTTPS. |
 
 Restart the API and worker after changing environment variables. Search availability, provider reachability, model availability and worker readiness are shown separately.
 
@@ -205,7 +208,10 @@ The CLI comparison exits `0` for pass, `1` for a measured regression and `2` for
 
 ## Verification and boundaries
 
-The **10 November 2026 local verification** recorded **198 Python tests passing, 84.04% coverage, 18 standard browser tests passing**, and two additional browser checks against real user-reported failures. Type checks, lint, frontend/Python builds and dependency audits also passed. These are dated checks, not a guarantee of error-free behavior; the badge above links to the current GitHub workflow.
+The **11 November 2026 completion verification** records the current Python, browser,
+build, typing, lint and dependency checks in [RILO_2_VERIFICATION.md](docs/RILO_2_VERIFICATION.md).
+These are dated checks, not a guarantee of error-free behavior; the badge above links
+to the current GitHub workflow.
 
 The [11 November publication checks](docs/PUBLICATION_VERIFICATION.md) reran all **198 Python tests** with **84.13% coverage**, plus backend/frontend lint, types and build checks. GitHub CI runs separately on the published source.
 
@@ -220,11 +226,12 @@ npm run build --prefix frontend
 
 For browser tests, start the API/worker with an idle queue, then run from `frontend/`: `npx playwright install chromium` and `npm run test:e2e`. The suite uses actual local fixture jobs; explicitly labeled boundary simulations and opt-in live-model checks are separate. [Full verification record](docs/RILO_2_VERIFICATION.md).
 
-- **Deployment:** local, single-user application. Public multi-user hosting and tenant authorization are not implemented.
+- **Deployment:** local mode remains the default. Optional hosted mode adds persistent accounts, CSRF-protected sessions and per-user ownership for evaluations, conversations, uploads, snapshots, reports, suites and private catalog entries. It is a single-instance SQLite deployment behind an HTTPS reverse proxy; see [hosted deployment](docs/HOSTED_DEPLOYMENT.md).
 - **Evidence:** source integrity is different from factual correctness. Semantic review is advisory; repository accuracy requires suitable independent ground truth.
 - **Repositories:** bounded capture and passage selection, not a complete security audit. Private GitHub access has not undergone live acceptance without credentials.
 - **Untrusted inputs:** SSRF/DNS/redirect checks, archive path checks, upload/response bounds, session/CSRF protection and secret redaction have automated coverage. Optional repository code runs in constrained Docker containers with no host mounts or network; this is not an independent security certification.
-- **Documents and websites:** text PDFs only; no OCR. Page scripts are not executed, so JavaScript-only content may need a readable URL or pasted text. Standard PDF export fonts have limited non-Latin coverage.
+- **Documents and websites:** scanned PDF pages use bounded local Tesseract OCR when installed; recognition errors remain possible. Page scripts are not executed, so JavaScript-only content may need a readable URL or pasted text. Standard PDF export fonts have limited non-Latin coverage.
+- **External acceptance:** live Tavily and live private-GitHub acceptance require credentials. The private GitHub path and provider contracts are tested without fabricating a live credential result.
 - **Statistics and fees:** small repeated samples are not broad reliability claims. Unknown metrics remain unknown; local zero-rate API estimates exclude compute and energy.
 
 ## Documentation and attribution

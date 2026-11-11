@@ -141,12 +141,14 @@ def save_upload(store: Store, filename: str, data: bytes) -> dict:
             "INSERT INTO uploads(id,data,created_at) VALUES(?,?,?)",
             (value["id"], json.dumps(value), value["created_at"]),
         )
+    store.claim_object("upload", str(value["id"]))
     return value
 
 
 def load_upload(store: Store, upload_id: str) -> tuple[dict, bytes]:
     import hashlib
 
+    store.require_access("upload", upload_id)
     with store.connection() as connection:
         row = connection.execute("SELECT data FROM uploads WHERE id=?", (upload_id,)).fetchone()
     if not row:
@@ -225,7 +227,13 @@ def repository_sources(files: dict[str, bytes]) -> tuple[list[dict], dict]:
     return sources, metadata
 
 
-async def github_repository(url: str, token: str = "") -> tuple[list[dict], dict]:
+async def github_repository(
+    url: str,
+    token: str = "",
+    *,
+    file_limit: int = 200,
+    byte_limit: int = 12_000_000,
+) -> tuple[list[dict], dict]:
     public_url(url)
     parsed = urlsplit(url)
     if parsed.hostname != "github.com" or parsed.query or parsed.fragment:
@@ -329,9 +337,15 @@ async def github_repository(url: str, token: str = "") -> tuple[list[dict], dict
                 raise ValueError("GitHub source file exceeds the 200,000-byte limit.")
             return path, data
 
-    captured = await asyncio.gather(
-        *(capture(entry) for entry in selected[:40]), return_exceptions=True
-    )
+    chosen: list[dict] = []
+    chosen_bytes = 0
+    for entry in selected:
+        size = int(entry.get("size", 0))
+        if len(chosen) >= file_limit or chosen_bytes + size > byte_limit:
+            continue
+        chosen.append(entry)
+        chosen_bytes += size
+    captured = await asyncio.gather(*(capture(entry) for entry in chosen), return_exceptions=True)
     for item in captured:
         if isinstance(item, BaseException):
             raise item
@@ -342,8 +356,12 @@ async def github_repository(url: str, token: str = "") -> tuple[list[dict], dict
         commit_sha=sha,
         default_branch=branch,
         files_in_tree=len(entries),
-        retrieval_limit=40,
-        omitted_candidate_files=max(0, len(selected) - 40),
+        retrieval_limit=file_limit,
+        retrieval_byte_limit=byte_limit,
+        candidate_files=len(selected),
+        candidate_bytes=sum(int(entry.get("size", 0)) for entry in selected),
+        selected_bytes=chosen_bytes,
+        omitted_candidate_files=max(0, len(selected) - len(chosen)),
         retrieval="commit-pinned bounded source files",
     )
     return sources, metadata
@@ -435,7 +453,12 @@ async def ingest(store: Store, task: dict) -> tuple[list[dict], dict]:
     inputs = task["inputs"]
     if task["category"] == "repository":
         if inputs.get("url"):
-            sources, metadata = await github_repository(inputs["url"], store.config.github_key)
+            sources, metadata = await github_repository(
+                inputs["url"],
+                store.config.github_key,
+                file_limit=store.config.repository_file_limit,
+                byte_limit=store.config.repository_byte_limit,
+            )
         elif len(inputs["upload_ids"]) == 1:
             item, data = load_upload(store, inputs["upload_ids"][0])
             if item["type"] != ".zip":

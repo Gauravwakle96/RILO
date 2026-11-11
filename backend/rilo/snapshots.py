@@ -73,9 +73,15 @@ class Snapshots:
                 "INSERT INTO snapshots(id,data,created_at) VALUES(?,?,?)",
                 (value["id"], json.dumps(value), timestamp),
             )
+        if self.store.config.hosted:
+            from .identity import current_owner
+
+            if current_owner():
+                self.store.claim_object("snapshot", str(value["id"]))
         return value
 
     def get(self, snapshot_id: str, include_content: bool = False) -> dict:
+        self.store.require_access("snapshot", snapshot_id)
         with self.store.connection() as connection:
             row = connection.execute(
                 "SELECT data FROM snapshots WHERE id=?", (snapshot_id,)

@@ -111,12 +111,6 @@ class SettingsUpdate(StrictModel):
         default=None, min_length=1, max_length=120, pattern=r"^[A-Za-z0-9_./:\-]+$"
     )
 
-    @field_validator("bifrost_url")
-    @classmethod
-    def local_gateway(cls, value: str | None) -> str | None:
-        return loopback_url(value) if value else value
-
-
 class Fact(StrictModel):
     text: str = Field(min_length=1, max_length=1500)
     source_ids: list[str] = Field(min_length=1, max_length=8)

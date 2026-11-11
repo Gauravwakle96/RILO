@@ -6,6 +6,23 @@ new product or hackathon scores.
 
 ## Automated checks
 
+### Completion pass — 11 November 2026
+
+- Final Python suite: **208 passed**, **83.53% coverage**.
+- Added Windows-safe verified backup/restore coverage and broader hosted tenant
+  isolation across conversations, uploads, snapshots, reports, suites and private
+  agents/tasks. Focused acceptance: **32 passed**.
+- Ruff and mypy passed. Frontend lint, TypeScript and production build passed; Python
+  source/wheel build passed. Standard Playwright acceptance: **16 passed**, **10
+  explicitly opt-in live checks skipped**, in 3.9 minutes. Both npm audits reported
+  zero known vulnerabilities.
+- Container target acceptance is **not performed locally** because Docker Desktop's
+  Linux daemon was unavailable. A separate GitHub Actions container job now builds
+  the image and checks the packaged Rilo CLI, Node, pinned Promptfoo runtime and
+  Tesseract. A green remote job is required before claiming the image verified.
+- Live Tavily is intentionally excluded without a real key. Live private GitHub
+  acceptance remains credential-gated and is not represented as executed.
+
 ### Public source release — 11 November 2026
 
 Fresh release checks passed 198 Python tests with 84.13% coverage, backend lint and
@@ -127,12 +144,13 @@ that every contention scenario has been resolved.
 - Tavily integration/configuration/mocked transport tested; live validation unavailable
   without TAVILY_API_KEY. Default off; these runs consumed no Tavily credits.
 - Authorized private GitHub API tested with transports; no live private credential.
-- No calibrated semantic vulnerability dataset, independent penetration test,
-  public multi-user deployment or independently awarded product score.
+- A small versioned calibration fixture exists for evaluator agreement; it is not a
+  universal semantic-vulnerability accuracy claim. No independent penetration test,
+  external hosted deployment or independently awarded product score.
 - Quote integrity differs from conclusion truth. Models can overstate evidence;
   advisory semantic review can err too.
 - Bounded repository selection; deterministic AST inventory focuses on Python.
-- See the guide/journal for PDF font, OCR, context and deployment limitations.
+- See the guide/journal for PDF font, OCR-recognition, context and deployment limitations.
 
 Private snapshots, traces, screenshots and raw reports stay in `.rilo`.
 No private retrieved contents or credentials were published.

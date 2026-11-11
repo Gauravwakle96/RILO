@@ -17,6 +17,22 @@ from .workspace_evaluation import RegressionCreate, SuiteCreate, compare_workspa
 from .workspace_store import WorkspaceStore, profiles
 
 
+def reports_for_owner(store: Store, kind: str) -> list[dict]:
+    with store.connection() as connection:
+        values = [
+            json.loads(row[0])
+            for row in connection.execute(
+                "SELECT data FROM workspace_artifacts WHERE kind=? ORDER BY created_at DESC",
+                (kind,),
+            )
+        ]
+    return [
+        value
+        for value in values
+        if store.can_access("experiment", value["experiment_id"])
+    ]
+
+
 def workspace_router(store: Store) -> APIRouter:
     router = APIRouter(prefix="/api/v1/workspace", tags=["workspace"])
     workspace = WorkspaceStore(store)
@@ -39,7 +55,7 @@ def workspace_router(store: Store) -> APIRouter:
             ).fetchone()[0]
         return {
             "task_checks": availability(),
-            "deployment": "local_single_user",
+            "deployment": "hosted_multi_user" if store.config.hosted else "local_single_user",
             "tavily": {
                 "configured": bool(store.config.tavily_key),
                 "default": "off",
@@ -57,43 +73,45 @@ def workspace_router(store: Store) -> APIRouter:
             },
             "documents": {
                 "formats": ["pdf", "docx", "txt", "md"],
-                "ocr": False,
+                "ocr": True,
+                "ocr_engine": "local Tesseract when installed",
                 "max_upload_bytes": 8_000_000,
             },
         }
 
     @router.get("/dashboard")
     def dashboard():
-        with store.connection() as connection:
-            total = connection.execute("SELECT count(*) FROM experiments").fetchone()[0]
-            aggregate = connection.execute("""
-                SELECT count(*) AS attempts,
-                coalesce(sum(state='completed'),0) AS successful_executions,
-                coalesce(sum(state NOT IN ('completed','queued','running')),0) AS failed_executions,
-                avg(CASE WHEN state NOT IN ('queued','running') THEN json_extract(data,'$.duration_ms') END) AS average_latency_ms,
-                sum(json_extract(data,'$.input_tokens')) AS observed_input_tokens,
-                sum(json_extract(data,'$.output_tokens')) AS observed_output_tokens,
-                sum(json_extract(data,'$.input_tokens') IS NOT NULL) AS token_observed_runs
-                FROM runs
-            """).fetchone()
-            agents = [
-                dict(row)
-                for row in connection.execute("""
-                SELECT json_extract(data,'$.agent_name') AS name, count(*) AS attempts,
-                sum(state='completed') AS completed,
-                avg(CASE WHEN state='completed' THEN json_extract(data,'$.duration_ms') END) AS latency_ms
-                FROM runs GROUP BY json_extract(data,'$.agent_name')
-            """)
-            ]
-            regressions = [
-                json.loads(row[0])
-                for row in connection.execute(
-                    "SELECT data FROM workspace_artifacts WHERE kind='regression' ORDER BY created_at DESC LIMIT 5"
-                )
-            ]
+        evaluations = store.experiments()
+        run_values = [
+            store.run(run["id"])
+            for value in evaluations
+            for run in store.experiment(value["id"])["runs"]
+        ]
+        terminal = [run for run in run_values if run["outcome"] not in {"queued", "running"}]
+        grouped: dict[str, list[dict]] = {}
+        for run in terminal:
+            grouped.setdefault(run["agent_name"], []).append(run)
+        agents = [
+            {
+                "name": name,
+                "attempts": len(values),
+                "completed": sum(value["outcome"] == "completed" for value in values),
+                "latency_ms": sum(value["duration_ms"] for value in values) / len(values),
+            }
+            for name, values in grouped.items()
+        ]
+        regressions = [item for item in reports_for_owner(store, "regression")[:5]]
         return {
-            "evaluations": total,
-            **dict(aggregate),
+            "evaluations": len(evaluations),
+            "attempts": len(run_values),
+            "successful_executions": sum(run["outcome"] == "completed" for run in terminal),
+            "failed_executions": sum(run["outcome"] != "completed" for run in terminal),
+            "average_latency_ms": sum(run["duration_ms"] for run in terminal) / len(terminal)
+            if terminal
+            else None,
+            "observed_input_tokens": sum(run.get("input_tokens") or 0 for run in terminal),
+            "observed_output_tokens": sum(run.get("output_tokens") or 0 for run in terminal),
+            "token_observed_runs": sum(run.get("input_tokens") is not None for run in terminal),
             "agents": agents,
             "regressions": regressions,
             "scope": "All persisted executions, including explicitly labeled fixture benchmarks. Completion is not verified accuracy.",
@@ -189,13 +207,7 @@ def workspace_router(store: Store) -> APIRouter:
 
     @router.get("/reports")
     def reports():
-        with store.connection() as connection:
-            return [
-                json.loads(row[0])
-                for row in connection.execute(
-                    "SELECT data FROM workspace_artifacts WHERE kind='report' ORDER BY created_at DESC LIMIT 100"
-                )
-            ]
+        return reports_for_owner(store, "report")[:100]
 
     @router.get("/suites")
     def suites():
@@ -205,6 +217,7 @@ def workspace_router(store: Store) -> APIRouter:
                 for row in connection.execute(
                     "SELECT data FROM benchmark_suites ORDER BY created_at DESC"
                 )
+                if store.can_access("suite", json.loads(row[0])["id"])
             ]
 
     @router.post("/suites", status_code=201)
@@ -236,15 +249,24 @@ def workspace_router(store: Store) -> APIRouter:
             else source["manifest"]["workspace"].get("checks", []),
         }
         with store.transaction() as connection:
-            if connection.execute(
-                "SELECT 1 FROM benchmark_suites WHERE json_extract(data,'$.name')=? AND json_extract(data,'$.version')=?",
-                (payload.name, payload.version),
-            ).fetchone():
+            duplicate = next(
+                (
+                    json.loads(row[0])
+                    for row in connection.execute(
+                        "SELECT data FROM benchmark_suites WHERE json_extract(data,'$.name')=? AND json_extract(data,'$.version')=?",
+                        (payload.name, payload.version),
+                    )
+                    if store.can_access("suite", json.loads(row[0])["id"])
+                ),
+                None,
+            )
+            if duplicate:
                 raise ValueError("This suite name and version already exist. Choose a new version.")
             connection.execute(
                 "INSERT INTO benchmark_suites(id,data,created_at) VALUES(?,?,?)",
                 (record["id"], json.dumps(record), record["created_at"]),
             )
+        store.claim_object("suite", record["id"])
         return record
 
     @router.post("/suites/{suite_id}/run", status_code=202)
@@ -253,6 +275,7 @@ def workspace_router(store: Store) -> APIRouter:
         from .storage import identifier
         from .workspace_store import runtime_hash
 
+        store.require_access("suite", suite_id)
         with store.connection() as connection:
             row = connection.execute(
                 "SELECT data FROM benchmark_suites WHERE id=?", (suite_id,)

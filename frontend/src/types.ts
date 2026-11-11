@@ -27,6 +27,8 @@ export interface Session {
   csrf_token: string;
   app_version: string;
   workspace_name: string;
+  hosted: boolean;
+  user: { id: string; name: string; email?: string; role: "admin" | "member" };
 }
 export interface Agent {
   id: string;

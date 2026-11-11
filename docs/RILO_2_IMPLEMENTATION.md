@@ -12,7 +12,8 @@ requested phase order; preserve existing behavior and record concrete limitation
   allowance; no silent fallback or live-validation claim without actual retrieval.
 - Pin a shared source snapshot before either agent runs. Execute sequentially on
   this laptop; isolate histories and run the evaluator after generation.
-- Keep single-user local deployment explicit. External providers optional.
+- Keep local mode as the default. Hosted mode remains optional, authenticated and
+  single-instance; external providers remain optional.
 - Unknown accuracy without ground truth stays unknown; semantic judgments advisory.
 
 ## Phases and delivered behavior
@@ -27,15 +28,15 @@ was taken before migration.
 | 0 Audit | Whole-project inventory, fresh 127 Python/13 browser baseline | Earlier verification kept separate |
 | 1 Foundation | Typed task contracts, shared model boundary, migrations, private snapshots, provenance | Existing single-server SQLite deployment |
 | 2 Chat | Persistent paired turns, isolated histories, context, cancellation, bounded response retries, traces, exports | Conservative local context budget; no cross-agent critique mode |
-| 3 Repository | Public GitHub commit-pinned file capture with archive fallback, authorized private API path, ZIP, Python AST/static checks, optional OSV/Docker | Bounded sources; no exhaustive vulnerability proof or dependency installation |
+| 3 Repository | Public/private GitHub commit-pinned file capture with archive fallback, ZIP, Python AST/static checks, optional OSV/Docker | Default 200 files / 12 MB; no exhaustive vulnerability proof or dependency installation |
 | 4 Evidence | Quotes, line/page checks, consistent code-indentation matching, independent advisory review, potential disagreements | Semantic correctness remains uncertain |
 | 5 Search | Optional Tavily basic search, shared retrieval, source validation/deduplication, preserved Scout/Relay research | Live Tavily unvalidated without credentials |
-| 6 Documents | Text PDFs with actual pages, DOCX/TXT/Markdown with lines, resource-limited parser | No OCR or reliable rendered DOCX pages |
+| 6 Documents | Text and scanned PDFs with actual pages, bounded local Tesseract OCR, DOCX/TXT/Markdown with lines, resource-limited parser | OCR can misrecognize text; no reliable rendered DOCX pages |
 | 7 Website | Robots-aware bounded capture, public IP/DNS/redirect checks, no scripts | No authenticated/script-rendered sites |
 | 8 Benchmarks | Immutable suite versions, repeated trials, pinned conditions, optional exact-quote labels | Quote metrics are not vulnerability accuracy |
 | 9 Regression | Retest, compatibility checks, findings/latency/tokens, labeled quote-F1 deltas, Wilson intervals | No unsupported winner; implementation changes flagged |
 | 10 Reports | Persisted JSON/CSV/Markdown/PDF; invariant PDF generation | Standard PDF font has limited non-Latin coverage |
-| 11 Reliability | Security boundaries, UI, tests, audits, package/build, local documentation | Public/team hosting and independent security assessment remain future work |
+| 11 Reliability | Security boundaries, UI, tests, audits, package/build, authenticated hosted mode, backup/restore and container documentation | Single-instance SQLite; independent security assessment remains future work |
 
 ## Validation
 
@@ -80,14 +81,14 @@ suites and dependency preflight using actual upstream code. This addresses the
 missing comparison flow for declared requirements. General semantic accuracy and
 security-coverage claims remain unsupported without independent measurements.
 
-1. Live Tavily and private GitHub validation need appropriate credentials.
+1. Live Tavily and live private GitHub validation need appropriate credentials.
 2. Calibrated semantic accuracy/security scoring requires independent truth labels.
    Repository rubric weights exist; no invented aggregate score is emitted.
 3. Disagreement matching is conservative and semantic model review is advisory.
 4. Deterministic architecture/static inventory is strongest for Python; other
    captured languages use model analysis without equivalent AST checks.
-5. Outdated-package detection, cross-agent critique, multilingual PDF fonts, OCR,
-   team authentication/ownership, public deployment and retention UI are not built.
+5. Outdated-package detection, cross-agent critique, multilingual PDF fonts,
+   horizontal scaling, self-service account recovery and retention UI are not built.
 
 RILO is a working local evaluation workspace. A 92+/100 product rating or hackathon
 result has not been independently established.

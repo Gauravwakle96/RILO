@@ -2,7 +2,7 @@ import json
 
 import pytest
 from pydantic import ValidationError
-from rilo.config import loopback_url, redact
+from rilo.config import loopback_url, redact, service_url
 from rilo.schemas import AgentCreate, ExperimentCreate
 
 
@@ -73,6 +73,21 @@ def test_endpoints_are_explicit_loopback_only(value):
         loopback_url(value)
     with pytest.raises(ValidationError):
         AgentCreate(name="Invalid", endpoint=value)
+
+
+def test_hosted_service_url_accepts_only_literal_private_destinations():
+    assert service_url("http://10.20.30.40:8086", hosted=True) == "http://10.20.30.40:8086"
+    assert service_url("http://host.docker.internal:8086", hosted=True) == (
+        "http://host.docker.internal:8086"
+    )
+    for value in (
+        "https://gateway.example:8086",
+        "https://8.8.8.8:8086",
+        "http://0.0.0.0:8086",
+        "http://169.254.169.254:8086",
+    ):
+        with pytest.raises(ValueError):
+            service_url(value, hosted=True)
 
 
 def test_redaction_preserves_real_usage_counts():

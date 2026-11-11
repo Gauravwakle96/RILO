@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import os
 import signal
@@ -26,10 +27,22 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("version", help="Show the installed version")
     serve = commands.add_parser("serve", help="Run API, built dashboard, and separate worker")
     serve.add_argument("--port", type=int, default=8018)
+    serve.add_argument("--host", default=os.environ.get("RILO_BIND_HOST", "127.0.0.1"))
     serve.add_argument(
         "--no-worker", action="store_true", help="Run only API; start worker separately"
     )
     commands.add_parser("doctor", help="Check real integration status and configuration")
+    calibrate = commands.add_parser(
+        "calibrate", help="Score versioned human-reviewed evaluator labels"
+    )
+    calibrate.add_argument("dataset", type=Path)
+    user = commands.add_parser("user", help="Manage hosted Rilo users")
+    user_commands = user.add_subparsers(dest="user_command", required=True)
+    add_user = user_commands.add_parser("add", help="Create a hosted user")
+    add_user.add_argument("--email", required=True)
+    add_user.add_argument("--name", required=True)
+    add_user.add_argument("--admin", action="store_true")
+    user_commands.add_parser("list", help="List hosted users")
     commands.add_parser("agents", help="List registered agents")
     commands.add_parser("tasks", help="List task definitions")
     commands.add_parser("experiments", help="List persisted experiments")
@@ -75,6 +88,7 @@ def serve(args: argparse.Namespace) -> int:
     environment = os.environ.copy()
     environment["RILO_DATA_DIR"] = str(Path(args.data_dir).resolve())
     environment["RILO_PORT"] = str(args.port)
+    environment["RILO_BIND_HOST"] = args.host
     process_args: list[list[str]] = [
         [
             sys.executable,
@@ -82,7 +96,7 @@ def serve(args: argparse.Namespace) -> int:
             "uvicorn",
             "rilo.api:app",
             "--host",
-            "127.0.0.1",
+            args.host,
             "--port",
             str(args.port),
         ]
@@ -103,7 +117,8 @@ def serve(args: argparse.Namespace) -> int:
     try:
         for command in process_args:
             children.append(subprocess.Popen(command, env=environment))
-        print(f"Rilo: http://127.0.0.1:{args.port}", flush=True)
+        shown_host = "127.0.0.1" if args.host == "0.0.0.0" else args.host
+        print(f"Rilo: http://{shown_host}:{args.port}", flush=True)
         print("The API and worker retain experiments in the local data folder.", flush=True)
         while not interrupted:
             for child in children:
@@ -148,6 +163,34 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "serve":
             return serve(args)
+        if args.command == "user":
+            from .config import Config
+            from .storage import Store
+
+            store = Store(Config.load())
+            if args.user_command == "list":
+                print(pretty(store.users()))
+                return 0
+            password = getpass.getpass("Password (12+ characters): ")
+            confirmation = getpass.getpass("Confirm password: ")
+            if password != confirmation:
+                raise RiloError("Passwords do not match.")
+            print(
+                pretty(
+                    store.create_user(
+                        args.email, args.name, password, "admin" if args.admin else "member"
+                    )
+                )
+            )
+            return 0
+        if args.command == "calibrate":
+            from .calibration import CalibrationDataset, score
+
+            dataset = CalibrationDataset.model_validate_json(
+                args.dataset.read_text(encoding="utf-8")
+            )
+            print(pretty(score(dataset)))
+            return 0
         with RiloClient(args.url, args.data_dir) as client:
             if args.command == "doctor":
                 print(pretty(client.request("GET", "settings")))

@@ -1,6 +1,9 @@
-# Local deployment and operation
+# Deployment and operation
 
-Rilo v0.1 runs as a private local browser application. The API binds to loopback, serves the built frontend, and uses a separate single worker over SQLite WAL. Public or shared hosting requires a new authentication, tenant, TLS, and execution-isolation design.
+Rilo v0.2 defaults to a private local browser application. The API binds to loopback,
+serves the built frontend, and uses a separate single worker over SQLite WAL. An
+optional authenticated hosted mode provides persistent users and per-user ownership
+behind an HTTPS reverse proxy; see [HOSTED_DEPLOYMENT.md](HOSTED_DEPLOYMENT.md).
 
 ## Setup
 
@@ -21,16 +24,18 @@ Windows launcher: `START_RILO.cmd`, optionally `-SkipBuild` and `-Gateway`. It r
 
 The RILO 2 workspace uses the same API and durable worker. New private variables:
 `GITHUB_TOKEN` for authorized private repositories, `RILO_SANDBOX_IMAGE` for a
-preinstalled digest-pinned Docker image, `RILO_WORKSPACE_INPUT_BYTES` (default 6000)
-and `RILO_STORAGE_MAX_BYTES` (default 512000000). Tavily is optional and off by default.
+preinstalled digest-pinned Docker image, `RILO_WORKSPACE_INPUT_BYTES` (default 6000),
+`RILO_STORAGE_MAX_BYTES` (default 512000000), bounded repository file/byte limits,
+and `RILO_OCR_LANGUAGE`. Tavily is optional and off by default.
 See [workspace guide](RILO_2_GUIDE.md). Restart both processes after source/config changes
 so queued run identities match the loaded implementation.
 
 Source objects and uploads are private in `.rilo/objects` and `.rilo/uploads`. Back up
 the entire data directory and a consistent SQLite backup; backing up only the DB
 loses captured source bodies. Stop API/worker before manual archive/restore. Existing
-records are never automatically deleted. Do not deploy the single-user session
-bootstrap as public authentication.
+records are never automatically deleted. Local session bootstrap remains loopback-only.
+Hosted mode instead requires a real initial user, persistent password sessions,
+HTTPS origin/host configuration and object ownership checks.
 
 Copy variable names from `.env.example` into private `.env`, preserving generated or existing credentials. Restart both API and worker after edits. Saved dashboard model/gateway settings take precedence over the corresponding environment defaults for later experiments.
 
@@ -45,6 +50,10 @@ Copy variable names from `.env.example` into private `.env`, preserving generate
 | `RILO_TAVILY_CREDIT_LIMIT` | Conservative workspace lifetime search reservation allowance; default 900 |
 | `RILO_PORT` | Allowed local origin for a separately launched API on a custom port |
 | `RILO_MODEL_PRICING_JSON` | Explicit per-model input/output rates per million tokens; absent means unknown fee |
+| `RILO_REPOSITORY_FILE_LIMIT`, `RILO_REPOSITORY_BYTE_LIMIT` | Bounded GitHub capture size |
+| `RILO_OCR_LANGUAGE` | Tesseract OCR language identifier |
+| `RILO_HOSTED`, `RILO_BIND_HOST`, `RILO_PUBLIC_URL` | Enable and validate hosted mode |
+| `RILO_ALLOWED_HOSTS`, `RILO_ALLOWED_ORIGINS` | Hosted browser boundary |
 
 The pricing configuration is a versioned estimate basis. Setting zero for a verified local model expresses its inference API fee; it excludes hardware, electricity, storage, and network costs. Cloud prices must be selected from the intended provider’s current terms. Missing usage, unknown/fallback model provenance, or opaque HTTP agents cannot establish a fee.
 
@@ -60,7 +69,12 @@ Ollama runs separately at `11434`. This project does not reinstall or alter an e
 
 `.rilo/rilo.db` stores experiments, catalog versions, results and traces. `.rilo/session.key` authorizes the SDK. `.rilo/settings.json` stores safe model/gateway choices. `.rilo/bifrost` contains the gateway artifact, configuration, and private operational databases. `.env`, `.rilo`, model files, build outputs, logs, and generated caches are ignored by Git.
 
-Stop Rilo before copying its private workspace for backup; include a private `.env` backup only in a location you control. SQLite WAL files may matter for an online copy, so a stopped copy or SQLite backup API is preferable. Restore into a stopped workspace, restart Rilo, and verify experiment counts/reports. Schema version 2 adds archived HTTP agent declarations to the initial version 1 database; prior experiment snapshots are preserved. Later migrations must preserve historical evidence. Report exports are portable evidence, not a complete database restore format.
+Use `uv run python scripts/backup.py create --data-dir .rilo --output backups/rilo.tar.gz`
+for a verified SQLite/object archive, ideally after stopping writes. Restore into an
+empty destination with the matching `restore` command, restart Rilo, and verify
+experiment counts/reports. Migrations are additive through schema version 5; prior
+experiment snapshots are preserved. Report exports are portable evidence, not a
+complete database restore format.
 
 Do not delete the workspace to fix a display problem. Reload the browser or check process/API status first. Expired running jobs are recorded as interrupted/partial after restart. They are not silently rerun; use Rerun for fresh attempts.
 

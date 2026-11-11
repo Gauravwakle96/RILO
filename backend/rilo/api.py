@@ -20,6 +20,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from pydantic import BaseModel, Field
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import __version__
@@ -27,6 +28,7 @@ from .catalog import public_source, public_task
 from .config import Config, allowed_origins, redact
 from .engine import InfrastructureError, bounded_json
 from .evaluation import compare
+from .identity import owner_context, token_hash
 from .schemas import (
     AgentCreate,
     AgentVersionCreate,
@@ -88,6 +90,16 @@ DOCS_CSS = """
 @media(prefers-color-scheme:dark){:root{--bg:#121a20;--panel:#18242c;--ink:#edf3f7;--muted:#a4b6c0;--line:#35444e;--accent:#76d6b1;--code:#101a21}.method{background:#264450;color:#c0e5f5}.method-post{background:#234c3b;color:#b3edd2}.method-patch{background:#4e4228;color:#ffe0a3}}
 @media(max-width:640px){header,main,footer{padding:18px}header{align-items:flex-start;flex-direction:column;gap:12px}nav{gap:18px}.filters{grid-template-columns:1fr}.operation-name{width:100%;margin-left:70px}.operation>summary{gap:10px;padding-right:12px}.operation-body{padding:0 14px 18px}.authentication{padding:15px}.brand{font-size:27px}}
 """
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=12, max_length=256)
+
+
+class UserCreateRequest(LoginRequest):
+    name: str = Field(min_length=1, max_length=100)
+    role: str = Field(default="member", pattern="^(admin|member)$")
 
 DOCS_JS = """
 "use strict";
@@ -236,13 +248,24 @@ DOCS_ASSETS = {
 def create_app(config: Config | None = None) -> FastAPI:
     settings = config or Config.load()
     store = Store(settings)
-    origins = allowed_origins(settings.port)
+    origins = (
+        set(settings.allowed_origins_override) if settings.hosted else allowed_origins(settings.port)
+    )
+    trusted_hosts = (
+        set(settings.allowed_hosts)
+        if settings.hosted
+        else {"localhost", "127.0.0.1", "::1", "testserver"}
+    )
     sessions: dict[str, tuple[str, float]] = {}
     requests: dict[str, deque] = defaultdict(deque)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         _ = settings.session_key
+        if settings.hosted and store.user_count() == 0:
+            raise RuntimeError(
+                "Hosted mode has no users. Run `rilo user add --admin` before starting the service."
+            )
         store.recover()
         yield
 
@@ -274,6 +297,8 @@ def create_app(config: Config | None = None) -> FastAPI:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
+        if settings.hosted:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if api:
             response.headers["Cache-Control"] = "no-store"
         response.headers["Content-Security-Policy"] = (
@@ -305,8 +330,8 @@ def create_app(config: Config | None = None) -> FastAPI:
             host = urlsplit("http://" + request.headers.get("host", "")).hostname
         except ValueError:
             host = None
-        if host not in {"localhost", "127.0.0.1", "::1", "testserver"}:
-            return failure("untrusted_host", "Rilo accepts local hosts only.", 403, request_id)
+        if host not in trusted_hosts:
+            return failure("untrusted_host", "This host is not allowed.", 403, request_id)
         origin = request.headers.get("origin")
         if origin and origin not in origins:
             return failure(
@@ -344,23 +369,45 @@ def create_app(config: Config | None = None) -> FastAPI:
                             "body_limit", "Request body exceeds the size limit.", 413, request_id
                         )
                 request._body = bytes(body)
-            if request.url.path != "/api/v1/session":
+            public_auth = request.url.path in {"/api/v1/session", "/api/v1/auth/login"}
+            if settings.hosted and request.url.path == "/api/v1/session":
+                public_auth = False
+            request.state.user = None
+            if not public_auth:
                 auth = request.headers.get("authorization", "")
-                bearer = auth.startswith("Bearer ") and hmac.compare_digest(
+                bearer = not settings.hosted and auth.startswith("Bearer ") and hmac.compare_digest(
                     auth[7:], settings.session_key
                 )
                 cookie = request.cookies.get("rilo_session", "")
-                cookie_session = sessions.get(cookie)
+                if settings.hosted:
+                    persisted = store.auth_session(cookie)
+                    cookie_session = (
+                        (persisted[1], time.time() + 60) if persisted else None
+                    )
+                    if persisted:
+                        request.state.user = persisted[0]
+                else:
+                    cookie_session = sessions.get(cookie)
                 if not bearer and (not cookie_session or cookie_session[1] < time.time()):
                     return failure(
                         "authentication_required",
-                        "Open Rilo locally to establish a session.",
+                        "Sign in to access this workspace."
+                        if settings.hosted
+                        else "Open Rilo locally to establish a session.",
                         401,
                         request_id,
                     )
                 if not bearer and request.method not in {"GET", "HEAD", "OPTIONS"}:
                     csrf = request.headers.get("x-csrf-token", "")
-                    if not cookie_session or not hmac.compare_digest(csrf, cookie_session[0]):
+                    valid_csrf = bool(
+                        cookie_session
+                        and (
+                            hmac.compare_digest(token_hash(csrf), cookie_session[0])
+                            if settings.hosted
+                            else hmac.compare_digest(csrf, cookie_session[0])
+                        )
+                    )
+                    if not valid_csrf:
                         return failure(
                             "csrf_required",
                             "Refresh the local session before changing data.",
@@ -368,7 +415,9 @@ def create_app(config: Config | None = None) -> FastAPI:
                             request_id,
                         )
         try:
-            response = await call_next(request)
+            owner_id = request.state.user["id"] if getattr(request.state, "user", None) else None
+            with owner_context(owner_id):
+                response = await call_next(request)
         except Exception as exc:
             logging.getLogger(__name__).error(
                 "Unexpected API failure (%s); request %s", type(exc).__name__, request_id
@@ -433,6 +482,30 @@ def create_app(config: Config | None = None) -> FastAPI:
 
     @app.get("/api/v1/session")
     def session(request: Request) -> JSONResponse:
+        if settings.hosted:
+            old_token = request.cookies.get("rilo_session", "")
+            persisted = store.auth_session(old_token)
+            if not persisted:
+                raise HTTPException(401, "Sign in to access this workspace.")
+            user, _csrf_hash = persisted
+            # The raw CSRF token is returned only at login; renew the session if the page lost it.
+            csrf = secrets.token_urlsafe(32)
+            token = secrets.token_urlsafe(48)
+            store.revoke_auth_session(old_token)
+            store.create_auth_session(user["id"], token, csrf)
+            response = JSONResponse(
+                {
+                    "csrf_token": csrf,
+                    "app_version": __version__,
+                    "workspace_name": "Rilo workspace",
+                    "hosted": True,
+                    "user": user,
+                }
+            )
+            response.set_cookie(
+                "rilo_session", token, httponly=True, samesite="strict", max_age=86400, secure=True
+            )
+            return response
         cookie = request.cookies.get("rilo_session", "")
         current = sessions.get(cookie)
         if not current or current[1] < time.time():
@@ -446,7 +519,13 @@ def create_app(config: Config | None = None) -> FastAPI:
             while len(sessions) > 200:
                 sessions.pop(next(iter(sessions)))
         response = JSONResponse(
-            {"csrf_token": csrf, "app_version": __version__, "workspace_name": "Local workspace"}
+            {
+                "csrf_token": csrf,
+                "app_version": __version__,
+                "workspace_name": "Local workspace",
+                "hosted": False,
+                "user": {"id": "local", "name": "Local developer", "role": "admin"},
+            }
         )
         response.set_cookie(
             "rilo_session",
@@ -457,6 +536,49 @@ def create_app(config: Config | None = None) -> FastAPI:
             secure=request.url.scheme == "https",
         )
         return response
+
+    @app.post("/api/v1/auth/login")
+    def login(payload: LoginRequest) -> JSONResponse:
+        if not settings.hosted:
+            raise HTTPException(404, "Hosted authentication is disabled.")
+        user = store.authenticate_user(payload.email, payload.password)
+        if not user:
+            raise HTTPException(401, "Email or password is incorrect.")
+        token, csrf = secrets.token_urlsafe(48), secrets.token_urlsafe(32)
+        store.create_auth_session(user["id"], token, csrf)
+        response = JSONResponse(
+            {
+                "csrf_token": csrf,
+                "app_version": __version__,
+                "workspace_name": "Rilo workspace",
+                "hosted": True,
+                "user": user,
+            }
+        )
+        response.set_cookie(
+            "rilo_session", token, httponly=True, samesite="strict", max_age=86400, secure=True
+        )
+        return response
+
+    @app.post("/api/v1/auth/logout", status_code=204)
+    def logout(request: Request) -> Response:
+        if settings.hosted:
+            store.revoke_auth_session(request.cookies.get("rilo_session", ""))
+        response = Response(status_code=204)
+        response.delete_cookie("rilo_session", httponly=True, samesite="strict", secure=settings.hosted)
+        return response
+
+    @app.get("/api/v1/users")
+    def users(request: Request) -> list[dict]:
+        if not settings.hosted or request.state.user["role"] != "admin":
+            raise HTTPException(403, "Administrator access is required.")
+        return store.users()
+
+    @app.post("/api/v1/users", status_code=201)
+    def create_user(payload: UserCreateRequest, request: Request) -> dict:
+        if not settings.hosted or request.state.user["role"] != "admin":
+            raise HTTPException(403, "Administrator access is required.")
+        return store.create_user(payload.email, payload.name, payload.password, payload.role)
 
     @app.get("/api/v1/agents")
     def agents() -> list[dict]:

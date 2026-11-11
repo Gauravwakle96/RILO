@@ -1,0 +1,11 @@
+{
+  "name": "Repository claim verification smoke calibration",
+  "version": "1.0.0",
+  "items": [
+    {"id": "direct_quote", "expected": "VERIFIED", "predicted": "VERIFIED", "reviewer": "Rilo fixture author", "rationale": "The claim is exactly the captured source quotation."},
+    {"id": "supported_interpretation", "expected": "PARTIALLY VERIFIED", "predicted": "PARTIALLY VERIFIED", "reviewer": "Rilo fixture author", "rationale": "The reference is valid while the interpretation still requires review."},
+    {"id": "missing_reference", "expected": "UNSUPPORTED", "predicted": "UNSUPPORTED", "reviewer": "Rilo fixture author", "rationale": "No matching captured evidence exists."},
+    {"id": "opposite_source", "expected": "CONTRADICTED", "predicted": "PARTIALLY VERIFIED", "reviewer": "Rilo fixture author", "rationale": "This deliberate miss demonstrates that a calibration set preserves evaluator errors."},
+    {"id": "ambiguous_context", "expected": "NEEDS MANUAL REVIEW", "predicted": "NEEDS MANUAL REVIEW", "reviewer": "Rilo fixture author", "rationale": "The available context cannot settle the conclusion deterministically."}
+  ]
+}

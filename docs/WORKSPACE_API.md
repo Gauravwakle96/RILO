@@ -1,7 +1,8 @@
 # Paired workspace API
 
-All routes use `/api/v1/workspace` and the existing session/CSRF or local CLI bearer
-authentication. Do not expose this local single-user API to the internet.
+All routes use `/api/v1/workspace` and session/CSRF authentication. Local mode also
+supports the private CLI bearer key. Hosted mode uses persistent users and per-user
+ownership behind HTTPS; it does not accept the local bearer shortcut.
 
 | Route | Purpose |
 | --- | --- |

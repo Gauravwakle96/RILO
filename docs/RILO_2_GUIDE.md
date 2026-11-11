@@ -1,6 +1,8 @@
 # Use RILO
 
-Open http://127.0.0.1:8018. RILO is a local website with a Python service and worker.
+Open http://127.0.0.1:8018. RILO defaults to a private local website with a Python
+service and worker. Administrators can instead enable the authenticated single-instance
+hosted mode documented in [HOSTED_DEPLOYMENT.md](HOSTED_DEPLOYMENT.md).
 
 1. Choose Chat, Repository (GitHub/ZIP), Documents (PDF/DOCX/TXT/Markdown), Website,
    or Search (Tavily or supplied source text).
@@ -23,8 +25,8 @@ workspace input makes one shared basic request. Local credit reservation is not 
 provider balance. Direct GitHub, URL and document analysis do not need Tavily. Search
 off with no supplied sources returns an honest error.
 
-**GitHub:** public retrieval uses metadata/tree lookup and up to 40 commit-pinned text
-files, with a bounded archive fallback when anonymous lookup is unavailable. Private access
+**GitHub:** public retrieval uses metadata/tree lookup and up to the configured 200
+commit-pinned text files / 12 MB by default, with a bounded archive fallback when anonymous lookup is unavailable. Private access
 requires authorized `GITHUB_TOKEN`, which is never given to agents. Private live
 acceptance has not been performed without a token.
 
@@ -41,7 +43,8 @@ installation, host mount or container networking. Runner failure is recorded.
 - Repository retrieval and selected passages are bounded, not exhaustive auditing.
 - Default input cap is 6,000 serialized bytes. Excessive history fails clearly; increase
   only after validating model context. Prior messages are never silently removed.
-- Text PDFs have true page numbers. OCR is absent. DOCX/TXT/Markdown use line citations.
+- PDFs retain true page numbers. Empty scanned pages use bounded local Tesseract OCR
+  when installed; recognition errors are identified by extraction metadata. DOCX/TXT/Markdown use line citations.
 - Website pages containing only metadata or scripts fail source capture before agent
   execution. Use a directly readable URL or paste source text in Chat.
 - Failed source capture can be retried as a new paired evaluation. Original attempts
@@ -49,8 +52,9 @@ installation, host mount or container networking. Runner failure is recorded.
 - No objective accuracy or winner without suitable labels. Exact-quote metrics have
   narrow scope; ordinary chat and semantic security claims are not objectively graded.
 - Standard PDF fonts have limited non-Latin coverage; JSON/Markdown preserve Unicode.
-- Local single-user deployment only. Team ownership, public hosting, calibrated semantic
-  benchmarks and retention management are future work.
+- Hosted mode provides persistent accounts and per-user resource ownership behind
+  HTTPS, but remains a single Rilo instance over SQLite. Horizontal scaling, self-service
+  account recovery and retention management are future work.
 
 Core local inference requires no paid API. Existing hardware, model downloads,
 electricity, internet and any future hosting still have their own costs.

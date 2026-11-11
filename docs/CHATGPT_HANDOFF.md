@@ -1,6 +1,11 @@
-# Rilo — current product and proposed adaptive-agent expansion
+# Rilo — historical pre-expansion planning handoff
 
 > RILO 2 workspace expansion: see [implementation status](RILO_2_IMPLEMENTATION.md), [workspace API](WORKSPACE_API.md), [guide](RILO_2_GUIDE.md), and [fresh verification](RILO_2_VERIFICATION.md). Earlier scope notes below describe the preserved benchmark foundation.
+
+> Historical notice: this document was written before the RILO 2 implementation and
+> intentionally preserves the old proposal. Statements such as “not built” and
+> “proposed” below are not current product status. Use the linked implementation and
+> verification documents for current claims.
 
 
 Prepared 9 November 2026. This document is ready to copy into ChatGPT. It distinguishes implemented behavior from proposed work. This request is planning only: do not start implementation until explicitly asked.

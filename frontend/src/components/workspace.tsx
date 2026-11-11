@@ -830,7 +830,7 @@ export function WorkspaceView({
               disabled={busy || pending}
             />
             <small>
-              Up to 8 MB each. Text-based PDFs only; OCR is not available.
+              Up to 8 MB each. Scanned PDFs use local Tesseract OCR when installed.
             </small>
           </label>
         )}

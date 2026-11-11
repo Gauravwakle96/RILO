@@ -109,9 +109,13 @@ class WorkspaceStore:
                 "INSERT INTO conversations(id,data,created_at) VALUES(?,?,?)",
                 (item["id"], json.dumps(item), item["created_at"]),
             )
+        self.store.claim_object("conversation", item["id"])
         return item
 
     def list(self) -> list[dict]:
+        owned = self.store.owned_ids("conversation")
+        if owned is not None:
+            return [self.get(value) for value in owned[:100]]
         with self.store.connection() as connection:
             return [
                 json.loads(row[0])
@@ -121,6 +125,7 @@ class WorkspaceStore:
             ]
 
     def get(self, conversation_id: str) -> dict:
+        self.store.require_access("conversation", conversation_id)
         with self.store.connection() as connection:
             row = connection.execute(
                 "SELECT data FROM conversations WHERE id=?", (conversation_id,)
@@ -215,10 +220,11 @@ class WorkspaceStore:
         conversation = self.get(conversation_id)
         request_hash = digest({"conversation_id": conversation_id, **payload.model_dump()})
         if idempotency_key:
+            scoped_key = self.store.scoped_key(idempotency_key)
             with self.store.connection() as connection:
                 existing = connection.execute(
                     "SELECT id,manifest FROM experiments WHERE idempotency_key=?",
-                    (idempotency_key,),
+                    (scoped_key,),
                 ).fetchone()
             if existing:
                 if (
@@ -305,6 +311,7 @@ class WorkspaceStore:
         return self.store.create_experiment(spec, idempotency_key, workspace=workspace)
 
     def artifact(self, experiment_id: str, kind: str, data: dict) -> dict:
+        self.store.require_access("experiment", experiment_id)
         value = {
             "id": identifier("artifact"),
             "experiment_id": experiment_id,
@@ -318,4 +325,5 @@ class WorkspaceStore:
                 "INSERT INTO workspace_artifacts(id,experiment_id,kind,data,created_at) VALUES(?,?,?,?,?)",
                 (value["id"], experiment_id, kind, json.dumps(value), value["created_at"]),
             )
+        self.store.claim_object("artifact", str(value["id"]))
         return value

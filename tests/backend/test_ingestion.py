@@ -101,6 +101,20 @@ def test_pdf_keeps_actual_page_numbers():
         extract("broken.pdf", ".pdf", b"%PDF-invalid")
 
 
+def test_scanned_pdf_uses_bounded_ocr_and_keeps_page_number(monkeypatch):
+    from reportlab.pdfgen import canvas
+
+    output = io.BytesIO()
+    pdf = canvas.Canvas(output)
+    pdf.rect(40, 650, 120, 30, fill=1)
+    pdf.save()
+    monkeypatch.setattr("rilo.documents._ocr_pdf", lambda data, pages, language: {1: "Scanned evidence"})
+    sources = extract("scan.pdf", ".pdf", output.getvalue())
+    assert sources[0]["page"] == 1
+    assert sources[0]["content"] == "Scanned evidence"
+    assert sources[0]["extraction_method"] == "ocr"
+
+
 def test_docx_has_line_evidence_without_invented_pages():
     data = make_zip(
         {
@@ -149,6 +163,37 @@ async def test_github_pins_commit_and_blob_paths(monkeypatch):
     assert metadata["commit_sha"] == "a" * 40
     assert sources[0]["reference"] == "src/app.py"
     assert any("a" * 40 in url for url in called)
+
+
+@pytest.mark.asyncio
+async def test_github_large_capture_respects_file_and_byte_limits(monkeypatch):
+    import base64
+
+    async def fetch(url, **kwargs):
+        if "/git/blobs/" in url:
+            body = {"encoding": "base64", "content": base64.b64encode(b"12345").decode()}
+        elif "/git/trees/" in url:
+            body = {
+                "truncated": False,
+                "tree": [
+                    {"type": "blob", "mode": "100644", "path": f"src/{index}.py", "size": 5, "sha": f"{index:040x}"}
+                    for index in range(80)
+                ],
+            }
+        elif "/commits/" in url:
+            body = {"sha": "a" * 40}
+        else:
+            body = {"default_branch": "main"}
+        return {"status": 200, "body": json.dumps(body).encode()}
+
+    monkeypatch.setattr("rilo.ingestion.fetch", fetch)
+    sources, metadata = await github_repository(
+        "https://github.com/test/large", "test-token", file_limit=50, byte_limit=125
+    )
+    assert len(sources) == 25
+    assert metadata["candidate_files"] == 80
+    assert metadata["selected_bytes"] == 125
+    assert metadata["omitted_candidate_files"] == 55
 
 
 @pytest.mark.asyncio

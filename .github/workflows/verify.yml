@@ -24,6 +24,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install locked dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr
           uv sync --locked
           npm ci --prefix frontend
           npm ci --prefix backend/rilo/promptfoo_runtime
@@ -55,3 +57,14 @@ jobs:
           cd frontend
           npx playwright install --with-deps chromium
           npm run test:e2e
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build hosted image
+        run: docker build --tag rilo-ci:${{ github.sha }} .
+      - name: Verify packaged runtime and OCR
+        run: |
+          docker run --rm --entrypoint sh rilo-ci:${{ github.sha }} -c 'rilo version && node --version && python -c "import json,pathlib,rilo; p=pathlib.Path(rilo.__file__).parent / \"promptfoo_runtime/node_modules/promptfoo/package.json\"; assert json.loads(p.read_text())[\"version\"] == \"0.125.1\"" && tesseract --version'

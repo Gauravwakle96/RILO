@@ -36,8 +36,9 @@ import type {
   Source,
   Task,
   View,
+  Session,
 } from "./types";
-import { api, ApiError, errorMessage, post, session } from "./lib/api";
+import { api, ApiError, errorMessage, login, logout, post, session } from "./lib/api";
 import { active } from "./lib/format";
 import {
   AgentForm,
@@ -141,7 +142,11 @@ export default function App() {
   const [baselineExperiment, setBaselineExperiment] =
     useState<Experiment | null>(null);
   const [toast, setToast] = useState("");
-  const [version, setVersion] = useState("0.1.0");
+  const [version, setVersion] = useState("0.2.0");
+  const [identity, setIdentity] = useState<Session | null>(null);
+  const [loginRequired, setLoginRequired] = useState(false);
+  const [loginBusy, setLoginBusy] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 800px)");
@@ -210,6 +215,8 @@ export default function App() {
     try {
       const sessionInfo = await session();
       setVersion(sessionInfo.app_version);
+      setIdentity(sessionInfo);
+      setLoginRequired(false);
       const results = await Promise.allSettled([
         api<Agent[]>("/agents"),
         api<Task[]>("/tasks"),
@@ -258,6 +265,7 @@ export default function App() {
       setConnected(Object.keys(updates).length > 0);
       setPermission(accessRejected);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) setLoginRequired(true);
       setError(errorMessage(err));
       setConnected(false);
       setPermission(err instanceof ApiError && [401, 403].includes(err.status));
@@ -265,6 +273,7 @@ export default function App() {
       setLoading(false);
     }
   }, []);
+
   useEffect(() => {
     let disposed = false;
     const start = () => {
@@ -312,6 +321,46 @@ export default function App() {
     window.addEventListener("keydown", keyboard);
     return () => window.removeEventListener("keydown", keyboard);
   }, [modal]);
+
+  if (loginRequired) {
+    return (
+      <main className="login-shell">
+        <form
+          className="login-card"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const form = new FormData(event.currentTarget);
+            setLoginBusy(true);
+            setLoginError("");
+            void login(String(form.get("email")), String(form.get("password")))
+              .then((value) => {
+                setIdentity(value);
+                setLoginRequired(false);
+                setLoading(true);
+                void refresh();
+              })
+              .catch((failure: unknown) => setLoginError(errorMessage(failure)))
+              .finally(() => setLoginBusy(false));
+          }}
+        >
+          <img src="/rilo.svg" alt="" />
+          <p className="eyebrow">AI agent evaluation workspace</p>
+          <h1>Sign in to Rilo</h1>
+          <p>Your evaluations, sources and reports are isolated to your account.</p>
+          {loginError && <Notice kind="error">{loginError}</Notice>}
+          <label className="field">
+            Email
+            <input name="email" type="email" autoComplete="username" required />
+          </label>
+          <label className="field">
+            Password
+            <input name="password" type="password" autoComplete="current-password" minLength={12} required />
+          </label>
+          <Button variant="primary" type="submit" busy={loginBusy}>Sign in</Button>
+        </form>
+      </main>
+    );
+  }
 
   const createdExperiment = (experiment: Experiment) => {
     setModal(null);
@@ -481,7 +530,7 @@ export default function App() {
           <span className="workspace-letter">R</span>
           <div>
             <strong>Evaluation workspace</strong>
-            <small>Local · private</small>
+            <small>{identity?.hosted ? "Hosted · private" : "Local · private"}</small>
           </div>
           <ChevronDown size={14} />
         </div>
@@ -539,19 +588,29 @@ export default function App() {
           <div className="sidebar-note">
             <div>
               <span className="small-status-dot" />
-              <strong>Runs stay on your machine</strong>
+              <strong>{identity?.hosted ? "Account-isolated workspace" : "Runs stay on your machine"}</strong>
             </div>
             <p>
-              Your workspace, evidence, and experiment history are stored
-              locally.
+              {identity?.hosted
+                ? "Your evidence and experiment history are accessible only to your account."
+                : "Your workspace, evidence, and experiment history are stored locally."}
             </p>
           </div>
           <div className="sidebar-footer">
-            <span className="avatar avatar-neutral">G</span>
+            <span className="avatar avatar-neutral">{identity?.user.name?.[0]?.toUpperCase() ?? "G"}</span>
             <div>
-              <strong>Local developer</strong>
+              <strong>{identity?.user.name ?? "Local developer"}</strong>
               <small>Rilo {version}</small>
             </div>
+            {identity?.hosted && (
+              <button
+                className="icon-button"
+                aria-label="Sign out"
+                onClick={() => void logout().finally(() => window.location.reload())}
+              >
+                <X size={17} />
+              </button>
+            )}
             <button
               className="icon-button"
               aria-label={

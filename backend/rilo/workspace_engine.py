@@ -120,6 +120,9 @@ async def prepare(store: Store, experiment: dict) -> dict:
                 "Search is off and no sources were supplied. Enable Tavily or attach source text."
             )
         snapshot = snapshots.create(task["category"], sources, metadata)
+        owner = store.object_owner("experiment", experiment["id"])
+        if owner:
+            store.claim_object("snapshot", snapshot["id"], owner)
     manifest["snapshot"] = snapshot
     max_history = max((len(json.dumps(h).encode()) for h in task["histories"].values()), default=0)
     budget = store.config.workspace_input_bytes

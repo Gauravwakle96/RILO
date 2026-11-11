@@ -4,6 +4,13 @@ Audit date: 9 November 2026. Existing project: `C:\Windows\System32\Rilo`.
 This document describes the pre-expansion code inspected during Phase 0. Historical
 verification is not used as a substitute for the fresh checks below.
 
+> Completion update — 11 November 2026: the audit below is the preserved Phase 0
+> baseline. The current implementation now includes schema version 5, paired
+> workspaces, repository/document/website ingestion, OCR, versioned suites,
+> deterministic reports, calibration fixtures, authenticated hosted mode and a
+> container/backup deployment package. See [RILO_2_IMPLEMENTATION.md](RILO_2_IMPLEMENTATION.md)
+> and [RILO_2_VERIFICATION.md](RILO_2_VERIFICATION.md) for current evidence.
+
 ## Existing architecture
 
 - React 19, TypeScript and Vite frontend. Hash navigation in `App.tsx`; reusable
