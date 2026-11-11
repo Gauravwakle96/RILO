@@ -22,6 +22,8 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Pin npm used by the hosted image
+        run: npm install --global npm@11.6.1
       - name: Install locked dependencies
         run: |
           sudo apt-get update
