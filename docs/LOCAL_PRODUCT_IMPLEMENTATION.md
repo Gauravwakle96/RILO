@@ -138,3 +138,7 @@ Final checks after the local product and provider changes:
   ZIP validation portable and exercising archive/restore with a separately created
   test conversation. The settings check includes the Bynara integration. Frontend
   lint/typecheck/build passed; the active UI shows `bynara/agnes-2.5-flash`.
+- Publication follow-up: saved conversation links now restore the selected chat
+  on reload and browser navigation, including links from Reports. Six targeted
+  browser checks passed in 21.3 seconds after this fix; lint/typecheck/build passed
+  again. These targeted results are separate from the full standard-suite totals.

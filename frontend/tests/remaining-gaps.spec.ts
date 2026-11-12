@@ -24,12 +24,53 @@ test("saved records expose retention controls with accessible layout", async ({
   await expect(page.getByRole("link", { name: title })).toHaveCount(0);
   await page.getByLabel("Show archived records").check();
   await expect(page.getByLabel("Show archived records")).toBeChecked();
-  await expect(page.getByRole("button", { name: "Restore", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Restore", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Restore", exact: true }).click();
   await expect(page.getByRole("link", { name: title })).toHaveCount(0);
   await page.getByLabel("Show archived records").uncheck();
   await expect(page.getByRole("link", { name: title })).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
+test("saved conversation links survive reload and browser navigation", async ({
+  page,
+}) => {
+  await page.goto("/#/reports");
+  await expect(
+    page.getByText("Local API connected", { exact: true }),
+  ).toBeVisible();
+  const session = await (await page.request.get("/api/v1/session")).json();
+  const title = `Conversation link acceptance ${Date.now()}`;
+  const response = await page.request.post("/api/v1/workspace/conversations", {
+    headers: { "X-CSRF-Token": session.csrf_token },
+    data: { title, category: "chat" },
+  });
+  expect(response.status()).toBe(201);
+  const conversation = await response.json();
+  await page.getByLabel("Saved record type").selectOption("conversations");
+  await page.getByLabel("Search all evaluations", { exact: true }).fill(title);
+  await page.getByRole("link", { name: title }).click();
+  await expect(page.getByLabel("Saved conversations")).toHaveValue(
+    conversation.id,
+  );
+  await expect(
+    page.getByRole("button", { name: "Export conversation", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Saved conversations")).toHaveValue(
+    conversation.id,
+  );
+  await page
+    .getByRole("button", { name: "New conversation", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#\/chat$/);
+  await expect(page.getByLabel("Saved conversations")).toHaveValue("");
+  await page.goBack();
+  await expect(page.getByLabel("Saved conversations")).toHaveValue(
+    conversation.id,
+  );
 });
 
 test("public URL investigation and local folder input are discoverable", async ({

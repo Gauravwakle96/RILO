@@ -51,6 +51,11 @@ const names: Record<Category, string> = {
   search: "Search",
 };
 
+function conversationFromLocation(category: Category): string {
+  const [route, id] = window.location.hash.replace(/^#\/?/, "").split("/");
+  return route === category && /^[a-zA-Z0-9_-]{1,80}$/.test(id || "") ? id : "";
+}
+
 function AgentResponse({
   run,
   model,
@@ -218,13 +223,28 @@ export function WorkspaceView({
   const [renameTitle, setRenameTitle] = useState("");
   const [showRename, setShowRename] = useState(false);
   const [selected, setSelected] = useState<Conversation | null>(null);
-  const [selectedId, setSelectedId] = useState("");
-  const currentSelection = useRef("");
+  const [selectedId, setSelectedId] = useState(() =>
+    conversationFromLocation(category),
+  );
+  const currentSelection = useRef(selectedId);
   const selectConversation = (id: string) => {
     currentSelection.current = id;
     setSelectedId(id);
     setSelected(null);
+    window.location.hash = `/${category}${id ? `/${id}` : ""}`;
   };
+  useEffect(() => {
+    const changed = () => {
+      const id = conversationFromLocation(category);
+      if (currentSelection.current !== id) {
+        currentSelection.current = id;
+        setSelectedId(id);
+        setSelected(null);
+      }
+    };
+    window.addEventListener("hashchange", changed);
+    return () => window.removeEventListener("hashchange", changed);
+  }, [category]);
   const [draft] = useState<Record<string, unknown>>(() => {
     try {
       const value = JSON.parse(
@@ -330,6 +350,10 @@ export function WorkspaceView({
         const value = await api<Conversation>(
           `/workspace/conversations/${requestedId}`,
         );
+        if (value.category !== category)
+          throw new Error(
+            "This conversation belongs to a different workspace. Open it from Reports.",
+          );
         if (currentSelection.current === requestedId) setSelected(value);
       }
     } catch (err) {
@@ -676,6 +700,10 @@ export function WorkspaceView({
             }}
           >
             <option value="">New conversation</option>
+            {selected &&
+              !conversations.some((item) => item.id === selected.id) && (
+                <option value={selected.id}>{selected.title}</option>
+              )}
             {conversations
               .filter((c) => c.category === category)
               .map((c) => (
