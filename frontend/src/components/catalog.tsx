@@ -57,12 +57,15 @@ export function AgentsView({
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [versionAgent, setVersionAgent] = useState<Agent | null>(null);
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState("practical");
   const [profiles, setProfiles] = useState<
     Record<
       string,
       {
         category: string;
+        catalog_group: string;
+        role: string | null;
+        example?: { category: string; task: string } | null;
         supported_tasks: string[];
         input_formats: string[];
         model_requirements: string;
@@ -98,7 +101,13 @@ export function AgentsView({
         title="Agents"
         description="Connect existing implementations. Keep their behavior and capabilities visible."
         actions={
-          <Button variant="primary" onClick={onAdd}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setCategory("custom");
+              onAdd();
+            }}
+          >
             <Plus size={16} />
             Connect agent
           </Button>
@@ -115,6 +124,8 @@ export function AgentsView({
           value={category}
           onChange={(event) => setCategory(event.target.value)}
         >
+          <option value="practical">Practical assistants</option>
+          <option value="reference">Scout &amp; Relay references</option>
           <option value="all">All agents</option>
           {[
             "chat",
@@ -135,6 +146,10 @@ export function AgentsView({
           .filter(
             (agent) =>
               category === "all" ||
+              (category === "practical" &&
+                profiles[agent.id]?.catalog_group === "practical") ||
+              (category === "reference" &&
+                profiles[agent.id]?.catalog_group === "reference") ||
               (category === "custom"
                 ? agent.kind === "http"
                 : profiles[agent.id]?.supported_tasks.includes(category)),
@@ -150,7 +165,9 @@ export function AgentsView({
                 <Badge>
                   {agent.kind === "http"
                     ? "Registered adapter"
-                    : "Included agent"}
+                    : profiles[agent.id]?.catalog_group === "practical"
+                      ? "Task assistant"
+                      : "Reference agent"}
                 </Badge>
               </div>
               <div className="agent-heading">
@@ -158,6 +175,11 @@ export function AgentsView({
                 <span className="mono">{agent.version}</span>
               </div>
               <p>{agent.description}</p>
+              {profiles[agent.id]?.example && (
+                <p className="muted">
+                  Example: {profiles[agent.id].example?.task}
+                </p>
+              )}
               <div className="agent-framework">
                 <Code2 size={15} />
                 <span>{agent.framework}</span>
@@ -219,9 +241,9 @@ export function AgentsView({
                 agent.config.workspace_categories.length > 0 ? (
                   <a
                     className="button button-ghost"
-                    href={`#/${agent.config.workspace_categories[0]}`}
+                    href={`#/${profiles[agent.id]?.example?.category || agent.config.workspace_categories[0]}?profile=${encodeURIComponent(agent.id)}`}
                   >
-                    Open {String(agent.config.workspace_categories[0])}
+                    Use assistant
                     <ArrowRight size={14} />
                   </a>
                 ) : (

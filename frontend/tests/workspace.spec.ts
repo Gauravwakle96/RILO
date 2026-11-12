@@ -431,6 +431,7 @@ test("actual catalogs, source search, referenced task, endpoint validation and s
   await page.goto("/");
   await connected(page);
   await navigate(page, "Agents");
+  await page.getByLabel("Agent category").selectOption("reference");
   await expect(
     page.getByRole("heading", { name: "Scout", exact: true }),
   ).toBeVisible();
@@ -537,6 +538,8 @@ test("registered HTTP agent version flow preserves identity and bounds its exper
     exact: true,
   });
   const name = `UI version workflow ${Date.now()}`;
+  // Registered adapters are separate from the default practical-assistant list.
+  // Select their category after closing the registration form below.
   await dialog.getByLabel("Agent name").fill(name);
   await dialog
     .getByLabel("Local run endpoint")
@@ -550,6 +553,7 @@ test("registered HTTP agent version flow preserves identity and bounds its exper
     .getByRole("button", { name: "Connect agent", exact: true })
     .click();
   const original = (await (await created).json()) as { id: string };
+  await page.getByLabel("Agent category").selectOption("custom");
   const card = page
     .locator(".agent-panel")
     .filter({ has: page.getByRole("heading", { name, exact: true }) });

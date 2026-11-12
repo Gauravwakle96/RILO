@@ -137,6 +137,40 @@ class Store:
                         "INSERT OR IGNORE INTO catalog(kind,id,data) VALUES(?,?,?)",
                         (kind, item["id"], json.dumps(item)),
                     )
+                    if kind == "agent" and item["config"].get("catalog_group") == "practical":
+                        row = connection.execute(
+                            "SELECT data FROM catalog WHERE kind='agent' AND id=?", (item["id"],)
+                        ).fetchone()
+                        previous = json.loads(row[0])
+                        prior_versions = (
+                            {"1.0.0"}
+                            if item["id"] == "customer_support"
+                            else ({"2.0.0", "2.1.0"} if item["id"] == "repo_analyst" else {"2.0.0"})
+                        )
+                        if (
+                            previous["version"] in prior_versions
+                            and previous["kind"] == item["kind"]
+                        ):
+                            # Preserve the earlier selectable version and custom execution settings.
+                            connection.execute(
+                                "INSERT OR IGNORE INTO agent_versions VALUES(?,?,?,?)",
+                                (previous["id"], previous["version"], json.dumps(previous), now()),
+                            )
+                            updated = {
+                                **item,
+                                "config": {
+                                    **item["config"],
+                                    **{
+                                        key: value
+                                        for key, value in previous["config"].items()
+                                        if key not in {"profile_instructions", "example"}
+                                    },
+                                },
+                            }
+                            connection.execute(
+                                "UPDATE catalog SET data=? WHERE kind='agent' AND id=?",
+                                (json.dumps(updated), item["id"]),
+                            )
             for row in connection.execute("SELECT data FROM catalog WHERE kind='agent'"):
                 item = json.loads(row["data"])
                 connection.execute(

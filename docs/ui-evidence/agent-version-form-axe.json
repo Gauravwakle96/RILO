@@ -10,9 +10,6 @@
         ],
         [
           ".modal-header > div > p"
-        ],
-        [
-          ".notice > div"
         ]
       ]
     }

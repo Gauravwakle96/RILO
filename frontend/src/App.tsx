@@ -38,7 +38,15 @@ import type {
   View,
   Session,
 } from "./types";
-import { api, ApiError, errorMessage, login, logout, post, session } from "./lib/api";
+import {
+  api,
+  ApiError,
+  errorMessage,
+  login,
+  logout,
+  post,
+  session,
+} from "./lib/api";
 import { active } from "./lib/format";
 import {
   AgentForm,
@@ -97,7 +105,10 @@ function savedTheme(): "dark" | "light" {
 }
 
 function currentLocation(): { view: View; experimentId: string | null } {
-  const [view, id] = window.location.hash.replace(/^#\/?/, "").split("/");
+  const [view, id] = window.location.hash
+    .split("?")[0]
+    .replace(/^#\/?/, "")
+    .split("/");
   if (view === "experiments" && id) {
     try {
       return { view: "experiments", experimentId: decodeURIComponent(id) };
@@ -346,7 +357,9 @@ export default function App() {
           <img src="/rilo.svg" alt="" />
           <p className="eyebrow">AI agent evaluation workspace</p>
           <h1>Sign in to Rilo</h1>
-          <p>Your evaluations, sources and reports are isolated to your account.</p>
+          <p>
+            Your evaluations, sources and reports are isolated to your account.
+          </p>
           {loginError && <Notice kind="error">{loginError}</Notice>}
           <label className="field">
             Email
@@ -354,9 +367,17 @@ export default function App() {
           </label>
           <label className="field">
             Password
-            <input name="password" type="password" autoComplete="current-password" minLength={12} required />
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              minLength={12}
+              required
+            />
           </label>
-          <Button variant="primary" type="submit" busy={loginBusy}>Sign in</Button>
+          <Button variant="primary" type="submit" busy={loginBusy}>
+            Sign in
+          </Button>
         </form>
       </main>
     );
@@ -530,7 +551,9 @@ export default function App() {
           <span className="workspace-letter">R</span>
           <div>
             <strong>Evaluation workspace</strong>
-            <small>{identity?.hosted ? "Hosted · private" : "Local · private"}</small>
+            <small>
+              {identity?.hosted ? "Hosted · private" : "Local · private"}
+            </small>
           </div>
           <ChevronDown size={14} />
         </div>
@@ -588,7 +611,11 @@ export default function App() {
           <div className="sidebar-note">
             <div>
               <span className="small-status-dot" />
-              <strong>{identity?.hosted ? "Account-isolated workspace" : "Runs stay on your machine"}</strong>
+              <strong>
+                {identity?.hosted
+                  ? "Account-isolated workspace"
+                  : "Runs stay on your machine"}
+              </strong>
             </div>
             <p>
               {identity?.hosted
@@ -597,7 +624,9 @@ export default function App() {
             </p>
           </div>
           <div className="sidebar-footer">
-            <span className="avatar avatar-neutral">{identity?.user.name?.[0]?.toUpperCase() ?? "G"}</span>
+            <span className="avatar avatar-neutral">
+              {identity?.user.name?.[0]?.toUpperCase() ?? "G"}
+            </span>
             <div>
               <strong>{identity?.user.name ?? "Local developer"}</strong>
               <small>Rilo {version}</small>
@@ -606,7 +635,9 @@ export default function App() {
               <button
                 className="icon-button"
                 aria-label="Sign out"
-                onClick={() => void logout().finally(() => window.location.reload())}
+                onClick={() =>
+                  void logout().finally(() => window.location.reload())
+                }
               >
                 <X size={17} />
               </button>

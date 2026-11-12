@@ -52,8 +52,31 @@ const names: Record<Category, string> = {
 };
 
 function conversationFromLocation(category: Category): string {
-  const [route, id] = window.location.hash.replace(/^#\/?/, "").split("/");
+  const [route, id] = window.location.hash
+    .split("?")[0]
+    .replace(/^#\/?/, "")
+    .split("/");
   return route === category && /^[a-zA-Z0-9_-]{1,80}$/.test(id || "") ? id : "";
+}
+
+interface ProfileExample {
+  category: Category;
+  task: string;
+  source_text?: string;
+  url?: string;
+  checks: TaskCheck[];
+}
+
+function initialProfile(category: Category, catalog: Catalog): string {
+  const requested = new URLSearchParams(
+    window.location.hash.split("?")[1] || "",
+  ).get("profile");
+  const agent = catalog.agents.find((item) => item.id === requested);
+  return agent &&
+    Array.isArray(agent.config.workspace_categories) &&
+    agent.config.workspace_categories.includes(category)
+    ? agent.id
+    : "scout";
 }
 
 function AgentResponse({
@@ -282,7 +305,7 @@ export function WorkspaceView({
   const [retriesB, setRetriesB] = useState("");
   const [sourceReferences, setSourceReferences] = useState<string[]>([]);
   const [uploads, setUploads] = useState<{ id: string; name: string }[]>([]);
-  const [agentA, setAgentA] = useState("scout");
+  const [agentA, setAgentA] = useState(() => initialProfile(category, catalog));
   const [agentB, setAgentB] = useState("relay");
   const [search, setSearch] = useState<"off" | "tavily">("off");
   const [busy, setBusy] = useState(false);
@@ -297,6 +320,9 @@ export function WorkspaceView({
   const [semanticReview, setSemanticReview] = useState(false);
   const [checks, setChecks] = useState<TaskCheck[]>([]);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const example = catalog.agents.find((agent) => agent.id === agentA)?.config
+    .example as unknown as ProfileExample | undefined;
+  const [exampleLoaded, setExampleLoaded] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
@@ -987,6 +1013,47 @@ export function WorkspaceView({
           </label>
         )}
         {!selected && (
+          <section className="panel padded-panel">
+            <h3>Try a practical task</h3>
+            <p className="muted">
+              Choose an assistant below. Compare it with Relay, or use the same
+              assistant on both sides with different models or instructions.
+            </p>
+            {example?.category === category && (
+              <Button
+                type="button"
+                variant="teal"
+                onClick={() => {
+                  setMessage(example.task);
+                  setContext(example.source_text || "");
+                  setUrl(example.url || "");
+                  setUploads([]);
+                  setSourceReferences([]);
+                  setChecks(
+                    example.checks.map((check) => ({
+                      ...check,
+                      target: check.target || "summary",
+                    })),
+                  );
+                  setSearch("off");
+                  setExampleLoaded(true);
+                }}
+              >
+                Load {catalog.agents.find((agent) => agent.id === agentA)?.name}{" "}
+                example
+              </Button>
+            )}
+            {exampleLoaded && (
+              <p className="muted">
+                Editable example loaded; nothing has been sent. Policy and
+                release notes are synthetic examples. Repository examples
+                retrieve an actual public repository. Checks measure the stated
+                requirements and reference validity, not general accuracy.
+              </p>
+            )}
+          </section>
+        )}
+        {!selected && (
           <div className="workspace-controls">
             {[
               ["Agent A", agentA, setAgentA],
@@ -995,6 +1062,7 @@ export function WorkspaceView({
               <label className="field" key={label as string}>
                 {label as string}
                 <select
+                  aria-label={label as string}
                   value={value as string}
                   onChange={(event) =>
                     (setter as (value: string) => void)(event.target.value)

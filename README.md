@@ -64,7 +64,7 @@ Rilo's contribution is the combination of **controlled agent failures, independe
 | **Website** | Capture a bounded set of public pages with robots.txt, DNS and redirect checks. A site with no readable body produces an actionable capture error. |
 | **Search** | Compare research on supplied sources or explicitly enable Tavily for a shared live search. Search is off by default. |
 
-Scout is the concise baseline; Relay adds bounded recovery. Web, Repo and Document Analyst profiles specialize the same engine. Custom HTTP agents support the original research contract and, when explicitly registered with compatible workspace-v1 tasks, paired workspaces. Internal usage remains unknown unless observed by Rilo.
+Scout is the concise baseline; Relay adds bounded recovery. Research, Coding, Document and Customer Support Assistant profiles specialize the same engine. Custom HTTP agents support the original research contract and, when explicitly registered with compatible workspace-v1 tasks, paired workspaces. Internal usage remains unknown unless observed by Rilo.
 
 ### A real repository recovery case study
 
@@ -178,6 +178,29 @@ Large uploads and source objects live in the ignored `.rilo/` directory, with me
 
 ## Configuration and developer automation
 
+### Practical assistants
+
+Agents opens with four focused profiles, all using the same paired execution,
+captured evidence and report infrastructure:
+
+| Assistant | Useful work | Boundary |
+| --- | --- | --- |
+| Customer Support | Draft a reply from supplied policies and flag human review | Does not send replies, access accounts or process refunds |
+| Document | Answer knowledge questions, find clauses and compare passages | Analyzes selected passages; pages must come from the captured document |
+| Coding | Explain repositories and review requested code issues | Suggests changes as text; tests require the opt-in isolated runner |
+| Research | Compare pages, dates and conflicting source statements | Public URLs work directly; web discovery requires optional search |
+
+Select **Use assistant**, then **Load example** to populate an editable task,
+source and explicit success checks. Policy/release examples are labeled synthetic;
+the coding example retrieves a real public GitHub repository. Loading does not
+dispatch work. Scout and Relay remain available under reference agents, and
+registered local adapters have their own category. Developers can put the same
+assistant in both slots and compare its models, prompts or versions.
+
+These are Rilo profiles powered by the selected model, not integrations with
+commercial help desks or coding products. Previous analyst IDs and version 2.0.0
+records are retained; new tasks use the updated versioned profiles.
+
 Use [.env.example](.env.example) as the reference. Keep credentials in private `.env`, which is excluded from Git.
 
 | Setting | Purpose |
@@ -267,10 +290,11 @@ The CLI comparison exits `0` for pass, `1` for a measured regression and `2` for
 
 ## Verification and boundaries
 
-The **12 November 2026 local delivery verification** records **242 passing Python
-tests with 83% coverage**, **24 passing standard browser tests with 8 explicit skips**,
+The **12 November 2026 practical-agent verification** records **252 passing Python
+tests with 83% coverage**, **27 passing standard browser tests with 8 explicit skips**,
 build, typing, lint and dependency checks in
-[LOCAL_PRODUCT_IMPLEMENTATION.md](docs/LOCAL_PRODUCT_IMPLEMENTATION.md).
+[PRACTICAL_AGENTS.md](docs/PRACTICAL_AGENTS.md), alongside the earlier
+[local product implementation](docs/LOCAL_PRODUCT_IMPLEMENTATION.md).
 These are dated checks, not a guarantee of error-free behavior; the badge above
 links to the current GitHub workflow.
 

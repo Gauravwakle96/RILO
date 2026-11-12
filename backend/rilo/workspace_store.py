@@ -70,9 +70,14 @@ def profiles(store: Store) -> list[dict]:
             {
                 **item,
                 "category": tasks[0] if len(tasks) == 1 else "general" if builtin else "custom",
+                "catalog_group": item["config"].get(
+                    "catalog_group", "reference" if builtin else "custom"
+                ),
+                "role": item["config"].get("role"),
+                "example": item["config"].get("example"),
                 "supported_tasks": tasks,
                 "input_formats": sorted({format for task in tasks for format in formats[task]}),
-                "model_requirements": "JSON-capable chat model via Bifrost"
+                "model_requirements": "JSON-capable chat model: local Bifrost/Ollama or a configured optional provider"
                 if builtin
                 else "Local HTTP workspace-v1"
                 if tasks
@@ -86,6 +91,7 @@ def profiles(store: Store) -> list[dict]:
                 "limitations": [
                     "Interpretations require independent verification",
                     "No arbitrary host code execution",
+                    *item["config"].get("limitations", []),
                 ]
                 if builtin
                 else ["Only final output observed; remote cancellation is not guaranteed"],

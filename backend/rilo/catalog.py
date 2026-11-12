@@ -15,7 +15,7 @@ CAPABILITIES = [
     "controlled_evidence",
     "cancellation",
 ]
-AGENTS = [
+AGENTS: list[dict[str, Any]] = [
     {
         "id": "scout",
         "name": "Scout",
@@ -38,36 +38,181 @@ AGENTS = [
     },
     {
         "id": "web_analyst",
-        "name": "Web Analyst",
-        "description": "Analyzes captured public pages with source citations and bounded recovery.",
+        "name": "Research Assistant",
+        "description": "Compares captured pages and research sources, identifies conflicting information and cites supporting passages.",
         "framework": "LangGraph task profile",
         "kind": "graph",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "capabilities": ["website_analysis", "source_citations"],
-        "config": {"workspace_categories": ["website", "search"], "retries": 1},
+        "config": {
+            "workspace_categories": ["website", "search"],
+            "retries": 1,
+            "role": "research",
+            "catalog_group": "practical",
+            "profile_instructions": "Compare source identity, dates and conflicting statements. Distinguish publication dates from retrieval dates. Report missing dates and weak coverage. Cite exact supplied passages. Never claim live search unless Rilo supplied search results.",
+            "limitations": [
+                "Search discovery requires an optional configured provider; supplied URLs and source text do not",
+                "Bounded captured passages may omit relevant sources",
+            ],
+            "example": {
+                "category": "search",
+                "task": "Compare the release dates in the two supplied source notes. Explain the disagreement; do not claim a live search.",
+                "source_text": "Synthetic release notes for this editable example. Announcement: Atlas was released on 2 November 2026. Documentation: Atlas was released on 5 November 2026. These notes disagree; no independent release record is supplied.",
+                "checks": [
+                    {
+                        "id": "release_date_a",
+                        "name": "Includes first source date",
+                        "type": "icontains",
+                        "value": "2 November 2026",
+                    },
+                    {
+                        "id": "release_date_b",
+                        "name": "Includes conflicting date",
+                        "type": "icontains",
+                        "value": "5 November 2026",
+                    },
+                    {
+                        "id": "references",
+                        "name": "Findings cite captured passages",
+                        "type": "citations-valid",
+                    },
+                ],
+            },
+        },
     },
     {
         "id": "repo_analyst",
-        "name": "Repo Analyst",
-        "description": "Reviews captured repository files, architecture and static observations with exact file references.",
+        "name": "Coding Assistant",
+        "description": "Explains captured repository architecture and reviews requested code problems with file and line evidence.",
         "framework": "LangGraph task profile",
         "kind": "graph",
-        "version": "2.0.0",
+        "version": "2.1.1",
         "capabilities": ["repository_analysis", "file_citations"],
-        "config": {"workspace_categories": ["repository"], "retries": 1},
+        "config": {
+            "workspace_categories": ["repository"],
+            "retries": 1,
+            "role": "coding",
+            "catalog_group": "practical",
+            "profile_instructions": "Explain the project's purpose and captured architecture. Review security only when requested. Cite short exact captured code quotations, preserving whitespace and comment prefixes. Put coverage limitations in summary; coverage metadata is not a file quotation. Propose fixes as text. Distinguish static concerns from executed tests. Never claim a test, installation, patch or exploit ran unless its recorded result is supplied.",
+            "limitations": [
+                "Reviews a bounded repository snapshot, not every file",
+                "Code changes are suggestions; execution requires Rilo's opt-in isolated test runner",
+            ],
+            "example": {
+                "category": "repository",
+                "task": "Explain this repository's purpose and one captured implementation detail. Return at most two findings, each with one short exact quotation copied from a single source line. Preserve comment prefixes and whitespace. Put coverage limits in summary, not findings.",
+                "url": "https://github.com/pallets/itsdangerous",
+                "checks": [
+                    {
+                        "id": "findings",
+                        "name": "Returns source-backed findings",
+                        "type": "has-findings",
+                    },
+                    {
+                        "id": "references",
+                        "name": "Findings cite captured file passages",
+                        "type": "citations-valid",
+                    },
+                ],
+            },
+        },
     },
     {
         "id": "document_analyst",
-        "name": "Document Analyst",
-        "description": "Answers from text documents and PDF pages with captured supporting passages.",
+        "name": "Document Assistant",
+        "description": "Answers knowledge questions, finds clauses and compares document passages with captured page or source references.",
         "framework": "LangGraph task profile",
         "kind": "graph",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "capabilities": ["document_analysis", "page_citations"],
-        "config": {"workspace_categories": ["documents", "chat"], "retries": 1},
+        "config": {
+            "workspace_categories": ["documents", "chat"],
+            "retries": 1,
+            "role": "documents",
+            "catalog_group": "practical",
+            "profile_instructions": "Answer knowledge questions from supplied document passages. Quote the relevant clause and qualify exceptions. Compare conflicting passages when asked. If the answer is absent, say the supplied material does not establish it. Never invent pages or assume unselected passages were read.",
+            "limitations": [
+                "Retrieval selects bounded passages; this is not an exhaustive enterprise knowledge index",
+                "Page references exist only when captured from paged documents",
+            ],
+            "example": {
+                "category": "chat",
+                "task": "What is the retention period in the supplied policy? Quote the supporting sentence and explain the stated exception.",
+                "source_text": "Synthetic policy for this editable example. Audit records are retained for 30 days. A legal hold suspends routine deletion until the hold is released.",
+                "checks": [
+                    {
+                        "id": "retention",
+                        "name": "Reports the stated retention period",
+                        "type": "icontains",
+                        "value": "30 days",
+                    },
+                    {
+                        "id": "exception",
+                        "name": "Includes the stated exception",
+                        "type": "icontains",
+                        "value": "legal hold",
+                    },
+                    {
+                        "id": "references",
+                        "name": "Findings cite captured clauses",
+                        "type": "citations-valid",
+                    },
+                ],
+            },
+        },
+    },
+    {
+        "id": "customer_support",
+        "name": "Customer Support Assistant",
+        "description": "Drafts policy-grounded customer replies and flags requests needing a human decision without promising account actions.",
+        "framework": "LangGraph task profile",
+        "kind": "graph",
+        "version": "1.0.1",
+        "capabilities": ["policy_answers", "source_citations", "escalation_recommendations"],
+        "config": {
+            "workspace_categories": ["chat", "documents"],
+            "retries": 1,
+            "role": "support",
+            "catalog_group": "practical",
+            "profile_instructions": "Draft a helpful customer reply in summary using only supplied support policies. State the applicable policy limit in the reply, not only in findings. If the request is outside policy, ambiguous, or the answer is absent, include NEEDS HUMAN SUPPORT and say human review is needed. This is a draft: never imply a review, escalation or account action has already happened. Do not invent exceptions, collect passwords, or claim to issue refunds, access accounts or open tickets. Cite policy passages where available.",
+            "limitations": [
+                "Drafts replies and escalation recommendations; does not send messages, issue refunds or operate a help desk",
+                "Requires supplied policies to establish product-specific answers",
+            ],
+            "example": {
+                "category": "chat",
+                "task": "A customer requests a refund 45 days after purchase. Draft a concise reply explaining the 30 days policy window. Include NEEDS HUMAN SUPPORT because human review is needed. Do not promise a refund or imply review has already started.",
+                "source_text": "Synthetic store policy for this editable example. Refunds are available within 30 days of purchase. Requests outside this window require a human support review. The assistant cannot process refunds or access customer accounts.",
+                "checks": [
+                    {
+                        "id": "policy",
+                        "name": "Uses the stated policy window",
+                        "type": "icontains",
+                        "value": "30 days",
+                    },
+                    {
+                        "id": "escalation",
+                        "name": "Flags the required human review",
+                        "type": "contains",
+                        "value": "NEEDS HUMAN SUPPORT",
+                    },
+                    {
+                        "id": "no_started_review",
+                        "name": "Does not claim review is underway",
+                        "type": "not-icontains",
+                        "value": "being reviewed",
+                    },
+                    {
+                        "id": "references",
+                        "name": "Findings cite captured policies",
+                        "type": "citations-valid",
+                    },
+                ],
+            },
+        },
     },
 ]
-SCENARIOS = [
+SCENARIOS: list[dict[str, Any]] = [
     {
         "id": "normal",
         "name": "Normal conditions",
@@ -111,7 +256,7 @@ def source(
     }
 
 
-SOURCES = [
+SOURCES: list[dict[str, Any]] = [
     source(
         "aurora_launch",
         "Aurora Labs launches Beacon",
@@ -189,7 +334,7 @@ SOURCES = [
     ),
 ]
 
-TASKS = [
+TASKS: list[dict[str, Any]] = [
     {
         "id": "company_brief",
         "title": "Recent company briefing",

@@ -189,7 +189,7 @@ async def prepare(store: Store, experiment: dict) -> dict:
 def generation_messages(manifest: dict, agent: dict) -> list[dict]:
     task = manifest["workspace"]
     robust = agent["kind"] == "graph"
-    specialty = {
+    specialty = agent["config"].get("profile_instructions") or {
         "web_analyst": "Focus on source identity, page dates and differences across pages.",
         "repo_analyst": "For repository overviews, explain the project's purpose and captured architecture. Only look for vulnerabilities if the user's task asks for security analysis. Static evidence is not proof of exploitability.",
         "document_analyst": "Focus on passages, clauses and contradictions. Never invent pages.",
@@ -218,7 +218,9 @@ def generation_messages(manifest: dict, agent: dict) -> list[dict]:
             "role": "system",
             "content": SYSTEM
             + identity
+            + "\n"
             + specialty
+            + "\n"
             + agent["config"].get("instructions", "")
             + (
                 " Check evidence carefully, qualify interpretations and explicitly report missing evidence."
@@ -341,19 +343,35 @@ async def invoke(context: RunContext, manifest: dict, agent: dict) -> WorkspaceO
                 output = WorkspaceOutput.model_validate_json(
                     re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
                 )
-                if manifest["sources"] and any(
+                citation_checks = (
+                    verify(output, manifest["sources"]) if manifest["sources"] else None
+                )
+                invalid_citations = citation_checks and any(
+                    not citation["valid"]
+                    for finding in citation_checks["findings"]
+                    for citation in finding["verification"]["citations"]
+                )
+                missing_citations = manifest["sources"] and any(
                     not finding.citations for finding in output.findings
-                ):
+                )
+                if missing_citations or invalid_citations:
                     context.event(
                         "citation_warning",
-                        "Response omitted supporting citations",
+                        "Response has missing or invalid supporting citations",
                         {"attempt": attempt + 1, "output": output.model_dump()},
                     )
                     if attempt + 1 < attempts:
                         messages[-1]["content"] += (
-                            "\nEach finding needs a supplied source_id and exact quote. Omit findings you cannot cite. Answer the original task."
+                            "\nRepair missing/invalid citations: copy short exact source lines, including whitespace/prefixes. Put coverage limits in summary."
                         )
-                        context.event("recovery", "Retry missing citations", {"bounded_retries": 1})
+                        context.event(
+                            "recovery",
+                            "Retry invalid or missing citations",
+                            {
+                                "bounded_retries": 1,
+                                "verification_method": "independent deterministic source matching",
+                            },
+                        )
                         continue
                 context.event("synthesis", "Response recorded", {"output": output.model_dump()})
                 return output

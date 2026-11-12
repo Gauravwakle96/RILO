@@ -142,3 +142,14 @@ Final checks after the local product and provider changes:
   on reload and browser navigation, including links from Reports. Six targeted
   browser checks passed in 21.3 seconds after this fix; lint/typecheck/build passed
   again. These targeted results are separate from the full standard-suite totals.
+
+## Practical assistant follow-up
+
+The four focused Support, Document, Coding and Research profiles reuse the same
+execution and evidence engine. The three existing analysts are upgraded under
+their stable IDs; earlier versions and custom configuration remain selectable.
+Agents now groups practical, reference and registered HTTP agents separately and
+links to editable task examples. See [PRACTICAL_AGENTS.md](PRACTICAL_AGENTS.md)
+for the updated 252-test backend and 27-test browser verification, live model
+results and retained answer-quality failures. These dated checks supersede the
+earlier suite totals above without changing historical evaluation records.
