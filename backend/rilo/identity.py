@@ -39,7 +39,12 @@ def password_hash(password: str) -> str:
         raise ValueError("Password must contain 12 to 256 characters.")
     salt = secrets.token_bytes(16)
     value = hashlib.scrypt(password.encode(), salt=salt, n=2**14, r=8, p=1, dklen=32)
-    return "scrypt$16384$" + base64.urlsafe_b64encode(salt).decode() + "$" + base64.urlsafe_b64encode(value).decode()
+    return (
+        "scrypt$16384$"
+        + base64.urlsafe_b64encode(salt).decode()
+        + "$"
+        + base64.urlsafe_b64encode(value).decode()
+    )
 
 
 def verify_password(password: str, encoded: str) -> bool:

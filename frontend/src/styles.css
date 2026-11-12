@@ -8,6 +8,9 @@
 }
 
 :root {
+  --violet: #b9a2ff;
+  --violet-soft: #302447;
+  --teal: #74e0ce;
   font-family: "Inter Variable", Inter, system-ui, sans-serif;
   color: #f0f2f7;
   background: #111318;
@@ -35,6 +38,9 @@
   color-scheme: dark;
 }
 :root[data-theme="light"] {
+  --violet: #6940b3;
+  --violet-soft: #f0e9ff;
+  --teal: #147263;
   color: #202735;
   background: #f6f7f9;
   --canvas: #f6f7f9;
@@ -263,17 +269,30 @@ code {
   background: #345ccb;
 }
 .button-secondary {
-  background: var(--raised);
-  border-color: var(--border);
-  color: var(--text);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent-hover) 40%, var(--border));
+  color: var(--accent-hover);
+  transition: border-color 0.15s;
 }
 .button-secondary:hover {
-  background: var(--hover);
+  background: var(--accent-soft);
   border-color: var(--strong-border);
 }
 .button-ghost {
   color: var(--muted);
 }
+.button-violet { background: var(--violet-soft); color: var(--violet); border-color: var(--violet); }
+.button-teal { background: var(--green-soft); color: var(--teal); border-color: var(--teal); }
+.button-violet:hover, .button-teal:hover { filter: brightness(1.12); }
+.slot-configuration { border: 1px solid var(--border); padding: 16px; border-radius: 10px; }
+.slot-configuration summary { color: var(--violet); margin-bottom: 12px; cursor: pointer; font-weight: 600; }
+.product-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.product-toolbar input { flex: 1; min-width: 170px; }
+.storage-meters { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 16px; margin: 16px 0; }
+.storage-meters div { padding: 14px; background: var(--raised); border-radius: 10px; }
+.storage-meters strong, .storage-meters small { display: block; }
+.setup-steps { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.setup-steps span { border-radius: 8px; padding: 12px; background: var(--accent-soft); color: var(--accent-hover); }
 .button-ghost:hover {
   background: var(--hover);
   color: var(--text);
@@ -3967,4 +3986,11 @@ progress::-webkit-progress-value {
   .workspace-stat-grid > section {
     padding: 18px;
   }
+}
+:root .source-inspector pre {
+  max-height: 340px;
+  overflow: auto;
+  padding: 14px;
+  white-space: pre;
+  font-size: 12px;
 }

@@ -1,7 +1,9 @@
 param(
     [int]$Port = 8018,
     [switch]$SkipBuild,
-    [switch]$Gateway
+    [switch]$Gateway,
+    [switch]$Update,
+    [switch]$NoBrowser
 )
 $ErrorActionPreference = 'Stop'
 $riloProjectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -10,12 +12,16 @@ Set-Location -LiteralPath $riloProjectRoot
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
     throw 'Install uv first: https://docs.astral.sh/uv/getting-started/installation/'
 }
-uv sync --locked
-if ($LASTEXITCODE -ne 0) { throw 'Python dependency setup failed.' }
-npm ci --prefix backend/rilo/promptfoo_runtime --no-fund
-if ($LASTEXITCODE -ne 0) { throw 'Promptfoo assertion engine setup failed.' }
+if ($Update -or -not (Test-Path -LiteralPath '.venv')) {
+    uv sync --locked
+    if ($LASTEXITCODE -ne 0) { throw 'Python dependency setup failed.' }
+}
+if ($Update -or -not (Test-Path -LiteralPath 'backend/rilo/promptfoo_runtime/node_modules/promptfoo/package.json')) {
+    npm ci --prefix backend/rilo/promptfoo_runtime --no-fund
+    if ($LASTEXITCODE -ne 0) { throw 'Promptfoo assertion engine setup failed.' }
+}
 
-if (-not $SkipBuild) {
+if (-not $SkipBuild -and ($Update -or -not (Test-Path -LiteralPath 'frontend/dist/index.html'))) {
     npm ci --prefix frontend
     if ($LASTEXITCODE -ne 0) { throw 'Frontend dependency setup failed.' }
     npm run build --prefix frontend
@@ -41,7 +47,8 @@ if ($Gateway) {
     }
 }
 try {
-    uv run rilo serve --port $Port
+    if ($NoBrowser) { uv run --no-sync rilo serve --port $Port }
+    else { uv run --no-sync rilo serve --port $Port --open }
 } finally {
     if ($riloGatewayProcess -and -not $riloGatewayProcess.HasExited) {
         taskkill /PID $riloGatewayProcess.Id /T /F 2>$null | Out-Null

@@ -233,6 +233,7 @@ async def github_repository(
     *,
     file_limit: int = 200,
     byte_limit: int = 12_000_000,
+    ref: str | None = None,
 ) -> tuple[list[dict], dict]:
     public_url(url)
     parsed = urlsplit(url)
@@ -266,13 +267,17 @@ async def github_repository(
     except ValueError:
         if token:
             raise
+        if ref:
+            raise ValueError(
+                "GitHub API unavailable for the requested revision. Upload a ZIP captured at that revision."
+            ) from None
         return await public_git_archive(owner, name)
     branch = repo.get("default_branch")
     if not isinstance(branch, str):
         raise ValueError("GitHub did not return a default branch.")
     from urllib.parse import quote
 
-    commit = await request("/commits/" + quote(branch, safe=""))
+    commit = await request("/commits/" + quote(ref or branch, safe=""))
     sha = commit.get("sha", "")
     if not re.fullmatch(r"[a-f0-9]{40}", sha):
         raise ValueError("GitHub did not return a valid commit SHA.")
@@ -451,6 +456,8 @@ async def public_git_archive(owner: str, name: str) -> tuple[list[dict], dict]:
 
 async def ingest(store: Store, task: dict) -> tuple[list[dict], dict]:
     inputs = task["inputs"]
+    if inputs.get("url") or inputs.get("dependency_advisories"):
+        store.config.require_connected("external source retrieval")
     if task["category"] == "repository":
         if inputs.get("url"):
             sources, metadata = await github_repository(
@@ -458,6 +465,7 @@ async def ingest(store: Store, task: dict) -> tuple[list[dict], dict]:
                 store.config.github_key,
                 file_limit=store.config.repository_file_limit,
                 byte_limit=store.config.repository_byte_limit,
+                **({"ref": inputs["repository_ref"]} if inputs.get("repository_ref") else {}),
             )
         elif len(inputs["upload_ids"]) == 1:
             item, data = load_upload(store, inputs["upload_ids"][0])
@@ -488,9 +496,20 @@ async def ingest(store: Store, task: dict) -> tuple[list[dict], dict]:
     if task["category"] == "documents" or inputs["upload_ids"]:
         from .documents import extract_documents
 
-        return await extract_documents(store, inputs["upload_ids"])
-    if task["category"] == "website":
+        sources, metadata = await extract_documents(store, inputs["upload_ids"])
+        if inputs.get("url"):
+            from .websites import crawl
+
+            store.config.require_connected("website retrieval")
+            pages, website_metadata = await crawl(
+                inputs["url"], inputs["max_pages"], inputs["max_depth"]
+            )
+            sources.extend(pages)
+            metadata["website"] = website_metadata
+        return sources, metadata
+    if task["category"] == "website" or inputs.get("url"):
         from .websites import crawl
 
+        store.config.require_connected("website retrieval")
         return await crawl(inputs["url"], inputs["max_pages"], inputs["max_depth"])
     raise ValueError("This input type is not supported in the selected workspace.")

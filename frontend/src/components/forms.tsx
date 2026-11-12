@@ -432,6 +432,7 @@ export function AgentForm({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [endpoint, setEndpoint] = useState("http://127.0.0.1:9000/run");
+  const [protocol, setProtocol] = useState("research-v1");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const submit = async (event: FormEvent) => {
@@ -445,6 +446,7 @@ export function AgentForm({
           description,
           kind: "http",
           endpoint,
+          protocol,
         }),
       );
     } catch (err) {
@@ -495,6 +497,7 @@ export function AgentForm({
             Use an explicitly registered loopback endpoint. Trace and fault
             support depend on the adapter’s declared capabilities.
           </Notice>
+          <label className="field">Agent protocol<select value={protocol} onChange={e => setProtocol(e.target.value)}><option value="research-v1">Research benchmark adapter</option><option value="workspace-v1">Paired workspace adapter</option></select><small>Workspace adapters receive task, evidence and their own history; return summary and findings.</small></label>
         </div>
         <div className="modal-footer">
           <span className="subtle">HTTP adapter</span>

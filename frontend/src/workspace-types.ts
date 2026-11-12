@@ -9,7 +9,11 @@ export interface TaskCheck {
     | "icontains"
     | "not-contains"
     | "not-icontains"
-    | "is-json";
+    | "is-json"
+    | "json-field-equals"
+    | "max-length"
+    | "citations-valid"
+    | "has-findings";
   value: string | null;
   target: "summary" | "response";
 }
@@ -69,6 +73,16 @@ export type WorkspaceRun = RunDetail & {
   };
 };
 export interface Conversation {
+  continuation?: { source_conversation_id: string; method: string };
+  slots?: {
+    agent_id: string;
+    version?: string;
+    model?: string;
+    instructions?: string;
+    temperature?: number;
+    max_retries?: number | null;
+  }[];
+  execution_agents?: { id: string; name: string; config: { model?: string } }[];
   id: string;
   title: string;
   category: Category;

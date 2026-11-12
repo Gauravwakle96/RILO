@@ -101,6 +101,7 @@ class UserCreateRequest(LoginRequest):
     name: str = Field(min_length=1, max_length=100)
     role: str = Field(default="member", pattern="^(admin|member)$")
 
+
 DOCS_JS = """
 "use strict";
 (() => {
@@ -249,7 +250,9 @@ def create_app(config: Config | None = None) -> FastAPI:
     settings = config or Config.load()
     store = Store(settings)
     origins = (
-        set(settings.allowed_origins_override) if settings.hosted else allowed_origins(settings.port)
+        set(settings.allowed_origins_override)
+        if settings.hosted
+        else allowed_origins(settings.port)
     )
     trusted_hosts = (
         set(settings.allowed_hosts)
@@ -375,15 +378,15 @@ def create_app(config: Config | None = None) -> FastAPI:
             request.state.user = None
             if not public_auth:
                 auth = request.headers.get("authorization", "")
-                bearer = not settings.hosted and auth.startswith("Bearer ") and hmac.compare_digest(
-                    auth[7:], settings.session_key
+                bearer = (
+                    not settings.hosted
+                    and auth.startswith("Bearer ")
+                    and hmac.compare_digest(auth[7:], settings.session_key)
                 )
                 cookie = request.cookies.get("rilo_session", "")
                 if settings.hosted:
                     persisted = store.auth_session(cookie)
-                    cookie_session = (
-                        (persisted[1], time.time() + 60) if persisted else None
-                    )
+                    cookie_session = (persisted[1], time.time() + 60) if persisted else None
                     if persisted:
                         request.state.user = persisted[0]
                 else:
@@ -565,7 +568,9 @@ def create_app(config: Config | None = None) -> FastAPI:
         if settings.hosted:
             store.revoke_auth_session(request.cookies.get("rilo_session", ""))
         response = Response(status_code=204)
-        response.delete_cookie("rilo_session", httponly=True, samesite="strict", secure=settings.hosted)
+        response.delete_cookie(
+            "rilo_session", httponly=True, samesite="strict", secure=settings.hosted
+        )
         return response
 
     @app.get("/api/v1/users")
@@ -596,7 +601,13 @@ def create_app(config: Config | None = None) -> FastAPI:
                 "kind": "http",
                 "version": payload.version,
                 "capabilities": ["final_output"],
-                "config": {"endpoint": payload.endpoint},
+                "config": {
+                    "endpoint": payload.endpoint,
+                    "protocol": payload.protocol,
+                    "workspace_categories": ["chat", "repository", "documents", "website", "search"]
+                    if payload.protocol == "workspace-v1"
+                    else [],
+                },
             },
         )
 
@@ -711,6 +722,30 @@ def create_app(config: Config | None = None) -> FastAPI:
         return {
             "bifrost": {**bifrost, "credential_configured": bool(settings.bifrost_key)},
             "ollama": ollama,
+            "bynara": {
+                "status": "offline"
+                if settings.offline
+                else "configured"
+                if settings.bynara_key
+                else "not_configured",
+                "configured": bool(settings.bynara_key),
+                "detail": "Use bynara/agnes-2.5-flash or an available provider model ID. Test inference validates the selected model; the provider may charge for usage."
+                if settings.bynara_key
+                else "Optional external inference: set BYNARA_API_KEY privately and restart Rilo.",
+            },
+            "agentrouter": {
+                "status": "offline"
+                if settings.offline
+                else "configured"
+                if settings.agentrouter_key
+                else "not_configured",
+                "configured": bool(settings.agentrouter_key),
+                "detail": "External inference is disabled by Offline mode."
+                if settings.offline
+                else "Private credential saved. Use Test inference with agentrouter/model to validate account access; configured does not mean authenticated."
+                if settings.agentrouter_key
+                else "Optional external inference: set AGENTROUTER_API_KEY in the private .env and restart Rilo.",
+            },
             "tavily": {
                 "status": "configured" if settings.tavily_key else "not_configured",
                 "configured": bool(settings.tavily_key),
@@ -726,6 +761,9 @@ def create_app(config: Config | None = None) -> FastAPI:
             "config": {
                 "bifrost_url": settings.bifrost_url,
                 "model": settings.model,
+                "offline": settings.offline,
+                "agentrouter_configured": bool(settings.agentrouter_key),
+                "bynara_configured": bool(settings.bynara_key),
                 "tavily_credit_limit": settings.tavily_credit_limit,
             },
             "integrations": await integrations(),
@@ -733,6 +771,8 @@ def create_app(config: Config | None = None) -> FastAPI:
 
     @app.patch("/api/v1/settings")
     async def save_settings(payload: SettingsUpdate) -> dict:
+        if payload.offline is not None:
+            settings.offline = payload.offline
         settings.save(payload.bifrost_url or settings.bifrost_url, payload.model or settings.model)
         return await get_settings()
 

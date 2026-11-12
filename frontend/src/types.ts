@@ -73,11 +73,19 @@ export interface Integration {
   models?: string[];
 }
 export interface Settings {
-  config: { bifrost_url: string; model: string };
+  config: {
+    bifrost_url: string;
+    model: string;
+    offline?: boolean;
+    agentrouter_configured?: boolean;
+    bynara_configured?: boolean;
+  };
   integrations: {
     bifrost: Integration;
     ollama: Integration;
     tavily: Integration;
+    agentrouter?: Integration;
+    bynara?: Integration;
   };
 }
 export interface Limits {
@@ -175,6 +183,7 @@ export interface RunDetail extends RunSummary {
   events: TraceEvent[];
 }
 export interface Experiment {
+  preparation_error?: string;
   id: string;
   name: string;
   state: string;

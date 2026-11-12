@@ -35,6 +35,8 @@ def _implementation_identity() -> str:
         "promptfoo_runtime/network_guard.mjs",
         "promptfoo_runtime/package.json",
         "promptfoo_runtime/package-lock.json",
+        "conversation_context.py",
+        "model_providers.py",
     )
 
 
@@ -55,7 +57,7 @@ def profiles(store: Store) -> list[dict]:
                 "workspace_categories", ["chat", "repository", "documents", "website", "search"]
             )
             if builtin
-            else []
+            else item["config"].get("workspace_categories", [])
         )
         formats = {
             "chat": ["text", "pdf", "docx", "txt", "markdown"],
@@ -72,6 +74,8 @@ def profiles(store: Store) -> list[dict]:
                 "input_formats": sorted({format for task in tasks for format in formats[task]}),
                 "model_requirements": "JSON-capable chat model via Bifrost"
                 if builtin
+                else "Local HTTP workspace-v1"
+                if tasks
                 else "Existing research HTTP contract",
                 "tools": ["snapshot_retrieval", "optional_tavily"] if builtin else [],
                 "execution_configuration": {
@@ -84,8 +88,12 @@ def profiles(store: Store) -> list[dict]:
                     "No arbitrary host code execution",
                 ]
                 if builtin
-                else ["Research benchmarks only; paired chat protocol unsupported"],
-                "status": "requires_model" if builtin else "benchmark_only",
+                else ["Only final output observed; remote cancellation is not guaranteed"],
+                "status": "requires_model"
+                if builtin
+                else "workspace_adapter"
+                if tasks
+                else "benchmark_only",
             }
         )
     return values
@@ -97,13 +105,48 @@ class WorkspaceStore:
 
     def create(self, spec: ConversationCreate) -> dict:
         supported = {p["id"] for p in profiles(self.store) if spec.category in p["supported_tasks"]}
-        if any(agent not in supported for agent in spec.agent_ids):
+        selected = [slot.agent_id for slot in spec.slots] if spec.slots else spec.agent_ids
+        if any(agent not in supported for agent in selected):
             raise ValueError("Selected agent does not support this workspace task.")
         if spec.search_provider == "tavily" and not self.store.config.tavily_key:
             raise ValueError(
                 "Tavily is unavailable. Configure TAVILY_API_KEY privately or choose Search off."
             )
         item = {"id": identifier("conv"), "created_at": now(), **spec.model_dump()}
+        if spec.slots:
+            executions = []
+            for index, slot in enumerate(spec.slots):
+                agent = self.store.item("agent", slot.agent_id)
+                if slot.version:
+                    matched = next(
+                        (
+                            value
+                            for value in self.store.agent_versions(slot.agent_id)
+                            if value["version"] == slot.version
+                        ),
+                        None,
+                    )
+                    if matched is None:
+                        raise ValueError("Selected agent version was not found.")
+                    agent = matched
+                item["slots"][index]["version"] = agent["version"]
+                executions.append(
+                    {
+                        **agent,
+                        "id": f"slot_{'a' if index == 0 else 'b'}",
+                        "profile_id": slot.agent_id,
+                        "name": agent["name"] + f" · {'A' if index == 0 else 'B'}",
+                        "config": {
+                            **agent["config"],
+                            "model": slot.model or spec.model,
+                            "instructions": slot.instructions,
+                            "temperature": slot.temperature,
+                            "max_retries": slot.max_retries,
+                        },
+                    }
+                )
+            item["execution_agents"] = executions
+            item["agent_ids"] = [agent["id"] for agent in executions]
         with self.store.transaction() as connection:
             connection.execute(
                 "INSERT INTO conversations(id,data,created_at) VALUES(?,?,?)",
@@ -120,7 +163,7 @@ class WorkspaceStore:
             return [
                 json.loads(row[0])
                 for row in connection.execute(
-                    "SELECT data FROM conversations ORDER BY created_at DESC LIMIT 100"
+                    "SELECT data FROM conversations WHERE id NOT IN (SELECT id FROM record_visibility WHERE kind='conversations') ORDER BY created_at DESC LIMIT 100"
                 )
             ]
 
@@ -218,6 +261,21 @@ class WorkspaceStore:
         self, conversation_id: str, payload: TurnCreate, idempotency_key: str | None = None
     ) -> dict:
         conversation = self.get(conversation_id)
+        if (
+            conversation["category"] in {"chat", "search"}
+            and not payload.inputs.url
+            and not payload.snapshot_id
+        ):
+            import re
+
+            urls = re.findall(r"https?://[^\s<>\"']+", payload.message)
+            urls = list(dict.fromkeys(value.rstrip(".,;!?)]}") for value in urls))
+            if len(urls) == 1:
+                if len(urls[0]) > 2000:
+                    raise ValueError("Public website URLs must be at most 2000 characters.")
+                payload = payload.model_copy(
+                    update={"inputs": payload.inputs.model_copy(update={"url": urls[0]})}
+                )
         request_hash = digest({"conversation_id": conversation_id, **payload.model_dump()})
         if idempotency_key:
             scoped_key = self.store.scoped_key(idempotency_key)
@@ -240,6 +298,8 @@ class WorkspaceStore:
         if len(conversation["turns"]) >= 20:
             raise ValueError("Conversation limit reached; start another conversation.")
         histories: dict[str, list[dict]] = {agent: [] for agent in conversation["agent_ids"]}
+        if conversation.get("continuation"):
+            histories = conversation["continuation"]["histories"]
         for turn in conversation["turns"]:
             if any(r["state"] in {"queued", "running"} for r in turn["retry_experiments"]):
                 raise ValueError("Wait for the failed response retry to finish.")
@@ -261,6 +321,12 @@ class WorkspaceStore:
         snapshot_id = payload.snapshot_id
         if (
             not snapshot_id
+            and conversation.get("continuation")
+            and not (payload.inputs.url or payload.inputs.upload_ids or payload.inputs.text)
+        ):
+            snapshot_id = conversation["continuation"].get("snapshot_id")
+        if (
+            not snapshot_id
             and conversation["turns"]
             and not (payload.inputs.url or payload.inputs.upload_ids or payload.inputs.text)
         ):
@@ -279,10 +345,19 @@ class WorkspaceStore:
             raise ValueError("Document analysis requires an uploaded document.")
         elif conversation["category"] == "website" and not payload.inputs.url:
             raise ValueError("Website analysis requires a public website URL.")
+        elif (
+            conversation["category"] == "search"
+            and conversation["search_provider"] == "off"
+            and not (payload.inputs.url or payload.inputs.upload_ids or payload.inputs.text)
+        ):
+            raise ValueError(
+                "Search is off. Paste a public website URL to investigate it, attach source text, or start a new Search conversation with Tavily enabled for web discovery."
+            )
         workspace = {
             "checks": [check.model_dump() for check in payload.checks],
             "request_hash": request_hash,
             "semantic_review": conversation.get("semantic_review", False),
+            "slots": conversation.get("slots"),
             "category": conversation["category"],
             "prompt": payload.message,
             "inputs": payload.inputs.model_dump(),
@@ -294,6 +369,8 @@ class WorkspaceStore:
             "runtime_hash": runtime_hash(),
             "previous_turns": len(conversation["turns"]),
         }
+        if conversation.get("execution_agents"):
+            workspace["execution_agents"] = conversation["execution_agents"]
         spec = ExperimentCreate(
             name=f"{conversation['title'][:110]} · {len(conversation['turns']) + 1}",
             agent_ids=conversation["agent_ids"],
@@ -309,6 +386,12 @@ class WorkspaceStore:
             limits=conversation["limits"],
         )
         return self.store.create_experiment(spec, idempotency_key, workspace=workspace)
+
+    def continue_conversation(self, conversation_id: str) -> dict:
+        """Explicit bounded continuation; original full histories remain available."""
+        from .conversation_context import continuation
+
+        return continuation(self, conversation_id)
 
     def artifact(self, experiment_id: str, kind: str, data: dict) -> dict:
         self.store.require_access("experiment", experiment_id)

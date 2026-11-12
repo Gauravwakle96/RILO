@@ -92,6 +92,45 @@ class RiloClient:
     def experiments(self) -> list[dict[str, Any]]:
         return self.request("GET", "experiments")
 
+    def history(self, *, kind: str = "experiments", query: str = "", page: int = 1) -> dict:
+        return self.request(
+            "GET", "workspace/history", params={"kind": kind, "query": query, "page": page}
+        )
+
+    def conversation(self, configuration: dict) -> dict:
+        return self.request("POST", "workspace/conversations", json=configuration)
+
+    def turn(self, conversation_id: str, task: dict, *, idempotency_key: str | None = None) -> dict:
+        self._identifier(conversation_id)
+        return self.request(
+            "POST",
+            f"workspace/conversations/{conversation_id}/turns",
+            json=task,
+            headers={"Idempotency-Key": idempotency_key} if idempotency_key else {},
+        )
+
+    def run_suite(self, suite_id: str, *, case: int = 0) -> dict:
+        self._identifier(suite_id)
+        return self.request(
+            "POST", f"workspace/suites/{suite_id}/run", params={"case": case}, json={}
+        )
+
+    def retest(self, experiment_id: str, *, slots: list[dict] | None = None) -> dict:
+        self._identifier(experiment_id)
+        return self.request(
+            "POST",
+            f"workspace/evaluations/{experiment_id}/retest",
+            json={"slots": slots} if slots else None,
+        )
+
+    def run_suite_batch(self, suite_id: str) -> dict:
+        self._identifier(suite_id)
+        return self.request("POST", f"workspace/suites/{suite_id}/batches", json={})
+
+    def suite_batch(self, batch_id: str) -> dict:
+        self._identifier(batch_id)
+        return self.request("GET", f"workspace/batches/{batch_id}")
+
     def run(self, spec: dict[str, Any], *, idempotency_key: str | None = None) -> dict[str, Any]:
         headers = {"Idempotency-Key": idempotency_key} if idempotency_key else {}
         return self.request("POST", "experiments", json=spec, headers=headers)

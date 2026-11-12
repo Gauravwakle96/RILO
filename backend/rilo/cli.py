@@ -10,6 +10,7 @@ import signal
 import subprocess
 import sys
 import time
+import webbrowser
 from pathlib import Path
 from typing import Any
 
@@ -29,9 +30,21 @@ def parser() -> argparse.ArgumentParser:
     serve.add_argument("--port", type=int, default=8018)
     serve.add_argument("--host", default=os.environ.get("RILO_BIND_HOST", "127.0.0.1"))
     serve.add_argument(
+        "--open", action="store_true", help="Open the local dashboard after API startup"
+    )
+    serve.add_argument(
         "--no-worker", action="store_true", help="Run only API; start worker separately"
     )
     commands.add_parser("doctor", help="Check real integration status and configuration")
+    backup_command = commands.add_parser(
+        "backup", help="Create a private local data archive; stop Rilo first"
+    )
+    backup_command.add_argument("--output", required=True, type=Path)
+    restore_command = commands.add_parser(
+        "restore", help="Verify and restore into an empty new data folder"
+    )
+    restore_command.add_argument("--archive", required=True, type=Path)
+    restore_command.add_argument("--destination", required=True, type=Path)
     calibrate = commands.add_parser(
         "calibrate", help="Score versioned human-reviewed evaluator labels"
     )
@@ -46,6 +59,15 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("agents", help="List registered agents")
     commands.add_parser("tasks", help="List task definitions")
     commands.add_parser("experiments", help="List persisted experiments")
+    suite = commands.add_parser("suite-run", help="Queue one captured suite case")
+    suite.add_argument("id")
+    suite.add_argument("--case", type=int, default=0)
+    suite.add_argument("--wait", action="store_true")
+    retest_command = commands.add_parser(
+        "retest", help="Repeat a workspace evaluation on its captured sources"
+    )
+    retest_command.add_argument("id")
+    retest_command.add_argument("--wait", action="store_true")
     run = commands.add_parser("run", help="Queue an experiment from a JSON specification")
     run.add_argument("spec", type=Path)
     run.add_argument("--wait", action="store_true")
@@ -120,12 +142,24 @@ def serve(args: argparse.Namespace) -> int:
         shown_host = "127.0.0.1" if args.host == "0.0.0.0" else args.host
         print(f"Rilo: http://{shown_host}:{args.port}", flush=True)
         print("The API and worker retain experiments in the local data folder.", flush=True)
+        browser_opened = not args.open
         while not interrupted:
             for child in children:
                 code = child.poll()
                 if code is not None:
                     print(f"A Rilo service stopped (exit {code}).", file=sys.stderr)
                     return code or 1
+            if not browser_opened:
+                import httpx
+
+                try:
+                    with httpx.Client(timeout=0.3, trust_env=False) as client:
+                        ready = client.get(f"http://{shown_host}:{args.port}/health").is_success
+                    if ready:
+                        webbrowser.open(f"http://{shown_host}:{args.port}")
+                        browser_opened = True
+                except httpx.HTTPError:
+                    pass
             time.sleep(0.25)
         return 0
     finally:
@@ -163,6 +197,19 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "serve":
             return serve(args)
+        if args.command in {"backup", "restore"}:
+            from .backup import backup, restore
+
+            if args.command == "backup":
+                backup(Path(args.data_dir).resolve(), args.output.resolve())
+            else:
+                restore(args.archive.resolve(), args.destination.resolve())
+            print(
+                "Private backup created."
+                if args.command == "backup"
+                else "Backup verified and restored."
+            )
+            return 0
         if args.command == "user":
             from .config import Config
             from .storage import Store
@@ -200,6 +247,13 @@ def main(argv: list[str] | None = None) -> int:
                 print(pretty(client.tasks()))
             elif args.command == "experiments":
                 print(pretty(client.experiments()))
+            elif args.command in {"suite-run", "retest"}:
+                result = (
+                    client.run_suite(args.id, case=args.case)
+                    if args.command == "suite-run"
+                    else client.retest(args.id)
+                )
+                print(pretty(client.wait(result["id"]) if args.wait else result))
             elif args.command == "run":
                 spec = json.loads(args.spec.read_text(encoding="utf-8"))
                 if not isinstance(spec, dict):

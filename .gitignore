@@ -26,3 +26,4 @@ frontend/*.tsbuildinfo
 build/
 dist/
 coverage-backend.json
+coverage.json

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Catalog, Experiment, JsonObject } from "../types";
 import type { Conversation } from "../workspace-types";
 import { api, downloadEvaluation, errorMessage, post } from "../lib/api";
 import { Badge, Button, EmptyState, Notice, PageHeader } from "./ui";
+import { LocalHistory, LocalSetup } from "./local-product";
+import { SuiteBatches } from "./suite-batches";
 
 interface Suite {
+  cases?: unknown[];
   id: string;
   name: string;
   version: string;
@@ -28,6 +31,7 @@ interface Report {
 }
 interface DashboardData {
   evaluations: number;
+  conversations?: number;
   attempts: number;
   successful_executions: number;
   failed_executions: number;
@@ -67,35 +71,39 @@ export function WorkspaceManagement({
   const [busy, setBusy] = useState(false);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [truth, setTruth] = useState("");
+  const [additional, setAdditional] = useState<string[]>([]);
+  const [allowAgentChanges, setAllowAgentChanges] = useState(false);
+  const [allowInputChanges, setAllowInputChanges] = useState(false);
   const [evaluations, setEvaluations] = useState<Experiment[]>(
     catalog.experiments,
   );
-  const refresh = async () => {
-    const results = await Promise.allSettled([
-      api<Conversation[]>("/workspace/conversations"),
-      api<Suite[]>("/workspace/suites"),
-      api<Report[]>("/workspace/reports"),
-      api<DashboardData>("/workspace/dashboard"),
-      api<Experiment[]>("/experiments"),
-    ]);
-    if (results[0].status === "fulfilled") setConversations(results[0].value);
-    if (results[1].status === "fulfilled") setSuites(results[1].value);
-    if (results[2].status === "fulfilled") setReports(results[2].value);
-    if (results[3].status === "fulfilled") setDashboard(results[3].value);
-    if (results[4].status === "fulfilled") setEvaluations(results[4].value);
+  const refresh = useCallback(async () => {
+    const calls: Promise<unknown>[] = [
+      api<Experiment[]>("/experiments").then(setEvaluations),
+    ];
+    if (view === "dashboard")
+      calls.push(
+        api<Conversation[]>("/workspace/conversations").then(setConversations),
+        api<DashboardData>("/workspace/dashboard").then(setDashboard),
+      );
+    if (view === "benchmarks")
+      calls.push(api<Suite[]>("/workspace/suites").then(setSuites));
+    if (view === "reports")
+      calls.push(api<Report[]>("/workspace/reports").then(setReports));
+    const results = await Promise.allSettled(calls);
     const failure = results.find((item) => item.status === "rejected");
     if (failure?.status === "rejected") setError(errorMessage(failure.reason));
-  };
+  }, [view]);
   useEffect(() => {
     const timer = window.setTimeout(() => void refresh(), 0);
     const poll = window.setInterval(() => {
       if (!document.hidden) void refresh();
-    }, 5000);
+    }, 10000);
     return () => {
       clearTimeout(timer);
       clearInterval(poll);
     };
-  }, []);
+  }, [refresh]);
   const action = async (callback: () => Promise<void>) => {
     setBusy(true);
     setError("");
@@ -129,6 +137,8 @@ export function WorkspaceManagement({
         }
       />
       {error && <Notice kind="error">{error}</Notice>}
+      {view === "dashboard" && <LocalSetup settings={catalog.settings} />}
+      {view === "reports" && <LocalHistory />}
       {view === "dashboard" && (
         <>
           <div className="workspace-stat-grid">
@@ -146,7 +156,10 @@ export function WorkspaceManagement({
                   ? "—"
                   : `${(dashboard.average_latency_ms / 1000).toFixed(1)} s`,
               ],
-              ["Conversations", conversations.length],
+              [
+                "Conversations",
+                dashboard?.conversations ?? conversations.length,
+              ],
             ].map(([label, value]) => (
               <section className="panel" key={label}>
                 <small>{label}</small>
@@ -168,6 +181,9 @@ export function WorkspaceManagement({
                     {exp.spec.model} · {exp.progress.completed}/
                     {exp.progress.total} attempts
                   </small>
+                  {exp.preparation_error && (
+                    <small>Input not ready: {exp.preparation_error}</small>
+                  )}
                 </span>
                 <Badge status={exp.state} />
               </a>
@@ -249,6 +265,7 @@ export function WorkspaceManagement({
                     version,
                     repetitions,
                     source_experiment_id: source,
+                    additional_experiment_ids: additional,
                     labels: truth.trim() ? JSON.parse(truth) : [],
                   });
                 else
@@ -256,6 +273,8 @@ export function WorkspaceManagement({
                     await post<JsonObject>("/workspace/regressions", {
                       baseline_id: source,
                       candidate_id: candidate,
+                      allow_agent_changes: allowAgentChanges,
+                      allow_input_changes: allowInputChanges,
                     }),
                   );
               });
@@ -284,6 +303,30 @@ export function WorkspaceManagement({
                   ))}
               </select>
             </label>
+            {view === "regression" && (
+              <div className="product-toolbar">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={allowAgentChanges}
+                    onChange={(e) => setAllowAgentChanges(e.target.checked)}
+                  />{" "}
+                  Declare candidate agent/model/prompt changes
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={allowInputChanges}
+                    onChange={(e) => setAllowInputChanges(e.target.checked)}
+                  />{" "}
+                  Declare source snapshot changes
+                </label>
+                <small>
+                  Changed conditions remain recorded. Other incompatible
+                  settings still prevent a like-for-like result.
+                </small>
+              </div>
+            )}
             {view === "benchmarks" ? (
               <div className="workspace-controls">
                 <label className="field">
@@ -341,6 +384,39 @@ export function WorkspaceManagement({
               </label>
             )}
             {view === "benchmarks" && (
+              <label className="field">
+                Additional test cases (up to 9)
+                <select
+                  multiple
+                  value={additional}
+                  onChange={(e) =>
+                    setAdditional(
+                      Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value,
+                      ).slice(0, 9),
+                    )
+                  }
+                >
+                  {evaluations
+                    .filter(
+                      (exp) =>
+                        exp.id !== source &&
+                        exp.state === "completed" &&
+                        exp.spec.engine === "bifrost",
+                    )
+                    .map((exp) => (
+                      <option key={exp.id} value={exp.id}>
+                        {exp.name}
+                      </option>
+                    ))}
+                </select>
+                <small>
+                  Each case retains its own task, captured sources and checks.
+                </small>
+              </label>
+            )}
+            {view === "benchmarks" && (
               <details>
                 <summary>Optional ground-truth quotation labels</summary>
                 <label className="field">
@@ -360,7 +436,7 @@ export function WorkspaceManagement({
                 </small>
               </details>
             )}
-            <Button variant="primary" type="submit" busy={busy}>
+            <Button variant="violet" type="submit" busy={busy}>
               {view === "benchmarks"
                 ? "Save versioned suite"
                 : "Compare recorded results"}
@@ -390,11 +466,16 @@ export function WorkspaceManagement({
                 disabled={busy}
                 onClick={() =>
                   void action(async () => {
-                    const exp = await post<Experiment>(
-                      `/workspace/suites/${suite.id}/run`,
-                      {},
-                    );
-                    window.location.hash = `/experiments/${exp.id}`;
+                    const batch = await post<{
+                      cases: { id: string; name: string }[];
+                      admission_error?: string;
+                    }>(`/workspace/suites/${suite.id}/batches`, {});
+                    setResult({ queued_cases: batch.cases });
+                    if (batch.admission_error)
+                      throw new Error(
+                        batch.admission_error +
+                          " The saved batch can resume its remaining cases.",
+                      );
                   })
                 }
               >
@@ -412,12 +493,26 @@ export function WorkspaceManagement({
       )}
       {result && (
         <section className="panel padded-panel">
-          <h2>Comparison result</h2>
-          <Badge status="inconclusive">
-            {result.compatible
-              ? "Compatible recorded conditions"
-              : "Conditions differ"}
-          </Badge>
+          <h2>
+            {Array.isArray(result.queued_cases)
+              ? "Queued suite cases"
+              : "Comparison result"}
+          </h2>
+          {!Array.isArray(result.queued_cases) && (
+            <Badge status="inconclusive">
+              {result.compatible
+                ? "Compatible recorded conditions"
+                : "Conditions differ"}
+            </Badge>
+          )}
+          {Array.isArray(result.queued_cases) &&
+            (result.queued_cases as { id: string; name: string }[]).map(
+              (value) => (
+                <p key={value.id}>
+                  <a href={`#/experiments/${value.id}`}>{value.name}</a>
+                </p>
+              ),
+            )}
           {typeof result.gate === "string" && (
             <p>
               <strong>{result.gate.replaceAll("_", " ")}</strong> · Declared
@@ -474,6 +569,7 @@ export function WorkspaceManagement({
           </details>
         </section>
       )}
+      {view === "benchmarks" && <SuiteBatches />}
       {view === "reports" && (
         <section className="panel padded-panel">
           {reports.map((report) => (

@@ -94,9 +94,15 @@ class Snapshots:
                 source["content"] = self.content(source["content_hash"])
         return value
 
-    def select(self, snapshot_id: str, prompt: str, budget: int = 3000) -> list[dict]:
+    def select(
+        self, snapshot_id: str, prompt: str, budget: int = 3000, references: list[str] | None = None
+    ) -> list[dict]:
         """One deterministic selection shared by both agents; absolute lines retained."""
         snapshot = self.get(snapshot_id, True)
+        if references and not set(references).issubset(
+            {source["reference"] for source in snapshot["sources"]}
+        ):
+            raise ValueError("Selected source references are not present in this snapshot.")
         terms = set(re.findall(r"[a-zA-Z_]{3,}", prompt.lower()))
         overview = bool(
             terms
@@ -104,6 +110,8 @@ class Snapshots:
         )
         chunks = []
         for source in snapshot["sources"]:
+            if references and source["reference"] not in references:
+                continue
             lines = source["content"].splitlines()
             offset = 0
             while offset < len(lines):

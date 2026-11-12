@@ -135,6 +135,10 @@ def lines(data: dict) -> list[tuple[str, str]]:
         result.append(("body", "Metrics: " + json.dumps(assessment.get("metrics", {}))))
         for limitation in assessment.get("limitations", []):
             result.append(("body", "Limitation: " + limitation))
+    for artifact in data.get("artifacts", []):
+        if artifact.get("kind") == "human_review":
+            result.append(("heading", "Human review · separate from automated verification"))
+            result.append(("body", json.dumps(artifact["data"], ensure_ascii=False)))
     result.append(("heading", "Comparison and retest"))
     for artifact in data.get("artifacts", []):
         result.append(("body", json.dumps(artifact["data"], ensure_ascii=False)))
@@ -233,11 +237,17 @@ def export(data: dict, format: str) -> tuple[bytes, str]:
             )
         return "\n\n".join(blocks).encode(), "text/markdown"
     if format == "pdf":
+        from .pdf_fonts import fonts, paragraph_text
+
+        fonts()
         pdf_stream = io.BytesIO()
         styles = getSampleStyleSheet()
         styles["BodyText"].fontSize = 9
         styles["BodyText"].leading = 13
         styles["Heading1"].textColor = colors.HexColor("#315ecd")
+        for name in ("BodyText", "Title", "Heading2"):
+            styles[name].fontName = "RiloNotoSans"
+            styles[name].shaping = True
         story = []
         for kind, text in lines(data):
             style = styles[
@@ -245,9 +255,7 @@ def export(data: dict, format: str) -> tuple[bytes, str]:
             ]
             # Bounded paragraphs prevent giant model text from overflowing PDF layout.
             for offset in range(0, max(1, len(text)), 3000):
-                story.append(
-                    Paragraph(escape(text[offset : offset + 3000]).replace("\n", "<br/>"), style)
-                )
+                story.append(Paragraph(paragraph_text(text[offset : offset + 3000]), style))
                 story.append(Spacer(1, 7))
         SimpleDocTemplate(
             pdf_stream,

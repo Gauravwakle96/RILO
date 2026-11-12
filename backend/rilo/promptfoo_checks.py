@@ -34,7 +34,7 @@ def availability() -> dict:
     }
 
 
-async def grade_output(output: dict, checks: list[dict], timeout: float = 30) -> dict:
+async def _grade_promptfoo(output: dict, checks: list[dict], timeout: float = 30) -> dict:
     checked = validate_checks([TaskCheck.model_validate(check) for check in checks])
     base = {"engine": "promptfoo", "version": VERSION, "scope": SCOPE}
     if not checked:
@@ -136,6 +136,86 @@ async def grade_output(output: dict, checks: list[dict], timeout: float = 30) ->
     except (OSError, ValueError, KeyError, TypeError):
         reason = "Promptfoo grading failed. The original agent response is preserved; check the pinned runtime installation."
     return {**base, "status": "error", "score": None, "checks": [], "reason": reason}
+
+
+async def grade_output(
+    output: dict, checks: list[dict], timeout: float = 30, assessment: dict | None = None
+) -> dict:
+    checked = validate_checks([TaskCheck.model_validate(check) for check in checks])
+    native = {"json-field-equals", "max-length", "citations-valid", "has-findings"}
+    external = [check.model_dump() for check in checked if check.type not in native]
+    result = await _grade_promptfoo(output, external, timeout)
+    if result["status"] == "error":
+        return result
+    rows = [{**row, "method": "Promptfoo " + VERSION} for row in result["checks"]]
+    for check in checked:
+        if check.type not in native:
+            continue
+        target = output.get("summary", "") if check.target == "summary" else json.dumps(output)
+        passed = False
+        reason = "Requirement not met."
+        if check.type == "max-length":
+            passed = len(target) <= int(check.value or "0")
+            reason = f"Observed {len(target)} characters; maximum {check.value}."
+        elif check.type == "has-findings":
+            passed = bool(output.get("findings"))
+            reason = "Structured findings present." if passed else "No structured findings."
+        elif check.type == "citations-valid":
+            findings = (assessment or {}).get("findings", [])
+            citations = [
+                citation
+                for finding in findings
+                for citation in finding.get("verification", {}).get("citations", [])
+            ]
+            passed = (
+                bool(findings)
+                and all(finding.get("verification", {}).get("citations") for finding in findings)
+                and bool(citations)
+                and all(citation.get("valid") for citation in citations)
+            )
+            reason = (
+                "Every finding has matched captured references; claim correctness is separate."
+                if passed
+                else "Missing or invalid captured references."
+            )
+        elif check.type == "json-field-equals":
+            rule = json.loads(check.value or "{}")
+            try:
+                value = json.loads(target) if check.target == "summary" else output
+                for key in rule["path"].split("."):
+                    value = value[int(key)] if isinstance(value, list) else value[key]
+                passed = type(value) is type(rule["value"]) and value == rule["value"]
+                reason = (
+                    "Selected field matches the expected value."
+                    if passed
+                    else "Selected field differs from the expected value."
+                )
+            except (ValueError, KeyError, IndexError, TypeError):
+                reason = "JSON or requested field is missing."
+        rows.append(
+            {
+                **check.model_dump(),
+                "passed": bool(passed),
+                "score": int(bool(passed)),
+                "reason": reason,
+                "method": "Rilo deterministic check",
+            }
+        )
+    if not checked:
+        return result
+    rows.sort(
+        key=lambda row: next(index for index, check in enumerate(checked) if check.id == row["id"])
+    )
+    passed_count = sum(row["passed"] for row in rows)
+    return {
+        **result,
+        "engine": "promptfoo+rilo" if native & {check.type for check in checked} else "promptfoo",
+        "checks": rows,
+        "passed": passed_count,
+        "total": len(rows),
+        "score": passed_count / len(rows),
+        "status": "pass" if passed_count == len(rows) else "fail",
+    }
 
 
 def compare_runs(runs: list[dict]) -> dict:

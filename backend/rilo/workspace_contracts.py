@@ -21,6 +21,29 @@ class TaskInput(StrictModel):
     run_tests: bool = False
     dependency_advisories: bool = False
     test_profile: Literal["python-unittest", "node-test"] = "python-unittest"
+    repository_ref: str | None = Field(default=None, min_length=1, max_length=200)
+    source_references: list[str] = Field(default_factory=list, max_length=100)
+
+    @model_validator(mode="after")
+    def valid_references(self):
+        if any(not value or len(value) > 2000 for value in self.source_references) or len(
+            set(self.source_references)
+        ) != len(self.source_references):
+            raise ValueError(
+                "Source references must be unique, nonempty captured references up to 2000 characters."
+            )
+        return self
+
+
+class AgentSlot(StrictModel):
+    agent_id: Identifier
+    version: str | None = Field(default=None, max_length=40)
+    model: str | None = Field(
+        default=None, min_length=1, max_length=120, pattern=r"^[A-Za-z0-9_./:\-]+$"
+    )
+    instructions: str = Field(default="", max_length=1200)
+    temperature: float = Field(default=0, ge=0, le=2)
+    max_retries: int | None = Field(default=None, ge=0, le=1)
 
 
 class ConversationCreate(StrictModel):
@@ -36,6 +59,7 @@ class ConversationCreate(StrictModel):
         pattern=r"^[A-Za-z0-9_./:\-]+$",
     )
     search_provider: Literal["off", "tavily"] = "off"
+    slots: list[AgentSlot] | None = Field(default=None, min_length=2, max_length=2)
     semantic_review: bool = False
     limits: Limits = Field(
         default_factory=lambda: Limits(max_model_calls=2, max_tool_calls=2, timeout_seconds=180)
@@ -43,7 +67,7 @@ class ConversationCreate(StrictModel):
 
     @model_validator(mode="after")
     def distinct_agents(self):
-        if self.agent_ids[0] == self.agent_ids[1]:
+        if not self.slots and self.agent_ids[0] == self.agent_ids[1]:
             raise ValueError("Choose two independent agent profiles.")
         return self
 
@@ -58,6 +82,23 @@ class TurnCreate(StrictModel):
     def unique_checks(self):
         validate_checks(self.checks)
         return self
+
+
+class CandidateCreate(StrictModel):
+    slots: list[AgentSlot] | None = Field(default=None, min_length=2, max_length=2)
+
+
+class RecordAction(StrictModel):
+    action: Literal["archive", "restore", "delete"]
+    confirmation: str = Field(default="", max_length=120)
+
+
+class HumanReview(StrictModel):
+    finding_id: Identifier
+    state: Literal[
+        "VERIFIED", "PARTIALLY VERIFIED", "UNSUPPORTED", "CONTRADICTED", "NEEDS MANUAL REVIEW"
+    ]
+    rationale: str = Field(min_length=1, max_length=2000)
 
 
 class Citation(StrictModel):

@@ -123,7 +123,9 @@ def extract(filename: str, kind: str, data: bytes) -> list[dict]:
             "type": "document",
             "page": page,
             "content": text,
-            "extraction_method": "ocr" if kind == ".pdf" and page in locals().get("empty_pages", []) else "text",
+            "extraction_method": "ocr"
+            if kind == ".pdf" and page in locals().get("empty_pages", [])
+            else "text",
         }
         for page, text in pages
     ]

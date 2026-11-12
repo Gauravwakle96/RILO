@@ -11,6 +11,7 @@ import time
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import certifi
+import httpx
 
 
 def public_url(value: str) -> tuple[str, str, int]:
@@ -44,13 +45,46 @@ def public_url(value: str) -> tuple[str, str, int]:
     return parsed.scheme, host, port
 
 
+def fallback_addresses(host: str) -> set[str]:
+    """Fixed TLS-verified resolver only when the OS resolver fails; no redirects."""
+    addresses = set()
+    with httpx.Client(timeout=5, trust_env=False, follow_redirects=False) as client:
+        for record_type in ("A", "AAAA"):
+            with client.stream(
+                "GET",
+                "https://1.1.1.1/dns-query",
+                params={"name": host, "type": record_type},
+                headers={"Accept": "application/dns-json"},
+            ) as response:
+                response.raise_for_status()
+                body = bytearray()
+                for part in response.iter_bytes():
+                    body.extend(part)
+                    if len(body) > 32000:
+                        raise ValueError("DNS response exceeds the size limit.")
+                import json
+
+                value = json.loads(body)
+            if not isinstance(value, dict) or value.get("Status") != 0:
+                raise ValueError("The public resolver could not resolve this host.")
+            for answer in value.get("Answer", []):
+                if answer.get("type") in {1, 28}:
+                    addresses.add(str(ipaddress.ip_address(answer["data"])))
+    return addresses
+
+
 def resolve_public(host: str, port: int) -> str:
     try:
         addresses = {
             str(item[4][0]) for item in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
         }
-    except OSError as exc:
-        raise ValueError("The public host could not be resolved.") from exc
+    except OSError:
+        try:
+            addresses = fallback_addresses(host)
+        except (OSError, httpx.HTTPError, ValueError, KeyError, TypeError) as fallback:
+            raise ValueError(
+                "The public host could not be resolved by the system or fallback resolver. Check connectivity or attach a captured source."
+            ) from fallback
     if not addresses or any(
         not ipaddress.ip_address(address).is_global
         or ipaddress.ip_address(address).is_multicast
@@ -129,6 +163,7 @@ def fetch_public(
                 "status": response.status,
                 "headers": dict(response.getheaders()),
                 "body": bytes(data),
+                "dns_policy": "system resolver; fixed Cloudflare DNS-over-HTTPS fallback on resolution failure; public IP validation and connection pinning",
             }
         except (OSError, http.client.HTTPException) as exc:
             raise ValueError(f"Public retrieval failed ({type(exc).__name__}).") from exc

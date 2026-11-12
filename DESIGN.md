@@ -1,5 +1,16 @@
 # Rilo design contract
 
+## Local workspace refinement — 12 November 2026
+
+Blue identifies primary execution actions, violet saved tests/history, and teal
+connection/source controls. Status still includes text and icons; color alone does
+not communicate success. Both themes use contrast-checked semantic tokens.
+Secondary controls retain stable backgrounds during theme changes to avoid
+transient low contrast. Per-side configuration lives in a collapsible advanced
+section. Source inspection loads on demand and distinguishes captured material from
+the bounded selection passed to agents. History search, privacy settings and empty
+states use the existing responsive panels; motion respects reduced-motion settings.
+
 The product surface is a developer's local reliability workspace. The user's job is to configure repeatable tests, compare agent behavior, inspect a failure, and rerun after a change. The primary action is **New experiment**.
 
 The selected awesome-design-md Linear analysis informs restrained surface steps, hairline dividers, compact type hierarchy, and product-first presentation. It is third-party design analysis, not an official specification. Rilo uses its own graphite/blue palette, semantic statuses, and local licensed Inter/JetBrains Mono fonts. The implementation starts with the application, not marketing content.

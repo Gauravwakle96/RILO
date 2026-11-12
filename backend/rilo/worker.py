@@ -28,6 +28,8 @@ from .storage import Store
 async def execute_run(store: Store, run: dict, spec: ExperimentCreate, manifest: dict) -> None:
     task = next(item for item in manifest["task_versions"] if item["id"] == run["task_id"])
     agent = next(item for item in manifest["agent_versions"] if item["id"] == run["agent_id"])
+    if manifest.get("workspace") and agent["config"].get("model"):
+        spec = spec.model_copy(update={"model": agent["config"]["model"]})
     context = RunContext(
         store,
         run,
@@ -35,7 +37,7 @@ async def execute_run(store: Store, run: dict, spec: ExperimentCreate, manifest:
         task,
         manifest["sources"],
         manifest["bifrost_url"],
-        manifest.get("price_basis"),
+        manifest.get("agent_price_basis", {}).get(run["agent_id"], manifest["price_basis"]),
     )
     context.opaque = agent["kind"] == "http"
     store.update_run(run["id"], {"outcome": "running"})
@@ -93,7 +95,11 @@ async def execute_run(store: Store, run: dict, spec: ExperimentCreate, manifest:
             observed_stats = context.stats()
             store.update_run(run["id"], {**observed_stats, "output": output.model_dump()})
             grading = asyncio.create_task(
-                grade_output(output.model_dump(), manifest["workspace"].get("checks", []))
+                grade_output(
+                    output.model_dump(),
+                    manifest["workspace"].get("checks", []),
+                    assessment=assessment,
+                )
             )
             try:
                 while not grading.done():

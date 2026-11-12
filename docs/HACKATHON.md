@@ -85,6 +85,6 @@ instructions. Repository publication alone does not submit the project.
 
 ## Assessment
 
-The mandatory platform behaviors are present and backed by actual repeated runs and developer/browser checks. The strongest demonstration is the evidence chain from injected fault to different recovery behavior, followed by a reproducible comparison. The clearest remaining hackathon gap is actual Tavily acceptance; broader calibration and independent developer usefulness also need evidence.
+The mandatory platform behaviors are present and backed by actual repeated runs and developer/browser checks. The strongest demonstration is the evidence chain from injected fault to different recovery behavior, followed by a reproducible comparison. For the Bifrost-only entry, live Tavily is optional. Broader evaluator calibration and independently observed developer usefulness remain evidence limits. See [current local delivery](LOCAL_PRODUCT_IMPLEMENTATION.md) for implemented candidate reruns, suite batches, retention, continuations, reports and fresh checks.
 
 The problem PDF does not publish a weighted numerical scoring rubric. A claimed 95+ score would be invented. Judge outcomes depend on the field, originality, implementation, integration evidence and presentation; use the checklist and actual measurements to assess readiness.

@@ -1,0 +1,17 @@
+{
+  "method": "temporary-store deterministic fixture exercise; no model inference",
+  "rounds": 3,
+  "evaluations": 30,
+  "attempts": 60,
+  "elapsed_seconds": 32.05749140000262,
+  "noncompleted_runs": 0,
+  "reader_threads": 4,
+  "history_dashboard_reads": 100,
+  "read_latency_ms_median": 50.96835000040301,
+  "read_latency_ms_p95": 110.95299999942654,
+  "queue_limit": 10,
+  "limitations": [
+    "Does not measure model throughput, external services, customer first-use success or multi-user hosting.",
+    "Measured on this machine under this workload only."
+  ]
+}

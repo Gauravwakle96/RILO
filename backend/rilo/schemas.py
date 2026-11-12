@@ -57,6 +57,7 @@ class ExperimentCreate(StrictModel):
 
 
 class AgentCreate(StrictModel):
+    protocol: Literal["research-v1", "workspace-v1"] = "research-v1"
     name: Short
     description: str = Field(default="", max_length=500)
     kind: Literal["http"] = "http"
@@ -106,10 +107,12 @@ class AgentVersionCreate(StrictModel):
 
 
 class SettingsUpdate(StrictModel):
+    offline: bool | None = None
     bifrost_url: str | None = Field(default=None, max_length=300)
     model: str | None = Field(
         default=None, min_length=1, max_length=120, pattern=r"^[A-Za-z0-9_./:\-]+$"
     )
+
 
 class Fact(StrictModel):
     text: str = Field(min_length=1, max_length=1500)

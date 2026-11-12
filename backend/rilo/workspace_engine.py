@@ -31,6 +31,7 @@ inside generation. Do not claim to have run code."""
 
 
 async def prepare(store: Store, experiment: dict) -> dict:
+    store.config.refresh_settings()
     manifest = experiment["manifest"]
     task = manifest["workspace"]
     if task["runtime_hash"] != runtime_hash():
@@ -42,6 +43,14 @@ async def prepare(store: Store, experiment: dict) -> dict:
         snapshot = snapshots.get(task["snapshot_id"])
     else:
         inputs = task["inputs"]
+        if store.config.offline and (
+            inputs.get("url")
+            or task["search_provider"] == "tavily"
+            or inputs.get("dependency_advisories")
+        ):
+            raise InfrastructureError(
+                "Offline mode blocks external retrieval. Use uploaded files or captured sources."
+            )
         if inputs.get("url") or inputs.get("upload_ids"):
             from .ingestion import ingest
 
@@ -70,6 +79,7 @@ async def prepare(store: Store, experiment: dict) -> dict:
             )
             metadata = {"retrieval": "user-provided context", "limitations": []}
         if task["search_provider"] == "tavily":
+            store.config.require_connected("Tavily search")
             import httpx
 
             if not store.config.tavily_key:
@@ -132,7 +142,10 @@ async def prepare(store: Store, experiment: dict) -> dict:
             "Conversation exceeds the configured local input budget. Start a new conversation or increase RILO_WORKSPACE_INPUT_BYTES only after validating the model context capacity. No history was silently removed."
         )
     manifest["sources"] = snapshots.select(
-        snapshot["id"], task["prompt"], budget=min(3000, available)
+        snapshot["id"],
+        task["prompt"],
+        budget=min(max(3000, budget // 2), available),
+        references=task["inputs"].get("source_references", []),
     )
     manifest["evidence_hash"] = digest(manifest["sources"])
     manifest["selection"] = {
@@ -140,6 +153,7 @@ async def prepare(store: Store, experiment: dict) -> dict:
         "characters": sum(len(s["content"]) for s in manifest["sources"]),
         "passages": len(manifest["sources"]),
         "source_count": len(snapshot["sources"]),
+        "selected_references": task["inputs"].get("source_references", []),
         "coverage": "bounded selected passages; not exhaustive",
         "input_byte_limit": budget,
         "budget_method": "conservative serialized input bytes; not a tokenizer count",
@@ -179,14 +193,20 @@ def generation_messages(manifest: dict, agent: dict) -> list[dict]:
         "web_analyst": "Focus on source identity, page dates and differences across pages.",
         "repo_analyst": "For repository overviews, explain the project's purpose and captured architecture. Only look for vulnerabilities if the user's task asks for security analysis. Static evidence is not proof of exploitability.",
         "document_analyst": "Focus on passages, clauses and contradictions. Never invent pages.",
-    }.get(agent["id"], "")
+    }.get(agent.get("profile_id", agent["id"]), "")
     history = task["histories"].get(agent["id"], [])
     identity = (
         f"\nYou are {agent['name']}, a Rilo agent profile. "
         + (
-            "You review supplied evidence carefully and can retry malformed JSON once. "
+            "You review supplied evidence carefully. "
             if robust
-            else "You provide concise baseline answers in one generation attempt, without recovery. "
+            else "You provide concise baseline answers. "
+        )
+        + (
+            "You can retry malformed JSON once within recorded limits. "
+            if agent["config"].get("max_retries", int(robust))
+            or (agent["config"].get("max_retries") is None and robust)
+            else "This configuration uses one generation attempt without recovery. "
         )
         + "You can answer questions and analyze the captured text, repository files, documents or website passages supplied by Rilo. "
         + f"Search for this task is {task['search_provider']}; retrieval is performed by Rilo before you answer, not by you. "
@@ -199,6 +219,7 @@ def generation_messages(manifest: dict, agent: dict) -> list[dict]:
             "content": SYSTEM
             + identity
             + specialty
+            + agent["config"].get("instructions", "")
             + (
                 " Check evidence carefully, qualify interpretations and explicitly report missing evidence."
                 if robust
@@ -244,12 +265,55 @@ def generation_messages(manifest: dict, agent: dict) -> list[dict]:
 async def invoke(context: RunContext, manifest: dict, agent: dict) -> WorkspaceOutput:
     task = manifest["workspace"]
     context.evidence = manifest["sources"]
+    if agent["kind"] == "http":
+        context.config.refresh_settings()
+        if context.config.offline:
+            raise InfrastructureError(
+                "Offline mode disables HTTP agents because their external tool access cannot be controlled by Rilo."
+            )
+        import httpx
+
+        from .config import loopback_url
+
+        endpoint = loopback_url(agent["config"]["endpoint"])
+        context.event(
+            "adapter_request",
+            "Invoke local workspace agent",
+            {"endpoint": endpoint, "observation_coverage": "final_output_only"},
+        )
+        async with httpx.AsyncClient(
+            timeout=context.spec.limits.timeout_seconds, trust_env=False, follow_redirects=False
+        ) as client:
+            response = await bounded_json(
+                client,
+                "POST",
+                endpoint,
+                json={
+                    "protocol": "workspace-v1",
+                    "run_id": context.run["id"],
+                    "task": task["prompt"],
+                    "category": task["category"],
+                    "evidence": manifest["sources"],
+                    "history": task["histories"].get(agent["id"], []),
+                    "configuration": {
+                        k: agent["config"].get(k) for k in ("model", "instructions", "temperature")
+                    },
+                    "limits": context.spec.limits.model_dump(),
+                },
+            )
+        context.check()
+        return WorkspaceOutput.model_validate(response.get("output", response))
+    context.temperature = agent["config"].get("temperature", 0)
     robust = agent["kind"] == "graph"
     history = task["histories"].get(agent["id"], [])
     messages = generation_messages(manifest, agent)
 
     async def generate() -> WorkspaceOutput:
-        attempts = min(2 if robust else 1, context.spec.limits.max_model_calls)
+        retries = agent["config"].get("max_retries")
+        attempts = min(
+            1 + (retries if retries is not None else int(robust)),
+            context.spec.limits.max_model_calls,
+        )
         for attempt in range(attempts):
             context.check()
             if len(json.dumps(messages, ensure_ascii=False).encode()) > manifest["selection"].get(

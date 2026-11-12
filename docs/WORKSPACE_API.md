@@ -10,6 +10,11 @@ ownership behind HTTPS; it does not accept the local bearer shortcut.
 | GET /capabilities | Optional integration availability without credentials |
 | POST /preflight | Check configuration's model, gateway, worker and optional grader readiness |
 | GET /dashboard | Aggregates from persisted executions |
+| GET /history | Paginated experiments/conversations: kind, query, page, size and optional conversation category |
+| GET /storage | Local database/blob usage and orphan-file preview |
+| POST /storage/cleanup | Remove only unreferenced blobs while the queue is idle |
+| GET /backup | Stream a consistent private backup while the queue is idle |
+| PATCH /conversations/{id} | Rename with a validated title |
 | GET, POST /conversations | List/create paired conversations |
 | GET /conversations/{id} | Shared turns, effective responses and original/retry attempts |
 | GET /conversations/{id}/export | All shared messages and separate responses as JSON |
@@ -78,3 +83,30 @@ regression gate. Existing quotation metrics remain separate.
 
 Preflight body: `{"configuration":{"title":"Check","model":"ollama/qwen2.5-coder:7b"},"require_checks":true}`.
 It performs health/list checks, not inference, and returns readiness details.
+
+`test_inference: true` executes a small real request for each selected model.
+Local Ollama uses Bifrost; `bynara/MODEL_ID` uses the fixed Bynara endpoint and
+private BYNARA_API_KEY. Credentials are never returned. HTTP 402 is insufficient
+provider credit; HTTP 404 means the selected model/endpoint is unavailable.
+
+Local retention: `POST /workspace/records/{experiments|conversations}/{id}` with
+`action: archive|restore|delete`. Deletion needs `confirmation` equal to the exact
+record ID, an idle queue and no retained dependency. History accepts `archived=true`.
+Shared snapshots/uploads are retained; archive is reversible.
+
+Candidate reruns: `POST /workspace/evaluations/{id}/retest` accepts optional two-slot
+configuration. An empty body retains original settings. Original task, checks,
+history and captured snapshot remain pinned; candidate changes need declaration
+when comparing regression conditions.
+
+`POST /workspace/conversations/{id}/continue` creates an explicitly extractive
+continuation with last-three-turn excerpts per agent and retained source snapshot.
+It preserves the original conversation and does not mix independent answers.
+
+`POST /workspace/suites/{id}/batches` persists a whole suite admission. Inspect
+`GET /workspace/batches/{id}`, resume missing cases with `POST .../{id}/resume`,
+or export `GET .../{id}/export`. Results reflect recorded per-case checks only.
+
+`POST /workspace/runs/{id}/reviews` accepts finding_id, verification state and
+rationale. Reviews are appended as human_review artifacts; original findings and
+automated checks stay intact. Reports include the separate human judgments.

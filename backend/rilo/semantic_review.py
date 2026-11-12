@@ -49,6 +49,10 @@ async def review(store, experiment: dict) -> dict:
             "model_graded": True,
         }
     config = store.config
+    try:
+        config.require_model(experiment["spec"]["model"])
+    except ValueError as exc:
+        raise InfrastructureError(str(exc)) from exc
     if len(json.dumps(findings).encode()) + 1100 > config.workspace_input_bytes:
         return {
             "status": "unavailable",
@@ -57,16 +61,22 @@ async def review(store, experiment: dict) -> dict:
             "coverage": {"submitted": len(findings), "reviewed": 0},
         }
     headers = {"x-bf-cache-no-store": "true"}
-    if config.bifrost_key:
-        headers["x-bf-vk"] = config.bifrost_key
+    model = experiment["spec"]["model"]
+    from .model_providers import connection
+
+    try:
+        endpoint, auth, model = connection(config, model, experiment["manifest"]["bifrost_url"])
+    except ValueError as exc:
+        raise InfrastructureError(str(exc)) from exc
+    headers.update(auth)
     async with httpx.AsyncClient(timeout=90, trust_env=False, follow_redirects=False) as client:
         result = await bounded_json(
             client,
             "POST",
-            experiment["manifest"]["bifrost_url"] + "/v1/chat/completions",
+            endpoint,
             headers=headers,
             json={
-                "model": experiment["spec"]["model"],
+                "model": model,
                 "temperature": 0,
                 "max_tokens": 2200,
                 "response_format": {"type": "json_object"},

@@ -105,6 +105,7 @@ async def crawl(url: str, max_pages: int = 3, max_depth: int = 1) -> tuple[list[
                     "published_at": parser.published,
                     "retrieved_at": now(),
                     "content": content,
+                    "dns_policy": response.get("dns_policy"),
                 }
             )
         else:

@@ -115,6 +115,15 @@ class Store:
                     created_at TEXT NOT NULL,PRIMARY KEY(object_type,object_id));
                 CREATE INDEX IF NOT EXISTS object_owner_lookup ON object_owners(owner_id,object_type,created_at);
                 INSERT OR IGNORE INTO schema_versions(version) VALUES(5);
+                CREATE INDEX IF NOT EXISTS experiments_history ON experiments(created_at DESC,id);
+                CREATE INDEX IF NOT EXISTS conversations_history ON conversations(created_at DESC,id);
+                CREATE INDEX IF NOT EXISTS artifacts_history ON workspace_artifacts(kind,created_at DESC);
+                INSERT OR IGNORE INTO schema_versions(version) VALUES(6);
+                CREATE TABLE IF NOT EXISTS record_visibility(kind TEXT NOT NULL,id TEXT NOT NULL,archived_at TEXT NOT NULL,PRIMARY KEY(kind,id));
+                CREATE TABLE IF NOT EXISTS local_audit(id TEXT PRIMARY KEY,action TEXT NOT NULL,kind TEXT NOT NULL,object_id TEXT NOT NULL,created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS suite_batches(id TEXT PRIMARY KEY,suite_id TEXT NOT NULL,data TEXT NOT NULL,created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS suite_batch_cases(batch_id TEXT NOT NULL REFERENCES suite_batches(id),case_index INTEGER NOT NULL,experiment_id TEXT NOT NULL UNIQUE REFERENCES experiments(id),PRIMARY KEY(batch_id,case_index));
+                INSERT OR IGNORE INTO schema_versions(version) VALUES(7);
             """)
         with self.transaction() as connection:
             for kind, values in (
@@ -140,7 +149,13 @@ class Store:
         name = name.strip()
         if not 1 <= len(name) <= 100 or role not in {"admin", "member"}:
             raise ValueError("User name or role is invalid.")
-        value = {"id": identifier("user"), "email": email, "name": name, "role": role, "created_at": now()}
+        value = {
+            "id": identifier("user"),
+            "email": email,
+            "name": name,
+            "role": role,
+            "created_at": now(),
+        }
         with self.transaction() as connection:
             connection.execute(
                 "INSERT INTO users(id,email,name,password_hash,role,created_at) VALUES(?,?,?,?,?,?)",
@@ -177,7 +192,15 @@ class Store:
             connection.execute("DELETE FROM auth_sessions WHERE expires_at<?", (timestamp,))
             connection.execute(
                 "INSERT INTO auth_sessions(id,user_id,token_hash,csrf_hash,expires_at,created_at,last_seen_at) VALUES(?,?,?,?,?,?,?)",
-                (identifier("auth"), user_id, token_hash(token), token_hash(csrf), session_expiry(), timestamp, timestamp),
+                (
+                    identifier("auth"),
+                    user_id,
+                    token_hash(token),
+                    token_hash(csrf),
+                    session_expiry(),
+                    timestamp,
+                    timestamp,
+                ),
             )
 
     def auth_session(self, token: str) -> tuple[dict, str] | None:
@@ -192,10 +215,15 @@ class Store:
                 (token_hash(token), timestamp),
             ).fetchone()
             if row:
-                connection.execute("UPDATE auth_sessions SET last_seen_at=? WHERE id=?", (timestamp, row["id"]))
+                connection.execute(
+                    "UPDATE auth_sessions SET last_seen_at=? WHERE id=?", (timestamp, row["id"])
+                )
         if not row:
             return None
-        user = {"id": row["user_id"], **{key: row[key] for key in ("email", "name", "role", "created_at")}}
+        user = {
+            "id": row["user_id"],
+            **{key: row[key] for key in ("email", "name", "role", "created_at")},
+        }
         return user, row["csrf_hash"]
 
     def revoke_auth_session(self, token: str) -> None:
@@ -329,7 +357,7 @@ class Store:
             revised = {
                 **current,
                 "version": update["version"],
-                "config": {"endpoint": update["endpoint"]},
+                "config": {**current["config"], "endpoint": update["endpoint"]},
                 **{
                     field: update[field]
                     for field in ("name", "description")
@@ -365,7 +393,11 @@ class Store:
         workspace: dict | None = None,
     ) -> dict[str, Any]:
         idempotency_key = self.scoped_key(idempotency_key)
-        agents = [self.item("agent", value) for value in spec.agent_ids]
+        pinned = {agent["id"]: agent for agent in (workspace or {}).get("execution_agents", [])}
+        agents = [
+            pinned[value] if value in pinned else self.item("agent", value)
+            for value in spec.agent_ids
+        ]
         if not workspace and any(agent["config"].get("workspace_categories") for agent in agents):
             raise ValueError(
                 "Task-specific analyst profiles run in their supported workspaces; select Scout, Relay or a research HTTP agent for this benchmark."
@@ -386,7 +418,7 @@ class Store:
         )
         scenarios = [self.item("scenario", value) for value in spec.scenario_ids]
         if any(agent["kind"] == "http" for agent in agents):
-            if spec.mode == "live":
+            if spec.mode == "live" and not workspace:
                 raise ValueError(
                     "HTTP adapters receive controlled evidence only; live search coverage is unsupported."
                 )
@@ -436,6 +468,14 @@ class Store:
             ],
         }
         if workspace:
+            manifest["agent_price_basis"] = {
+                agent["id"]: price_basis(
+                    agent["config"].get("model") or spec.model,
+                    self.config.model_pricing,
+                    fixture=spec.engine == "fixture",
+                )
+                for agent in agents
+            }
             manifest["workspace"] = workspace
             manifest["sources"] = []
             manifest["grader_version"] = "workspace-evidence-v1"
@@ -541,6 +581,11 @@ class Store:
                 ),
             )
             if workspace:
+                if workspace.get("batch_id"):
+                    connection.execute(
+                        "INSERT INTO suite_batch_cases(batch_id,case_index,experiment_id) VALUES(?,?,?)",
+                        (workspace["batch_id"], workspace["suite_case"], experiment_id),
+                    )
                 if workspace.get("retry_of"):
                     connection.execute(
                         "INSERT INTO workspace_retries(experiment_id,original_id,run_id,created_at) VALUES(?,?,?,?)",
@@ -568,6 +613,7 @@ class Store:
                     "experiment_id": experiment_id,
                     "agent_id": agent["id"],
                     "agent_name": agent["name"],
+                    "model": agent["config"].get("model") or spec.model,
                     "task_id": task["id"],
                     "task_name": task["title"],
                     "scenario_id": scenario["id"],
@@ -628,7 +674,7 @@ class Store:
             ids = [
                 row["id"]
                 for row in connection.execute(
-                    "SELECT id FROM experiments ORDER BY created_at DESC LIMIT 200"
+                    "SELECT id FROM experiments WHERE id NOT IN (SELECT id FROM record_visibility WHERE kind='experiments') ORDER BY created_at DESC LIMIT 200"
                 )
             ]
         return [self.experiment(value, detail=False) for value in ids]
@@ -718,6 +764,18 @@ class Store:
             "summary": summary,
             "agent_metrics": metrics,
         }
+        if manifest.get("workspace") and not manifest.get("snapshot") and complete:
+            reason = next(
+                (
+                    check.get("evidence")
+                    for run in complete
+                    for check in (run.get("assessment") or {}).get("checks", [])
+                    if check.get("name") == "Input preparation"
+                ),
+                None,
+            )
+            if reason:
+                result["preparation_error"] = reason
         if detail:
             result["manifest"] = manifest
             result["runs"] = [

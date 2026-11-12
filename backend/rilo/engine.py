@@ -52,6 +52,22 @@ async def bounded_json(client: httpx.AsyncClient, method: str, url: str, **kwarg
                     "The endpoint returned a redirect; redirects are not followed."
                 )
             if response.status_code >= 400:
+                if response.status_code in {401, 403}:
+                    raise InfrastructureError(
+                        f"The service returned HTTP {response.status_code}. Authentication was rejected; check the private API key and account access."
+                    )
+                if response.status_code == 429:
+                    raise InfrastructureError(
+                        "The service returned HTTP 429. The provider rate or credit limit was reached; retry later or select a local model."
+                    )
+                if response.status_code == 402:
+                    raise InfrastructureError(
+                        "The service returned HTTP 402. Provider credits are insufficient; use a local model or resolve your provider account balance."
+                    )
+                if response.status_code == 404:
+                    raise InfrastructureError(
+                        "The service returned HTTP 404. The requested model or endpoint was not found; select a model listed by your provider."
+                    )
                 raise InfrastructureError(f"The service returned HTTP {response.status_code}.")
             content = bytearray()
             async for part in response.aiter_bytes():
@@ -121,6 +137,8 @@ def tavily_evidence(result: dict, call_number: int) -> list[dict]:
 
 
 class RunContext:
+    temperature: float = 0
+
     def __init__(
         self,
         store: Store,
@@ -250,6 +268,10 @@ class RunContext:
             selected = [dict(item) for item in candidates[:6]]
             await asyncio.sleep(0.035)
         else:
+            try:
+                self.config.require_connected("live search")
+            except ValueError as exc:
+                raise InfrastructureError(str(exc)) from exc
             if not self.config.tavily_key:
                 raise InfrastructureError(
                     "Tavily is not configured. Set TAVILY_API_KEY in the private .env file."
@@ -427,8 +449,17 @@ class RunContext:
         """Shared observed Bifrost boundary for benchmark and workspace agents."""
         start = time.monotonic()
         headers = {"Content-Type": "application/json", "x-bf-cache-no-store": "true"}
-        if self.config.bifrost_key:
-            headers["x-bf-vk"] = self.config.bifrost_key
+        try:
+            self.config.require_model(self.spec.model)
+        except ValueError as exc:
+            raise InfrastructureError(str(exc)) from exc
+        from .model_providers import connection
+
+        try:
+            endpoint, auth, model = connection(self.config, self.spec.model, self.bifrost_url)
+        except ValueError as exc:
+            raise InfrastructureError(str(exc)) from exc
+        headers.update(auth)
         self.dispatched_models += 1
         self.persist_stats()
         async with httpx.AsyncClient(
@@ -439,12 +470,12 @@ class RunContext:
             result = await bounded_json(
                 client,
                 "POST",
-                self.bifrost_url + "/v1/chat/completions",
+                endpoint,
                 headers=headers,
                 json={
-                    "model": self.spec.model,
+                    "model": model,
                     "messages": messages,
-                    "temperature": 0,
+                    "temperature": getattr(self, "temperature", 0),
                     "max_tokens": max_tokens,
                     "response_format": {"type": "json_object"},
                 },
@@ -455,7 +486,7 @@ class RunContext:
             self.input_tokens += token_counts[0]
             self.output_tokens += token_counts[1]
             self.reported_dispatches += 1
-        matches_model = response_matches_requested_model(result, self.spec.model)
+        matches_model = response_matches_requested_model(result, model)
         if matches_model:
             self.matched_dispatches += 1
         if isinstance(result.get("model"), str):

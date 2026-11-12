@@ -6,13 +6,20 @@ import json
 from typing import Literal
 
 from fastapi import APIRouter, Request
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
+from starlette.background import BackgroundTask
 
 from .promptfoo_checks import availability
 from .readiness import PreflightInput, readiness
 from .snapshots import Snapshots
 from .storage import Store
-from .workspace_contracts import ConversationCreate, TurnCreate
+from .workspace_contracts import (
+    CandidateCreate,
+    ConversationCreate,
+    HumanReview,
+    RecordAction,
+    TurnCreate,
+)
 from .workspace_evaluation import RegressionCreate, SuiteCreate, compare_workspace
 from .workspace_store import WorkspaceStore, profiles
 
@@ -26,11 +33,7 @@ def reports_for_owner(store: Store, kind: str) -> list[dict]:
                 (kind,),
             )
         ]
-    return [
-        value
-        for value in values
-        if store.can_access("experiment", value["experiment_id"])
-    ]
+    return [value for value in values if store.can_access("experiment", value["experiment_id"])]
 
 
 def workspace_router(store: Store) -> APIRouter:
@@ -81,41 +84,113 @@ def workspace_router(store: Store) -> APIRouter:
 
     @router.get("/dashboard")
     def dashboard():
-        evaluations = store.experiments()
-        run_values = [
-            store.run(run["id"])
-            for value in evaluations
-            for run in store.experiment(value["id"])["runs"]
-        ]
-        terminal = [run for run in run_values if run["outcome"] not in {"queued", "running"}]
-        grouped: dict[str, list[dict]] = {}
-        for run in terminal:
-            grouped.setdefault(run["agent_name"], []).append(run)
-        agents = [
-            {
-                "name": name,
-                "attempts": len(values),
-                "completed": sum(value["outcome"] == "completed" for value in values),
-                "latency_ms": sum(value["duration_ms"] for value in values) / len(values),
-            }
-            for name, values in grouped.items()
-        ]
-        regressions = [item for item in reports_for_owner(store, "regression")[:5]]
+        from .local_product import dashboard as local_dashboard
+
+        result = local_dashboard(store)
+        result["regressions"] = reports_for_owner(store, "regression")[:5]
+        return result
+
+    @router.get("/history")
+    def history(
+        kind: Literal["experiments", "conversations"] = "experiments",
+        query: str = "",
+        page: int = 1,
+        size: int = 25,
+        category: str | None = None,
+        archived: bool = False,
+    ):
+        from .local_product import history as records
+
+        return records(store, kind, query[:200], page, size, category, archived)
+
+    @router.post("/records/{kind}/{record_id}")
+    def record_action(
+        kind: Literal["experiments", "conversations"], record_id: str, payload: RecordAction
+    ):
+        from .local_product import manage_record
+
+        return manage_record(store, kind, record_id, payload.action, payload.confirmation)
+
+    @router.get("/storage")
+    def storage():
+        from .local_product import orphan_files, storage_status
+
+        files = orphan_files(store)
         return {
-            "evaluations": len(evaluations),
-            "attempts": len(run_values),
-            "successful_executions": sum(run["outcome"] == "completed" for run in terminal),
-            "failed_executions": sum(run["outcome"] != "completed" for run in terminal),
-            "average_latency_ms": sum(run["duration_ms"] for run in terminal) / len(terminal)
-            if terminal
-            else None,
-            "observed_input_tokens": sum(run.get("input_tokens") or 0 for run in terminal),
-            "observed_output_tokens": sum(run.get("output_tokens") or 0 for run in terminal),
-            "token_observed_runs": sum(run.get("input_tokens") is not None for run in terminal),
-            "agents": agents,
-            "regressions": regressions,
-            "scope": "All persisted executions, including explicitly labeled fixture benchmarks. Completion is not verified accuracy.",
+            **storage_status(store),
+            "orphan_files": len(files),
+            "reclaimable_bytes": sum(path.stat().st_size for path in files),
         }
+
+    @router.get("/backup")
+    def download_backup():
+        import shutil
+        import tempfile
+        from pathlib import Path
+
+        from .backup import backup
+
+        if store.config.hosted:
+            raise ValueError("Backup downloads are local-only.")
+        with store.transaction() as connection:
+            if connection.execute(
+                "SELECT 1 FROM experiments WHERE state IN ('queued','running')"
+            ).fetchone():
+                raise ValueError("Wait for queued/running work before taking a consistent backup.")
+            temporary = tempfile.mkdtemp(prefix="rilo-backup-")
+            try:
+                path = Path(temporary) / "rilo-backup.tar.gz"
+                backup(store.config.data_dir, path)
+            except Exception:
+                shutil.rmtree(temporary)
+                raise
+        return FileResponse(
+            path,
+            media_type="application/gzip",
+            filename="rilo-private-backup.tar.gz",
+            background=BackgroundTask(shutil.rmtree, temporary),
+        )
+
+    @router.post("/storage/cleanup")
+    def cleanup():
+        from .local_product import orphan_files
+
+        with store.transaction() as connection:
+            if connection.execute(
+                "SELECT 1 FROM experiments WHERE state IN ('queued','running')"
+            ).fetchone():
+                raise ValueError("Wait for queued/running work before cleaning storage.")
+            files = orphan_files(store)
+            for path in files:
+                if not path.resolve().is_relative_to(store.config.data_dir):
+                    raise ValueError("Unexpected storage path.")
+                path.unlink()
+        return {
+            "removed_files": len(files),
+            "scope": "Only blobs without persisted source references removed.",
+        }
+
+    @router.patch("/conversations/{conversation_id}")
+    def rename(conversation_id: str, payload: dict):
+        store.require_access("conversation", conversation_id)
+        if (
+            set(payload) != {"title"}
+            or not isinstance(payload["title"], str)
+            or not 1 <= len(payload["title"].strip()) <= 120
+        ):
+            raise ValueError("Provide a title of 1–120 characters.")
+        with store.transaction() as connection:
+            row = connection.execute(
+                "SELECT data FROM conversations WHERE id=?", (conversation_id,)
+            ).fetchone()
+            if not row:
+                raise KeyError(conversation_id)
+            data = json.loads(row[0])
+            data["title"] = payload["title"].strip()
+            connection.execute(
+                "UPDATE conversations SET data=? WHERE id=?", (json.dumps(data), conversation_id)
+            )
+        return data
 
     @router.get("/conversations")
     def conversations():
@@ -138,6 +213,10 @@ def workspace_router(store: Store) -> APIRouter:
             headers={"Content-Disposition": f'attachment; filename="rilo-{value["id"]}.json"'},
         )
 
+    @router.post("/conversations/{conversation_id}/continue", status_code=201)
+    def continue_conversation(conversation_id: str):
+        return workspace.continue_conversation(conversation_id)
+
     @router.post("/conversations/{conversation_id}/turns", status_code=202)
     def turn(conversation_id: str, payload: TurnCreate, request: Request):
         key = request.headers.get("idempotency-key")
@@ -152,6 +231,30 @@ def workspace_router(store: Store) -> APIRouter:
     @router.post("/runs/{run_id}/retry", status_code=202)
     def retry_response(run_id: str):
         return workspace.retry(run_id)
+
+    @router.post("/runs/{run_id}/reviews", status_code=201)
+    def human_review(run_id: str, payload: HumanReview):
+        run = store.run(run_id)
+        finding = next(
+            (
+                f
+                for f in (run.get("assessment") or {}).get("findings", [])
+                if f["id"] == payload.finding_id
+            ),
+            None,
+        )
+        if finding is None:
+            raise ValueError("Finding does not belong to this recorded run.")
+        return workspace.artifact(
+            run["experiment_id"],
+            "human_review",
+            {
+                "run_id": run_id,
+                **payload.model_dump(),
+                "method": "human-reviewed",
+                "scope": "User judgment; stored separately from automated evidence integrity and original findings.",
+            },
+        )
 
     @router.get("/evaluations/{experiment_id}")
     def evaluation(experiment_id: str):
@@ -248,6 +351,26 @@ def workspace_router(store: Store) -> APIRouter:
             if payload.checks is not None
             else source["manifest"]["workspace"].get("checks", []),
         }
+        record["cases"] = []
+        for value in [source["id"], *payload.additional_experiment_ids]:
+            captured = store.experiment(value)
+            if captured["state"] != "completed" or not captured["manifest"].get("snapshot"):
+                raise ValueError(
+                    "Every suite case requires a completed captured workspace evaluation."
+                )
+            record["cases"].append(
+                {
+                    "spec": captured["spec"],
+                    "source_manifest": captured["manifest"],
+                    "snapshot_id": captured["manifest"]["snapshot"]["id"],
+                    "checks": record["checks"]
+                    if value == source["id"]
+                    else captured["manifest"]["workspace"].get("checks", []),
+                    "labels": record["labels"]
+                    if value == source["id"]
+                    else captured["manifest"]["workspace"].get("ground_truth", []),
+                }
+            )
         with store.transaction() as connection:
             duplicate = next(
                 (
@@ -270,7 +393,7 @@ def workspace_router(store: Store) -> APIRouter:
         return record
 
     @router.post("/suites/{suite_id}/run", status_code=202)
-    def run_suite(suite_id: str):
+    def run_suite(suite_id: str, case: int = 0, batch_id: str | None = None):
         from .schemas import ExperimentCreate
         from .storage import identifier
         from .workspace_store import runtime_hash
@@ -283,12 +406,30 @@ def workspace_router(store: Store) -> APIRouter:
         if not row:
             raise KeyError(suite_id)
         suite = json.loads(row[0])
+        if batch_id:
+            store.require_access("batch", batch_id)
+            with store.connection() as connection:
+                batch = connection.execute(
+                    "SELECT suite_id FROM suite_batches WHERE id=?", (batch_id,)
+                ).fetchone()
+                if not batch or batch[0] != suite_id:
+                    raise ValueError("Batch does not belong to this suite.")
+                existing = connection.execute(
+                    "SELECT experiment_id FROM suite_batch_cases WHERE batch_id=? AND case_index=?",
+                    (batch_id, case),
+                ).fetchone()
+            if existing:
+                return store.experiment(existing[0])
+        if not 0 <= case < len(suite.get("cases", [suite])):
+            raise ValueError("Suite case was not found.")
+        suite = {**suite, **suite.get("cases", [suite])[case]}
         original = suite["source_manifest"]["workspace"]
         conv = workspace.create(
             ConversationCreate(
                 title=suite["name"],
                 category=original["category"],
                 agent_ids=suite["spec"]["agent_ids"],
+                slots=suite["source_manifest"]["workspace"].get("slots"),
                 model=suite["spec"]["model"],
                 search_provider="off",
                 limits=suite["spec"]["limits"],
@@ -303,9 +444,11 @@ def workspace_router(store: Store) -> APIRouter:
             "runtime_hash": runtime_hash(),
             "suite_id": suite_id,
             "suite_version": suite["version"],
+            "suite_case": case,
             "ground_truth": suite["labels"],
             "checks": suite.get("checks", original.get("checks", [])),
             "search_provider": "off",
+            **({"batch_id": batch_id} if batch_id else {}),
         }
         spec = ExperimentCreate.model_validate(
             {
@@ -316,6 +459,57 @@ def workspace_router(store: Store) -> APIRouter:
             }
         )
         return store.create_experiment(spec, workspace=task)
+
+    @router.get("/batches")
+    def batches():
+        from .suite_batches import batch_summary
+
+        with store.connection() as connection:
+            ids = [
+                r[0]
+                for r in connection.execute(
+                    "SELECT id FROM suite_batches ORDER BY created_at DESC LIMIT 100"
+                )
+            ]
+        return [batch_summary(store, value) for value in ids if store.can_access("batch", value)]
+
+    @router.get("/batches/{batch_id}")
+    def batch(batch_id: str):
+        from .suite_batches import batch_summary
+
+        return batch_summary(store, batch_id)
+
+    @router.post("/suites/{suite_id}/batches", status_code=202)
+    def start_batch(suite_id: str):
+        from .suite_batches import create_batch
+
+        record = create_batch(store, suite_id)
+        return resume_batch(record["id"])
+
+    @router.post("/batches/{batch_id}/resume", status_code=202)
+    def resume_batch(batch_id: str):
+        from .suite_batches import batch_summary
+
+        record = batch_summary(store, batch_id)
+        admission_error = None
+        for case in record["missing_cases"]:
+            try:
+                run_suite(record["suite_id"], case, batch_id)
+            except ValueError as exc:
+                admission_error = str(exc)
+                break
+        return {**batch_summary(store, batch_id), "admission_error": admission_error}
+
+    @router.get("/batches/{batch_id}/export")
+    def export_batch(batch_id: str):
+        from .suite_batches import batch_summary
+
+        value = batch_summary(store, batch_id)
+        return Response(
+            json.dumps(value, ensure_ascii=False, indent=2).encode(),
+            media_type="application/json",
+            headers={"Content-Disposition": f'attachment; filename="rilo-{value["id"]}.json"'},
+        )
 
     @router.post("/regressions")
     def regression(payload: RegressionCreate):
@@ -334,12 +528,16 @@ def workspace_router(store: Store) -> APIRouter:
         return result
 
     @router.post("/evaluations/{experiment_id}/retest", status_code=202)
-    def retest(experiment_id: str):
+    def retest(experiment_id: str, payload: CandidateCreate | None = None):
+        if payload and not payload.slots:
+            payload = None
         source = store.experiment(experiment_id)
         task = source["manifest"].get("workspace")
         if not task or source["state"] not in {"completed", "partial", "failed", "cancelled"}:
             raise ValueError("Choose a finished workspace evaluation to retest.")
         snapshot = source["manifest"].get("snapshot")
+        if payload and not task.get("slots"):
+            raise ValueError("Editable reruns require an evaluation with independent A/B slots.")
         search_provider: Literal["off", "tavily"] = (
             "tavily" if not snapshot and task.get("search_provider") == "tavily" else "off"
         )
@@ -348,6 +546,7 @@ def workspace_router(store: Store) -> APIRouter:
                 title=source["name"][:90] + " retest",
                 category=task["category"],
                 agent_ids=source["spec"]["agent_ids"],
+                slots=payload.slots if payload else task.get("slots"),
                 model=source["spec"]["model"],
                 limits=source["spec"]["limits"],
                 search_provider=search_provider,
@@ -369,6 +568,12 @@ def workspace_router(store: Store) -> APIRouter:
             "retest_of": source["id"],
             "source_capture": "reused_snapshot" if snapshot else "retry_input_capture",
         }
+        if payload:
+            pinned_task.update(
+                slots=conv["slots"],
+                execution_agents=conv["execution_agents"],
+                declared_agent_changes=True,
+            )
         spec = ExperimentCreate.model_validate(
             {
                 **source["spec"],

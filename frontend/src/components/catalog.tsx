@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LocalStorage } from "./local-product";
 import type { FormEvent } from "react";
 import {
   ArrowRight,
@@ -214,7 +215,8 @@ export function AgentsView({
                   <Link2 size={14} />
                   Check connection
                 </Button>
-                {Array.isArray(agent.config.workspace_categories) ? (
+                {Array.isArray(agent.config.workspace_categories) &&
+                agent.config.workspace_categories.length > 0 ? (
                   <a
                     className="button button-ghost"
                     href={`#/${agent.config.workspace_categories[0]}`}
@@ -856,6 +858,7 @@ export function SettingsView({
           </Button>
         }
       />
+      <LocalStorage settings={settings} onRefresh={onRefresh} />
       {error && <Notice kind="error">{error}</Notice>}
       {saved && (
         <Notice kind="success">
@@ -868,7 +871,9 @@ export function SettingsView({
           caption="Real service checks. Credentials stay in the backend environment."
         />
         <div className="integration-list">
-          {(["bifrost", "ollama", "tavily"] as const).map((name) => {
+          {(
+            ["bifrost", "ollama", "tavily", "agentrouter", "bynara"] as const
+          ).map((name) => {
             const integration = settings?.integrations[name];
             return (
               <div className="integration-row" key={name}>
@@ -887,7 +892,11 @@ export function SettingsView({
                       ? "Bifrost gateway"
                       : name === "ollama"
                         ? "Ollama local models"
-                        : "Tavily research"}
+                        : name === "agentrouter"
+                          ? "AgentRouter inference"
+                          : name === "bynara"
+                            ? "Bynara inference"
+                            : "Tavily research"}
                   </h3>
                   <p>
                     {integration?.detail ?? "Service status not yet available."}

@@ -32,7 +32,9 @@ def service_url(value: str, *, hosted: bool = False) -> str:
 
         try:
             address = ipaddress.ip_address(host)
-            allowed = address.is_private and not address.is_unspecified and not address.is_link_local
+            allowed = (
+                address.is_private and not address.is_unspecified and not address.is_link_local
+            )
         except ValueError:
             allowed = False
     if (
@@ -93,6 +95,9 @@ class Config:
     model: str = "ollama/qwen2.5-coder:7b"
     tavily_key: str = ""
     bifrost_key: str = ""
+    agentrouter_key: str = ""
+    bynara_key: str = ""
+    offline: bool = False
     github_key: str = ""
     tavily_credit_limit: int = 900
     port: int = 8018
@@ -129,6 +134,9 @@ class Config:
             model=os.environ.get("RILO_MODEL", "ollama/qwen2.5-coder:7b"),
             tavily_key=os.environ.get("TAVILY_API_KEY", ""),
             bifrost_key=os.environ.get("BIFROST_API_KEY", ""),
+            agentrouter_key=os.environ.get("AGENTROUTER_API_KEY", ""),
+            bynara_key=os.environ.get("BYNARA_API_KEY", ""),
+            offline=os.environ.get("RILO_OFFLINE", "0").lower() in {"1", "true", "yes"},
             github_key=os.environ.get("GITHUB_TOKEN", ""),
             tavily_credit_limit=max(0, int(os.environ.get("RILO_TAVILY_CREDIT_LIMIT", "900"))),
             port=int(os.environ.get("RILO_PORT", "8018")),
@@ -169,25 +177,60 @@ class Config:
             if not config.public_url.startswith("https://"):
                 raise ValueError("Hosted mode requires an HTTPS RILO_PUBLIC_URL.")
             public = urlsplit(config.public_url)
-            if not public.hostname or public.path not in {"", "/"} or public.query or public.fragment:
+            if (
+                not public.hostname
+                or public.path not in {"", "/"}
+                or public.query
+                or public.fragment
+            ):
                 raise ValueError("RILO_PUBLIC_URL must be an HTTPS origin without a path.")
             if not config.allowed_hosts:
                 config.allowed_hosts = (public.hostname.lower(),)
             if not config.allowed_origins_override:
                 config.allowed_origins_override = (config.public_url,)
         allowed_origins(config.port)
-        saved = data / "settings.json"
-        if saved.exists():
-            values = json.loads(saved.read_text(encoding="utf-8"))
-            config.bifrost_url = service_url(
-                values.get("bifrost_url", config.bifrost_url), hosted=config.hosted
-            )
-            config.model = values.get("model", config.model)
+        config.refresh_settings()
         return config
+
+    def refresh_settings(self) -> None:
+        """Refresh safe runtime settings in API and separately running workers."""
+        saved = self.data_dir / "settings.json"
+        if not saved.exists():
+            return
+        values = json.loads(saved.read_text(encoding="utf-8"))
+        endpoint = service_url(values.get("bifrost_url", self.bifrost_url), hosted=self.hosted)
+        model = values.get("model", self.model)
+        offline = values.get("offline", self.offline)
+        if not isinstance(model, str) or not re.fullmatch(r"[A-Za-z0-9_./:\-]{1,120}", model):
+            raise ValueError("Saved model configuration is invalid.")
+        if type(offline) is not bool:
+            raise ValueError("Saved offline configuration must be a boolean.")
+        self.bifrost_url, self.model, self.offline = endpoint, model, offline
+
+    def require_connected(self, operation: str) -> None:
+        self.refresh_settings()
+        if self.offline:
+            raise ValueError(
+                f"Offline mode blocks {operation}. Enable connected features in Settings."
+            )
+
+    def require_model(self, model: str) -> None:
+        self.refresh_settings()
+        if self.offline and not model.startswith("ollama/"):
+            raise ValueError(
+                "Offline mode permits only local Ollama inference. Select an installed ollama/model."
+            )
 
     @property
     def secrets(self) -> tuple[str, ...]:
-        return self.tavily_key, self.bifrost_key, self.github_key, self.session_key
+        return (
+            self.tavily_key,
+            self.bifrost_key,
+            self.github_key,
+            self.agentrouter_key,
+            self.bynara_key,
+            self.session_key,
+        )
 
     @property
     def session_key(self) -> str:
@@ -207,7 +250,8 @@ class Config:
         destination = self.data_dir / "settings.json"
         temporary = destination.with_suffix(".tmp")
         temporary.write_text(
-            json.dumps({"bifrost_url": self.bifrost_url, "model": model}), encoding="utf-8"
+            json.dumps({"bifrost_url": self.bifrost_url, "model": model, "offline": self.offline}),
+            encoding="utf-8",
         )
         temporary.replace(destination)
 

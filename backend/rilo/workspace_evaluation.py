@@ -31,6 +31,7 @@ class GroundTruth(StrictModel):
 
 
 class SuiteCreate(StrictModel):
+    additional_experiment_ids: list[Identifier] = Field(default_factory=list, max_length=9)
     name: str = Field(min_length=1, max_length=120)
     version: str = Field(min_length=1, max_length=40)
     source_experiment_id: Identifier
@@ -41,6 +42,10 @@ class SuiteCreate(StrictModel):
     @model_validator(mode="after")
     def unique_labels(self):
         validate_checks(self.checks or [])
+        if self.source_experiment_id in self.additional_experiment_ids or len(
+            set(self.additional_experiment_ids)
+        ) != len(self.additional_experiment_ids):
+            raise ValueError("Each suite case must reference a distinct evaluation.")
         if len({label.label_id for label in self.labels}) != len(self.labels):
             raise ValueError("Ground-truth label IDs must be unique.")
         if len({(label.reference, label.expected_quote) for label in self.labels}) != len(
@@ -84,11 +89,11 @@ def compare_workspace(baseline: dict, candidate: dict, spec: RegressionCreate) -
         raise ValueError(
             "Select two workspace evaluations. Research benchmarks use Compare & baselines."
         )
-    mismatches = []
+    mismatches: list[str] = []
     changes: list[str] = []
     for field in ("model", "limits", "agent_ids", "repetitions", "mode", "engine"):
         if baseline["spec"][field] != candidate["spec"][field]:
-            mismatches.append(field)
+            (changes if field == "model" and spec.allow_agent_changes else mismatches).append(field)
     for field in (
         "workspace_runtime_hash",
         "grader_version",
@@ -105,12 +110,17 @@ def compare_workspace(baseline: dict, candidate: dict, spec: RegressionCreate) -
                 else False
             )
             (changes if allowed else mismatches).append(field)
-    for field in ("category", "histories", "search_provider", "checks"):
+    for field in ("category", "histories", "search_provider", "checks", "semantic_review"):
         if baseline["manifest"].get("workspace", {}).get(field) != candidate["manifest"].get(
             "workspace", {}
         ).get(field):
             mismatches.append(field)
-    for field in ("suite_id", "suite_version", "ground_truth"):
+    for field in ("slots", "execution_agents"):
+        if baseline["manifest"]["workspace"].get(field) != candidate["manifest"]["workspace"].get(
+            field
+        ):
+            (changes if spec.allow_agent_changes else mismatches).append(field)
+    for field in ("suite_id", "suite_version", "suite_case", "ground_truth"):
         if baseline["manifest"]["workspace"].get(field) != candidate["manifest"]["workspace"].get(
             field
         ):

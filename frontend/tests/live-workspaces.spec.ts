@@ -102,7 +102,7 @@ test("live paired chat keeps follow-ups independent and supports retest reports"
     .getByLabel("Send the same follow-up to both agents")
     .fill("Recall your previous conclusion in one sentence.");
   const followup = await send(page);
-  for (const agent of ["scout", "relay"]) {
+  for (const agent of first.spec.agent_ids as string[]) {
     const own = first.runs.find(
       (r: { agent_id: string }) => r.agent_id === agent,
     );

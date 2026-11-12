@@ -59,6 +59,10 @@ const labels: Record<TaskCheck["type"], string> = {
   "not-icontains": "Does not contain text (ignore case)",
   equals: "Equals exact answer",
   "is-json": "Is valid JSON",
+  "json-field-equals": "JSON field equals expected value",
+  "max-length": "Maximum answer length",
+  "citations-valid": "All findings have valid references",
+  "has-findings": "Contains structured findings",
 };
 
 export function TaskCheckEditor({
@@ -78,7 +82,7 @@ export function TaskCheckEditor({
         <div>
           <h3>Define what a good answer must do</h3>
           <p className="muted">
-            Checks powered by Promptfoo. Both agents are graded against the same
+            Checks use Promptfoo and deterministic Rilo checks. Both agents are graded against the same
             rules. No checks means ungraded.
           </p>
         </div>
@@ -120,7 +124,7 @@ export function TaskCheckEditor({
               onChange={(event) =>
                 update(index, {
                   type: event.target.value as TaskCheck["type"],
-                  value: event.target.value === "is-json" ? null : "",
+                  value: ["is-json", "citations-valid", "has-findings"].includes(event.target.value) ? null : "",
                 })
               }
             >
@@ -145,7 +149,7 @@ export function TaskCheckEditor({
               <option value="response">Full structured response</option>
             </select>
           </label>
-          {check.type !== "is-json" && (
+          {!["is-json", "citations-valid", "has-findings"].includes(check.type) && (
             <label className="field">
               Check {index + 1} expected text
               <input
@@ -236,7 +240,7 @@ export function CheckComparison({
         <div>
           <h3>Which agent did better?</h3>
           <small>
-            Checks powered by Promptfoo 0.125.1 · evidence and timing shown
+            Promptfoo 0.125.1 and deterministic Rilo checks · evidence and timing shown
             separately
           </small>
         </div>

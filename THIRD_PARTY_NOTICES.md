@@ -63,3 +63,11 @@ reports or an independently reproducible repository benchmark. The synthetic
 research benchmark publishes its separate source fixtures and full execution data.
 
 The installed Qwen model is an independently downloaded artifact governed by its model license. Rilo does not grant rights to third-party models, provider brands, or retrieved publications. The working name has not been reviewed for trademark/domain availability.
+# Unicode report fonts
+
+Rilo bundles Noto Sans, Noto Sans Devanagari and Noto Sans Arabic from
+https://github.com/notofonts/noto-fonts under the SIL Open Font License 1.1.
+The original license and copyright notices are retained in
+`backend/rilo/fonts/OFL.txt`. These fonts support Latin, Greek, Cyrillic,
+Devanagari and Arabic; unsupported PDF glyphs fail explicitly rather than
+being silently replaced. Markdown and JSON preserve other scripts.
