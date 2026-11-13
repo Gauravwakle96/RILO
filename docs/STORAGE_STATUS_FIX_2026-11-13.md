@@ -100,3 +100,11 @@ Python package built successfully, and the final restarted API/worker passed
 readiness plus forty concurrent storage reads. The two targeted comparison/mobile
 browser tests passed in 36.4 seconds and frontend lint passed. The existing
 provider/model settings and evaluation history were preserved throughout.
+
+The full CI browser suite subsequently exposed a request-burst limit: it runs
+much faster than the Windows local suite and reached the unchanged per-minute
+API budget near its comparison tests. Workspace browser tests now wait, with a
+65-second bound, when the setup session receives HTTP 429. They do not disable
+rate limiting, repeat mutations or silently turn failed responses into empty
+results. Other setup errors still fail immediately. Existing test assertions and
+security limits are preserved.

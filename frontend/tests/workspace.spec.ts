@@ -8,6 +8,26 @@ import type { Experiment } from "../src/types";
 const evidenceDir = path.resolve("../docs/ui-evidence");
 const runLabel = `UI recovery verification ${Date.now()}`;
 
+test.beforeEach(async ({ page }, testInfo) => {
+  // CI can execute the full suite faster than the local API's per-minute budget.
+  // Respect that budget instead of disabling its protection or retrying mutations.
+  const deadline = Date.now() + 65_000;
+  let waiting = false;
+  while (true) {
+    const response = await page.request.get("/api/v1/session");
+    if (response.status() !== 429) {
+      expect(response.ok()).toBe(true);
+      break;
+    }
+    if (!waiting) {
+      testInfo.setTimeout(testInfo.timeout + 65_000);
+      waiting = true;
+    }
+    expect(Date.now(), "Local API rate limit did not recover within one minute").toBeLessThan(deadline);
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+});
+
 async function connected(page: Page) {
   await expect(
     page.getByText("Local API connected", { exact: true }),
