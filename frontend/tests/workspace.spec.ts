@@ -611,11 +611,16 @@ test("declared agent change posts the real flag and explicitly simulated record 
 }) => {
   await page.goto("/");
   await connected(page);
-  const available = (
-    (await (
-      await page.request.get("/api/v1/experiments")
-    ).json()) as Experiment[]
-  ).filter((experiment) => !["queued", "running"].includes(experiment.state));
+  // Establish the direct API client's cookie before relying on its response shape.
+  const sessionResponse = await page.request.get("/api/v1/session");
+  expect(sessionResponse.ok()).toBe(true);
+  const experimentsResponse = await page.request.get("/api/v1/experiments");
+  expect(experimentsResponse.ok()).toBe(true);
+  const experiments = (await experimentsResponse.json()) as Experiment[];
+  expect(Array.isArray(experiments)).toBe(true);
+  const available = experiments.filter(
+    (experiment) => !["queued", "running"].includes(experiment.state),
+  );
   test.skip(
     available.length < 2,
     "Requires two real experiment records for the comparison request.",

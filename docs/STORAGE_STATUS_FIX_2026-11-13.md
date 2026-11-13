@@ -75,3 +75,28 @@ Its source text is an explicit supplied SQLite/Redis example, not a live researc
 query or general accuracy benchmark. The
 [captured check matrix](ui-evidence/promptfoo-real-paired-checks.png) is refreshed
 from this actual browser run.
+
+## Setup portability and browser test follow-up
+
+The patched release with live evidence, `2a1fdb5`, passed all
+[GitHub checks](https://github.com/Gauravwakle96/RILO/actions/runs/43396589847).
+An earlier patched-runtime workflow had intermittent browser failures: a direct
+test API request returned an error object before filtering records, and the
+following mobile check missed API readiness. The comparison test now explicitly
+establishes its own API session and asserts HTTP success and array shape before
+using the records. The comparison and 390-pixel tests passed locally afterward.
+No authorization checks or failing test cases were removed.
+
+Newer npm 11.11.0 also required five existing optional dependency paths omitted by
+npm 11.6.1's lockfile layout. The lockfile now includes those resolved optional
+entries while retaining earlier nested entries required by npm 11.6.1. Both npm
+versions accept the lockfile in clean-install dry runs. This does not add database
+services or provider integrations to Rilo; they remain transitive optional
+dependencies of the assertion package. Existing locked versions are preserved.
+
+The final npm 11.11.0 clean install passed with zero reported vulnerabilities.
+All eighteen Promptfoo backend tests passed in 46.52 seconds afterward. The
+Python package built successfully, and the final restarted API/worker passed
+readiness plus forty concurrent storage reads. The two targeted comparison/mobile
+browser tests passed in 36.4 seconds and frontend lint passed. The existing
+provider/model settings and evaluation history were preserved throughout.
