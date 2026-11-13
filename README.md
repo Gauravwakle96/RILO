@@ -290,9 +290,11 @@ The CLI comparison exits `0` for pass, `1` for a measured regression and `2` for
 
 ## Verification and boundaries
 
-The **12 November 2026 practical-agent verification** records **252 passing Python
-tests with 83% coverage**, **27 passing standard browser tests with 8 explicit skips**,
-build, typing, lint and dependency checks in
+The **13 November 2026 storage reliability verification** records **257 passing
+Python tests with 83% coverage** and **3 passing targeted browser checks** in
+[STORAGE_STATUS_FIX_2026-11-13.md](docs/STORAGE_STATUS_FIX_2026-11-13.md).
+The preceding full standard browser suite had **27 passes and 8 explicit skips**;
+practical-agent live results, build, typing, lint and dependency checks are in
 [PRACTICAL_AGENTS.md](docs/PRACTICAL_AGENTS.md), alongside the earlier
 [local product implementation](docs/LOCAL_PRODUCT_IMPLEMENTATION.md).
 These are dated checks, not a guarantee of error-free behavior; the badge above

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import shutil
+import stat
+from collections.abc import Iterable
 from pathlib import Path
 
 from .storage import Store, identifier, now
@@ -249,16 +251,27 @@ def dashboard(store: Store) -> dict:
     }
 
 
+def storage_file_sizes(paths: Iterable[Path]) -> dict[Path, int]:
+    """Sample regular files once; cleanup and SQLite may remove files during a read."""
+    sizes = {}
+    for path in paths:
+        try:
+            metadata = path.stat(follow_symlinks=False)
+        except FileNotFoundError:
+            continue
+        if stat.S_ISREG(metadata.st_mode):
+            sizes[path] = metadata.st_size
+    return sizes
+
+
 def storage_status(store: Store) -> dict:
     if store.config.hosted:
         raise ValueError("Data management is available in local mode only.")
     sizes: dict = {
-        name: sum(p.stat().st_size for p in (store.config.data_dir / name).glob("*") if p.is_file())
+        name: sum(storage_file_sizes((store.config.data_dir / name).glob("*")).values())
         for name in ("uploads", "objects", "backups")
     }
-    sizes["database"] = sum(
-        p.stat().st_size for p in store.config.data_dir.glob("rilo.db*") if p.is_file()
-    )
+    sizes["database"] = sum(storage_file_sizes(store.config.data_dir.glob("rilo.db*")).values())
     sizes["limit"] = store.config.storage_max_bytes
     sizes["free_disk"] = shutil.disk_usage(store.config.data_dir).free
     sizes["data_directory"] = str(store.config.data_dir)

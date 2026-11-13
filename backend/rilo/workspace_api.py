@@ -113,13 +113,13 @@ def workspace_router(store: Store) -> APIRouter:
 
     @router.get("/storage")
     def storage():
-        from .local_product import orphan_files, storage_status
+        from .local_product import orphan_files, storage_file_sizes, storage_status
 
-        files = orphan_files(store)
+        files = storage_file_sizes(orphan_files(store))
         return {
             **storage_status(store),
             "orphan_files": len(files),
-            "reclaimable_bytes": sum(path.stat().st_size for path in files),
+            "reclaimable_bytes": sum(files.values()),
         }
 
     @router.get("/backup")
@@ -155,6 +155,7 @@ def workspace_router(store: Store) -> APIRouter:
     def cleanup():
         from .local_product import orphan_files
 
+        removed = 0
         with store.transaction() as connection:
             if connection.execute(
                 "SELECT 1 FROM experiments WHERE state IN ('queued','running')"
@@ -164,9 +165,13 @@ def workspace_router(store: Store) -> APIRouter:
             for path in files:
                 if not path.resolve().is_relative_to(store.config.data_dir):
                     raise ValueError("Unexpected storage path.")
-                path.unlink()
+                try:
+                    path.unlink()
+                except FileNotFoundError:
+                    continue
+                removed += 1
         return {
-            "removed_files": len(files),
+            "removed_files": removed,
             "scope": "Only blobs without persisted source references removed.",
         }
 

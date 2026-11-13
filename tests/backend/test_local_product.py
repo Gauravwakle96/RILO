@@ -1,13 +1,14 @@
 """Local product boundaries: independent candidates, real sources, privacy and checks."""
 
 import json
+from pathlib import Path
 
 import httpx
 import pytest
 from pydantic import ValidationError
 from rilo.config import Config, redact
 from rilo.engine import InfrastructureError, RunContext, bounded_json
-from rilo.local_product import dashboard, history, orphan_files
+from rilo.local_product import dashboard, history, orphan_files, storage_file_sizes, storage_status
 from rilo.promptfoo_checks import grade_output
 from rilo.schemas import ExperimentCreate
 from rilo.snapshots import Snapshots
@@ -388,3 +389,76 @@ def test_local_backup_download_and_cleanup_require_no_active_work(client, config
         ).status_code
         == 409
     )
+
+
+@pytest.mark.parametrize("relative", ["uploads/disappearing", "rilo.db-shm"])
+def test_storage_status_survives_files_removed_during_size_read(store, monkeypatch, relative):
+    vanished = store.config.data_dir / relative
+    vanished.parent.mkdir(exist_ok=True)
+    vanished.write_bytes(b"transient")
+    retained = store.config.data_dir / "uploads" / "retained"
+    retained.parent.mkdir(exist_ok=True)
+    retained.write_bytes(b"saved upload")
+    original_stat = Path.stat
+
+    def remove_during_read(path, *args, **kwargs):
+        if path == vanished:
+            vanished.unlink(missing_ok=True)
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", remove_during_read)
+    result = storage_status(store)
+    assert result["uploads"] == len(b"saved upload")
+    assert result["database"] > 0
+    assert retained.read_bytes() == b"saved upload"
+
+
+def test_storage_size_read_preserves_permission_errors(tmp_path, monkeypatch):
+    denied = tmp_path / "denied"
+    original_stat = Path.stat
+
+    def deny_read(path, *args, **kwargs):
+        if path == denied:
+            raise PermissionError("Storage read denied")
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", deny_read)
+    with pytest.raises(PermissionError, match="Storage read denied"):
+        storage_file_sizes([denied])
+
+
+@pytest.mark.parametrize("route", ["status", "cleanup"])
+def test_storage_routes_survive_orphan_removed_after_listing(client, config, monkeypatch, route):
+    from rilo.storage import Store
+
+    store = Store(config)
+    snapshot = Snapshots(store).create(
+        "chat", [{"reference": "Context", "type": "text", "content": "Keep this source."}]
+    )
+    retained = config.data_dir / "objects" / snapshot["sources"][0]["content_hash"]
+    vanished = config.data_dir / "objects" / "transient-orphan"
+    remaining = config.data_dir / "objects" / "remaining-orphan"
+    vanished.write_bytes(b"removed elsewhere")
+    remaining.write_bytes(b"reclaimable")
+
+    def disappear_after_listing(store):
+        files = orphan_files(store)
+        vanished.unlink()
+        return files
+
+    monkeypatch.setattr("rilo.local_product.orphan_files", disappear_after_listing)
+    csrf = client.get("/api/v1/session").json()["csrf_token"]
+    if route == "status":
+        response = client.get("/api/v1/workspace/storage")
+        assert response.status_code == 200
+        assert response.json()["orphan_files"] == 1
+        assert response.json()["reclaimable_bytes"] == len(b"reclaimable")
+        assert remaining.exists()
+    else:
+        response = client.post(
+            "/api/v1/workspace/storage/cleanup", json={}, headers={"X-CSRF-Token": csrf}
+        )
+        assert response.status_code == 200
+        assert response.json()["removed_files"] == 1
+        assert not remaining.exists()
+    assert retained.read_text() == "Keep this source."

@@ -153,3 +153,13 @@ links to editable task examples. See [PRACTICAL_AGENTS.md](PRACTICAL_AGENTS.md)
 for the updated 252-test backend and 27-test browser verification, live model
 results and retained answer-quality failures. These dated checks supersede the
 earlier suite totals above without changing historical evaluation records.
+
+## Storage reliability follow-up on 13 November 2026
+
+A recorded storage-status HTTP 500 exposed a filesystem race. File measurements
+now tolerate files disappearing during metadata reads, and cleanup counts only
+actual removals. Referenced blobs remain protected. The full backend suite passed
+257 tests with 83.10% coverage; three targeted browser checks and forty concurrent
+storage-status reads also passed. See
+[STORAGE_STATUS_FIX_2026-11-13.md](STORAGE_STATUS_FIX_2026-11-13.md) for the diagnosis,
+regression coverage and limits. The prior practical-assistant GitHub build passed.
