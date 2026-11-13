@@ -65,3 +65,13 @@ in 111.98 seconds, covering actual Promptfoo assertions, practical assistants,
 local storage and CLI runtime. The full 257-test result above predates this
 dependency patch. The restarted patched services again passed readiness and
 forty concurrent storage-status reads.
+
+The opt-in actual-inference Chromium test also passed in 3.1 minutes using
+`bynara/agnes-2.5-flash`. It exercised paired replies, two declared text checks,
+PDF download, saved regression suite and retest with the patched Promptfoo
+runtime. The saved original evaluation is `exp_bacab9bdf2e84cf3` in conversation
+`conv_b4dac25451a345be`; both agents completed and passed the declared checks.
+Its source text is an explicit supplied SQLite/Redis example, not a live research
+query or general accuracy benchmark. The
+[captured check matrix](ui-evidence/promptfoo-real-paired-checks.png) is refreshed
+from this actual browser run.
