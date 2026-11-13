@@ -41,3 +41,27 @@ The practical-assistant release `e73e4f7` also passed its
 [GitHub verification workflow](https://github.com/Gauravwakle96/RILO/actions/runs/43272855900).
 That historical result is separate from this fix's local verification and its
 subsequent workflow run.
+
+## Dependency advisory discovered during publication
+
+The storage-fix build `b4f3339` passed its Python lint/typing/tests/package stage
+and container build, then failed the npm audit in the frontend-check stage.
+Two new moderate advisories affected the transitive `@hono/node-server` 2.1.5
+dependency in the Promptfoo runtime. The browser stage did not run in that failed
+workflow. This does not invalidate its recorded local tests.
+
+The follow-up pins the patched dependency to 2.1.6 without changing Promptfoo
+0.125.1 or hiding audit failures. It changes only that package's lockfile entry,
+using CI's npm 11.6.1. See the
+[integration notes](PROMPTFOO_INTEGRATION.md) for advisory references. Previous
+evaluations retain their captured implementation identity; future evaluations
+record the updated runtime lockfile hash. API and worker must restart after the
+dependency update so they share the same loaded identity.
+
+The patched runtime passed a clean install with npm 11.6.1, both npm dependency
+audits (zero reported vulnerabilities), frontend lint/typecheck/build and the
+Python source/wheel build. Fifty-four targeted backend integration tests passed
+in 111.98 seconds, covering actual Promptfoo assertions, practical assistants,
+local storage and CLI runtime. The full 257-test result above predates this
+dependency patch. The restarted patched services again passed readiness and
+forty concurrent storage-status reads.

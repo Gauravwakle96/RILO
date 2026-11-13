@@ -64,6 +64,11 @@ matrix uses real Promptfoo grading results inside the existing workspace.
 MIT notice: `docs/licenses/promptfoo-MIT.txt`; attribution also appears in
 `THIRD_PARTY_NOTICES.md`. npm overrides pin glob 14.0.4, minimatch 11.0.5 and
 basic-ftp 6.2.6 to address the eight advisories reported by the initial install.
+On 13 November 2026, `@hono/node-server` was additionally pinned to 2.1.6 for
+[GHSA-qv5m-9pm6-hqp3](https://github.com/advisories/GHSA-qv5m-9pm6-hqp3) and
+[GHSA-jpvv-r467-5p4w](https://github.com/advisories/GHSA-jpvv-r467-5p4w).
+Promptfoo stays at 0.125.1. Only the affected lockfile entry changed; the lockfile
+was regenerated using npm 11.6.1, matching CI.
 No force downgrade or advisory suppression was used. The lockfile and adapter
 files contribute to the captured workspace implementation hash.
 
